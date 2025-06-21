@@ -1,0 +1,25 @@
+manifest:
+  name: catalyst
+  version: 0.1.0
+  type: BINARY
+  description: A declarative build system for Modern C++.
+  tooling:
+    CC: clang
+    CCFLAGS: -Wall -Werror -Wextra -Wpedantic
+    CXX: clang++
+    CXXFLAGS: -Wall -Werror -Wextra -Wpedantic
+  provides: catalyst
+  dirs:
+    include:
+      - include
+    source:
+      - src
+      - src/subcommand_actions
+    build: build
+dependencies:
+  yaml-cpp:
+    version: latest
+    profile: ""
+    source: catalyst_hub
+    using:
+      []

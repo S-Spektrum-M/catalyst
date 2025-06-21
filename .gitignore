@@ -1,0 +1,6 @@
+build
+.cache
+*.cbuild
+compile_commands.json
+catalyst-libs
+.todos.sm

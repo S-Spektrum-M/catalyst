@@ -1,0 +1,3 @@
+# NOTE: these are better suited for my vim/monitor config, I'm not imposing this as a requirement.
+IndentWidth: 4
+ColumnLimit: 120
