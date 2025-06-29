@@ -28,7 +28,7 @@ Each block ends with:
 
 Inside each block, messages are recorded.
 
-> [!NOTE}
+> [!NOTE]
 > If Catalyst detects that a git repo is being used, it furhter ammend the introducer to
 > `[beginblock <TIMESTAMP>:<ARGSTR>:<git email>]` since blames aren't really effective.
 

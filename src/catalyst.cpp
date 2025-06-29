@@ -1,40 +1,18 @@
-#include "parse_rules.h"
-#include "subcommand_actions.h"
-#include "utils.h"
-
+#include "catalyst/subcommands/add/action.hpp"
+#include "catalyst/subcommands/add/parse_cli.hpp"
+#include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
+#include <string>
 
 int main(int argc, char **argv) {
-    CLI::App app{"Catalyst is a modern build system for Modern C++."};
-    CLI::App *add_sub = app.add_subcommand("add", "Add a dependency to the Catalyst project manifest.");
-    CLI::App *init_sub = app.add_subcommand("init", "Initialize the current directory as a Catalyst project.");
-    CLI::App *build_sub = app.add_subcommand("build", "Generates the build file for the current Catalyst project.");
-    add_args_t a_args;
-    init_args_t i_args;
-    build_args_t b_args;
-    parse_rules_add(add_sub, a_args);
-    parse_rules_init(init_sub, i_args);
-    parse_rules_build(build_sub, b_args);
-    app.get_formatter()->column_width(80);
-
-    try {
-        app.parse(argc, argv);
-    } catch (const CLI ::ParseError &e) {
-        if (strcmp(argv[1], "--help") && strcmp(argv[1], "-h"))
-            log_print(log_level::ERROR, "Failed to parse cli arguments");
-        return app.exit(e);
-    };
-
-    if (*add_sub)
-        subcommand_add_action(a_args);
-    else if (*init_sub)
-        subcommand_init_action(i_args);
-    else if (*build_sub) {
-        // these are a bit too complex to validate using straight CLI11 so I use this
-        // function defined in parse_rules.h
-        if (!validate_build_args(b_args))
+    CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
+    const auto [add_subc, add_res] = catalyst::add::parse(app);
+    CLI11_PARSE(app, argc, argv);
+    if (*add_subc) {
+        auto res = catalyst::add::action(*add_res);
+        if (!res) {
             return 1;
-        subcommand_build_action(b_args);
+        }
     }
-    return 0;
+        return 0;
 }

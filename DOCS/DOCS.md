@@ -1,4 +1,4 @@
-## Catalyst Profile Configuration Schema
+# Catalyst Profile Configuration Schema
 
 > [!TIP]
 > If reading docs isn't your style, please look at catalyst's own profiles and ignores
