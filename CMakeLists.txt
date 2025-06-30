@@ -10,8 +10,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
 # Gather source files
-file(GLOB_RECURSE ACTION_SOURCES "src/subcommands/add/action.cpp")
-file(GLOB_RECURSE PARSE_CLI_SOURCES "src/subcommands/add/parse_cli.cpp")
+file(GLOB_RECURSE ACTION_SOURCES
+    "src/subcommands/add/action.cpp"
+    "src/subcommands/init/action.cpp"
+)
+file(GLOB_RECURSE PARSE_CLI_SOURCES
+    "src/subcommands/add/parse_cli.cpp"
+    "src/subcommands/init/parse_cli.cpp"
+)
 file(GLOB_RECURSE YAML_UTILS_SOURCES "src/yaml-utils/*.cpp")
 
 # Create static libraries

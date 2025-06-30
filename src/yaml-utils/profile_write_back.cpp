@@ -14,8 +14,9 @@ std::expected<void, std::string> profile_write_back(const std::string &profile_n
     else
         profile_path = std::format("catalyst_{}.yaml", profile_name);
 
-    if (!fs::exists(profile_path))
-        return std::unexpected(std::format("profile file: {} not found", profile_path.string()));
+    if (!fs::exists(profile_path)) {
+        // log that we're creating a new file
+    }
 
     std::ofstream profile_file{profile_path};
     YAML::Emitter emmiter;

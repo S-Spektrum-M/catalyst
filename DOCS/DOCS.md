@@ -3,7 +3,7 @@
 > [!TIP]
 > If reading docs isn't your style, please look at catalyst's own profiles and ignores
 > which are extensively annotated or the catalyst example repo:
-[Catalyzing C++](https://www.github.com/S-Spektrum-M/catalyst-demo), which provides an intuitive follow-along.
+> [Catalyzing C++](https://www.github.com/S-Spektrum-M/catalyst-demo), which provides an intuitive follow-along.
 
 Each Catalyst project has profiles defined in a yaml profile-configuration file.
 The default (`common`) profile is defined in `catalyst.yaml`. Other profiles can
@@ -12,10 +12,19 @@ be defined in files of the form: `catalyst_{PROFILE NAME}.yaml`.
 
 | Field        | Description                                  |
 | ------------ | -------------------------------------------- |
+| `meta`       | Catalyst Metadata                            |
 | `manifest`     | Project metadata and build layout            |
 | `dependencies` | External packages and package specifications |
 | `features`     | Preprocessor-level feature flags             |
 | `hooks`        | Optional lifecycle callbacks                 |
+
+### `meta` Schema
+
+The `meta` section defines Catalyst specific information.
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `min_ver` | The minimum required catalyst version to build the project. | Equivalent to ``catalyst --version`` |
 
 ### `manifest` Schema
 
@@ -106,7 +115,7 @@ declarative configs to adapt to the realities of cross-platform development.
 |`publish`|Custom logic for uploading artifacts or pushing metadata|
 
 > [!NOTE]
-> Hooks were added to Catalyst in `0.0.2`.
+> Hooks will be added to Catalyst in `0.0.2`.
 
 ## `.catalystignore` File Schema
 
