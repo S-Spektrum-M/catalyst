@@ -1,7 +1,6 @@
 #pragma once
 #include <CLI/App.hpp>
 #include <filesystem>
-#include <regex>
 #include <string>
 #include <vector>
 
