@@ -17,7 +17,3 @@ include/catalyst/
     yaml-utils/             -- this provides a number of utility functions for wrangling and emmiting YAML(driven by the yaml-cpp library)
     log-utils/              -- this provides functioanlity for writing to a a logfile(see: DOCS/logfile.md)
 ```
-
-When compiled, all files matching `subcommmand/*/action.cpp` generate `catalyst_act.a` and all files matching
-`subcommand/*/pase_cli.cpp` generate `catalyst_parse.a`. When these are linked to `src/catalyst.cpp` and other one off
-files, we get the executable, `catalyst`.

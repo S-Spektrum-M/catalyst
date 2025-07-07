@@ -13,5 +13,8 @@ manifest:
     include:
       - include
     source:
-      - src
+      - src/subcommands/add
+      - src/subcommands/generate
+      - src/subcommands/init
+      - src/yaml-utils
     build: build

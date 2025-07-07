@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_options(-Wall -Werror -Wextra -Wpedantic)
+
 # Include directories
 include_directories(include)
 
@@ -29,16 +31,12 @@ file(GLOB_RECURSE PARSE_CLI_SOURCES
 )
 file(GLOB_RECURSE YAML_UTILS_SOURCES "src/yaml-utils/*.cpp")
 
-# Create static libraries
-add_library(catalyst_act STATIC ${ACTION_SOURCES})
-add_library(catalyst_parse STATIC ${PARSE_CLI_SOURCES})
-add_library(yaml_utils STATIC ${YAML_UTILS_SOURCES})
-
-# Add the executable
-add_executable(catalyst src/catalyst.cpp)
-
-# Link libraries
-target_link_libraries(catalyst PRIVATE catalyst_act catalyst_parse yaml_utils)
+add_executable(catalyst
+    src/catalyst.cpp
+    ${ACTION_SOURCES}
+    ${PARSE_CLI_SOURCES}
+    ${YAML_UTILS_SOURCES}
+)
 
 # Find and link yaml-cpp
 find_package(yaml-cpp REQUIRED)
