@@ -15,7 +15,7 @@ be defined in files of the form: `catalyst_{PROFILE NAME}.yaml`.
 | `meta`       | Catalyst Metadata                            |
 | `manifest`     | Project metadata and build layout            |
 | `dependencies` | External packages and package specifications |
-| `features`     | Preprocessor-level feature flags             |
+| `features`     | Preprocessor-level feature flags, useful for library authors to provide togglable behavior. |
 | `hooks`        | Optional lifecycle callbacks                 |
 
 ### `meta` Schema
@@ -103,9 +103,12 @@ Features are named preprocessor flags that can control build-time behavior.
 
 ### `hooks` Schema
 
-Hooks are optional scripts triggered at various stages of the build lifecycle. They enable incorporating support for
-declarative configs to adapt to the realities of cross-platform development.
+> [!NOTE]
+> Hooks will be added to Catalyst in `0.0.2`.
 
+Hooks are optional scripts triggered at various stages of the build lifecycle. They enable incorporating support for
+imperative configs to adapt to the realities of cross-platform development. Support is planned for bash, powershell,
+and python scripts.
 
 |Field|Description|
 |-----|-----------|
@@ -114,18 +117,16 @@ declarative configs to adapt to the realities of cross-platform development.
 |`fail`|Executed if the build fails|
 |`publish`|Custom logic for uploading artifacts or pushing metadata|
 
-> [!NOTE]
-> Hooks will be added to Catalyst in `0.0.2`.
 
 ## `.catalystignore` File Schema
 
 Catalyst allows users to specify entire directories as `source` directories.
 However, this can result in unintended source files
 (e.g., test stubs, platform-specific files) being included in a build.
-To prevent this, Catalyst supports a `.catalystignore` file—similar in
+To prevent this, Catalyst supports a `.catalystignore` file, similar in
 spirit to `.gitignore` or `.dockerignore`.
 
-When building the **source set**, Catalyst looks for a `.catalystignore` file
+When cerating the source file set, Catalyst looks for a `.catalystignore` file
 inside each specified `source` directory. Any file matching a pattern in that
 file will be excluded from the build.
 
@@ -155,7 +156,7 @@ debug:
 
 ### Behavior
 
-- If a profile is active and a matching section exists, its rules are applied
+- If a profile is active and a matching section exists, its ignore rules are applied
 in addition to the global ones.
 - Files ignored via `.catalystignore` are completely excluded from the
 compilation step and dependency graph.

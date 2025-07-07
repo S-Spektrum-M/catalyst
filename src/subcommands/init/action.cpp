@@ -51,6 +51,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         auto ignore_path = fs::path(dir) / ".catalystignore";
         if (!fs::exists(ignore_path)) { std::ofstream{ignore_path}; }
     }
+    if (!fs::exists(parse_args.dirs.build))
+        fs::create_directory(parse_args.dirs.build);
 
     return catalyst::YAML_UTILS::profile_write_back(parse_args.profile, std::move(node));
 }
