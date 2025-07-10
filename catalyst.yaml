@@ -9,8 +9,8 @@ manifest:
   tooling:
     CC: clang
     CXX: clang++
-    CCFLAGS: ""
-    CXXFLAGS: ""
+    CCFLAGS: "--std=c++2c"
+    CXXFLAGS: "--std=c++2c"
   dirs:
     include:
       - include
