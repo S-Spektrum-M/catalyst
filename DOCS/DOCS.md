@@ -66,7 +66,7 @@ Define important source and build paths within the project:
 | `build` | Directory where build outputs should go | `build` |
 
 > [!NOTE]
-> `dirs.source` does not support recursive file finding. Including a subdirectory must be done explicitly.
+> `dirs.source` recursively finds all source files within the listed directories.
 > Also see the `.catalystignore` section for excluding files found by `dirs.source`.
 
 
@@ -83,6 +83,7 @@ Each entry is an object with the following keys:
 |`source`|Git URL, `catalyst-hub`, or `vcpkg`|
 |`using`|List of feature flags to enable in the dependency|
 
+> [!NOTE]
 > Catalyst resolves dependencies directly from Git where possible, enabling minimal and reproducible builds.
 
 > [!NOTE]

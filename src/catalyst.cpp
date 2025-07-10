@@ -1,5 +1,7 @@
 #include "catalyst/subcommands/add/action.hpp"
 #include "catalyst/subcommands/add/parse_cli.hpp"
+#include "catalyst/subcommands/fetch/action.hpp"
+#include "catalyst/subcommands/fetch/parse_cli.hpp"
 #include "catalyst/subcommands/generate/action.hpp"
 #include "catalyst/subcommands/generate/parse_cli.hpp"
 #include "catalyst/subcommands/init/action.hpp"
@@ -13,7 +15,17 @@ int main(int argc, char **argv) {
     const auto [add_subc, add_res] = catalyst::add::parse(app);
     const auto [init_subc, init_res] = catalyst::init::parse(app);
     const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
+    const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
+    std::string catalyst_version{"0.0.1"};
+    bool show_version{false};
+    app.add_flag("-v,--version", show_version, "current version");
+    app.add_subcommand("help", "Display help information for the application.")->callback([&]() {
+        std::cout << app.help() << std::endl;
+    });
     CLI11_PARSE(app, argc, argv);
+    if (show_version) {
+        std::cout << catalyst_version << std::endl;
+    }
     if (*add_subc)
         if (auto res = catalyst::add::action(*add_res); !res)
             return 1;
@@ -22,6 +34,9 @@ int main(int argc, char **argv) {
             return 1;
     if (*generate_subc)
         if (auto res = catalyst::generate::action(*generate_res); !res)
+            return 1;
+    if (*fetch_subc)
+        if (auto res = catalyst::fetch::action(*fetch_res); !res)
             return 1;
     return 0;
 }
