@@ -1,3 +1,5 @@
+meta:
+  min_ver: 0.0.1
 manifest:
   name: catalyst-build-system
   type: BINARY
@@ -13,8 +15,11 @@ manifest:
     include:
       - include
     source:
-      - src/subcommands/add
-      - src/subcommands/generate
-      - src/subcommands/init
-      - src/yaml-utils
+      - src
     build: build
+dependencies:
+  - name: yaml-cpp
+    source: https://github.com/S-Spektrum-M/yaml-cpp
+    version: latest
+    using:
+      []

@@ -157,7 +157,7 @@ std::expected<std::unordered_set<fs::path>, std::string> build_source_set(std::v
             }
         }
 
-        for (const auto &entry : fs::directory_iterator(dir)) {
+        for (const auto &entry : fs::recursive_directory_iterator(dir)) {
             if (entry.is_regular_file()) {
                 bool ignored = false;
                 for (const auto &pattern : ignored_files) {
@@ -194,13 +194,23 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
             cflags += " -I" + (current_dir / dir).string();
         }
     }
+    std::string ldlibs;
+    if (auto deps = profile["dependencies"]; deps && deps.IsSequence()) {
+        for (const auto &dep : deps) {
+            if (dep["name"] && dep["name"].IsScalar()) {
+                ldlibs += std::format(" -l{}", dep["name"].as<std::string>());
+            }
+        }
+    }
     buildfile << "# Variables\n"
               << "cc = " << profile["manifest"]["tooling"]["CC"].as<std::string>() << "\n"
               << "cxx = " << profile["manifest"]["tooling"]["CXX"].as<std::string>() << "\n"
               << "cxxflags = " << cxxflags << "\n"
               << "cflags = " << cflags << "\n"
               << "builddir = " << build_dir.string() << "\n"
-              << "objdir = " << obj_dir.string() << "\n\n";
+              << "objdir = " << obj_dir.string() << "\n"
+              << "ldflags = -Lcatalyst-libs \n"
+              << "ldlibs= " << ldlibs << "\n\n"; // place compiled libraries here
 }
 
 void write_rules(std::ofstream &buildfile) {
@@ -217,10 +227,9 @@ void write_rules(std::ofstream &buildfile) {
     buildfile << "  depfile = $out.d\n";
     buildfile << "  deps = gcc\n\n";
 
-    // TODO: DISCOVER DEPS for a -L flag
     buildfile << "# Rules for linking\n";
     buildfile << "rule binary_link\n";
-    buildfile << "  command = $cxx $in -o $out\n";
+    buildfile << "  command = $cxx $in -o $out $ldflags $ldlibs\n";
     buildfile << "  description = LINK $out\n\n";
 
     buildfile << "rule static_link\n";
@@ -278,7 +287,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     buildfile << "# Source File Compilation\n";
     std::vector<std::string> object_files;
     for (const auto &src : source_set) {
-        object_files.push_back(obj_dir / src.filename().replace_extension(".o"));
+        fs::path relative_src_path = fs::relative(src, current_dir);
+        std::string obj_name = relative_src_path.string();
+        std::replace(obj_name.begin(), obj_name.end(), '/', '_');
+        std::replace(obj_name.begin(), obj_name.end(), '\\', '_'); // For Windows paths
+        obj_name = obj_name.substr(0, obj_name.find_last_of('.')) + ".o";
+        object_files.push_back(obj_dir / obj_name);
         buildfile << "build " << object_files.back() << ": "
                   << ((src.extension() == ".c") ? "c_compile" : "cxx_compile") << " " << src.string() << "\n";
     }
@@ -290,7 +304,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::string target_suffix;
     std::string link_rule;
 
-    if (type == "STATIC") {
+    if (type == "STATICLIB") {
         link_rule = "static_link";
 #if defined(_WIN32)
         target_prefix = "";
@@ -299,7 +313,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         target_prefix = "lib";
         target_suffix = ".a";
 #endif
-    } else if (type == "SHARED") {
+    } else if (type == "SHAREDLIB") {
         link_rule = "shared_link";
 #if defined(_WIN32)
         target_prefix = "";
