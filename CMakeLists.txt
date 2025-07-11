@@ -19,19 +19,9 @@ add_compile_options(-Wall -Werror -Wextra -Wpedantic)
 include_directories(include)
 
 # Gather source files
-file(GLOB_RECURSE ACTION_SOURCES
-    "src/subcommands/add/action.cpp"
-    "src/subcommands/init/action.cpp"
-    "src/subcommands/generate/action.cpp"
-    "src/subcommands/fetch/action.cpp"
-)
+file(GLOB_RECURSE ACTION_SOURCES "src/subcommands/*/action.cpp")
 
-file(GLOB_RECURSE PARSE_CLI_SOURCES
-    "src/subcommands/add/parse_cli.cpp"
-    "src/subcommands/init/parse_cli.cpp"
-    "src/subcommands/generate/parse_cli.cpp"
-    "src/subcommands/fetch/parse_cli.cpp"
-)
+file(GLOB_RECURSE PARSE_CLI_SOURCES "src/subcommands/*/parse_cli.cpp")
 
 file(GLOB_RECURSE YAML_UTILS_SOURCES "src/yaml-utils/*.cpp")
 
