@@ -42,9 +42,16 @@ add_executable(catalyst
     ${YAML_UTILS_SOURCES}
 )
 
-# Find and link yaml-cpp
-find_package(yaml-cpp REQUIRED)
-target_link_libraries(catalyst PRIVATE yaml-cpp)
+include(FetchContent)
+
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+)
+
+FetchContent_MakeAvailable(yaml-cpp)
+
+target_link_libraries(catalyst PRIVATE yaml-cpp::yaml-cpp)
 
 # Install the executable
 install(TARGETS catalyst DESTINATION bin)
