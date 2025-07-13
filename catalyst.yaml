@@ -1,10 +1,10 @@
 meta:
   min_ver: 0.0.1
 manifest:
-  name: catalyst-build-system
+  name: catalyst
   type: BINARY
   version: 0.0.1
-  description: Your Description Goes Here
+  description: Catalyst is a Declarative Modern C++ Package Manager
   provides: ""
   tooling:
     CC: clang
