@@ -1,3 +1,12 @@
+include(FetchContent)
+
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+)
+
+FetchContent_MakeAvailable(yaml-cpp)
+
 cmake_minimum_required(VERSION 3.10)
 project(catalyst)
 
@@ -31,15 +40,6 @@ add_executable(catalyst
     ${PARSE_CLI_SOURCES}
     ${YAML_UTILS_SOURCES}
 )
-
-include(FetchContent)
-
-FetchContent_Declare(
-  yaml-cpp
-  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-)
-
-FetchContent_MakeAvailable(yaml-cpp)
 
 target_link_libraries(catalyst PRIVATE yaml-cpp::yaml-cpp)
 
