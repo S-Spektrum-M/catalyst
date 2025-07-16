@@ -342,8 +342,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     buildfile << "\n\n";
 
     // Default target
-    buildfile << "# Default target to build\n";
+    buildfile << "# Default target to build";
     buildfile << "default " << target_path.string() << "\n";
+
+    std::ofstream profile_comp_file{build_dir / "profile_composition.yaml"};
+    if (!profile_comp_file) {
+        return std::unexpected("Failed to open profile_composition.yaml for writing in " + build_dir.string());
+    }
+    profile_comp_file << profile;
 
     return {};
 }
