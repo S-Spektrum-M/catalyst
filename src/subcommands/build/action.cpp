@@ -1,11 +1,10 @@
-#include <array>
-#include <cstdio>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <yaml-cpp/node/node.h>
 
 #include "catalyst/subcommands/build/parse_cli.hpp"
@@ -15,8 +14,19 @@
 
 namespace catalyst::build {
 namespace fs = std::filesystem;
+
+bool dep_missing(const YAML::Node &pc) {
+    fs::path build_dir = pc["manifest"]["dirs"]["build"].as<std::string>();
+    if (!pc["dependencies"]) return false; // program has no dependencies
+    if (std::any_of(pc["dependencies"].begin(), pc["dependencies"].end(), [&](const YAML::Node &dep) {
+        return !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
+    })) return true;
+    return false;
+}
+
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    // TODO: check if the exsiting build file matches the provided profile profile composition std::vector<
+    // TODO: check if the exsiting build file matches the provided profile
+    // profile composition std::vector<
     std::vector<std::string> profiles = parse_args.profiles;
     if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
         profiles.insert(profiles.begin(), "common");
@@ -27,53 +37,51 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     } else {
         pc = res.value();
     }
-    std::string build_dir_str = pc["manifest"]["dirs"]["build"].as<std::string>();
+    fs::path build_dir = pc["manifest"]["dirs"]["build"].as<std::string>();
     bool regenerate = false;
-    if (fs::exists(std::format("{}/{}", build_dir_str, "profile_composition.yaml"))) {
-        YAML::Node existing_pc = YAML::LoadFile(std::format("{}/{}", build_dir_str, "profile_composition.yaml"));
+    if (fs::exists(build_dir / "profile_composition.yaml")) {
+        YAML::Node existing_pc = YAML::LoadFile((build_dir / "profile_composition.yaml").string());
         if (existing_pc.size() != pc.size()) {
             regenerate = true;
         }
     }
 
     // DONE: generate the build file if requested or needed
-    if (!fs::exists(std::format("{}/{}", build_dir_str, "build.ninja")) || parse_args.regen || regenerate) {
+    if (!fs::exists(build_dir / "build.ninja") || parse_args.regen || regenerate) {
         auto res = catalyst::generate::action({parse_args.profiles, parse_args.enabled_features});
         if (!res)
             return std::unexpected(res.error());
     }
 
     // TODO: check if all deps exist or we've been asked to refetch them
-    if (!fs::exists(std::format("{}/{}", build_dir_str, "catalyst-libs")) || parse_args.force_refetch) {
-        auto res = catalyst::fetch::action({parse_args.profiles});
-        if (!res)
+    if (!fs::exists(build_dir / "catalyst-libs") || parse_args.force_refetch || dep_missing(pc)) {
+        if (parse_args.force_refetch) {
+            fs::remove_all(fs::path{build_dir / "catalyst-libs"}); // cleanup
+        }
+        if (auto res = catalyst::fetch::action({parse_args.profiles}); !res)
             return std::unexpected(res.error());
     }
-    // TODO: check if all deps exist or we've been asked to refetch them
 
-    // DONE: call "ninja -C build_dir_str"
-    std::system(std::format("ninja -C {}", build_dir_str).c_str());
-
-    // DONE: call "ninja -C build_dir_str -t compdb > build_dir_str/compile_commands.json"
-    std::string compdb_command = std::format("ninja -C {} -t compdb", build_dir_str);
-    FILE *pipe = popen(compdb_command.c_str(), "r");
-    if (!pipe) {
-        return std::unexpected("failed to output compile commands");
+    // DONE: call "ninja -C build_dir"
+    if (!std::system(std::format("ninja -C {}", build_dir.string()).c_str())) {
+        return std::unexpected("build failed");
     }
 
-    std::array<char, 256> buffer;
-    std::string result;
-    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-        result += buffer.data();
+    // effectively: call "ninja -C build_dir -t compdb >
+    // build_dir/compile_commands.json"
+    fs::path temp_compdb_path = fs::temp_directory_path() / "catalyst-compdb.json";
+    std::string compdb_command =
+        std::format("ninja -C {} -t compdb > {}", build_dir.string(), temp_compdb_path.string());
+    if (std::system(compdb_command.c_str()) != 0) {
+        return std::unexpected("failed to generate compile commands");
     }
-    pclose(pipe);
 
-    std::string compdb_path = std::format("{}/compile_commands.json", build_dir_str);
-    std::ofstream compdb_file(compdb_path);
-    if (!compdb_file) {
-        return std::unexpected(std::format("Failed to open {} for writing.", compdb_path));
+    fs::path compdb_path = build_dir / "compile_commands.json";
+    try {
+        fs::rename(temp_compdb_path, compdb_path);
+    } catch (const fs::filesystem_error &e) {
+        return std::unexpected(std::format("failed to move compile commands: {}", e.what()));
     }
-    compdb_file << result;
 
     return {};
 }

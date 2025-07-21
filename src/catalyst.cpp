@@ -8,6 +8,7 @@
 #include "catalyst/subcommands/generate/parse_cli.hpp"
 #include "catalyst/subcommands/init/action.hpp"
 #include "catalyst/subcommands/init/parse_cli.hpp"
+#include "catalyst/GLOBALS.hpp"
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
 #include <string>
@@ -19,7 +20,6 @@ int main(int argc, char **argv) {
     const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
     const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
     const auto [build_subc, build_res] = catalyst::build::parse(app);
-    std::string catalyst_version{"0.0.1"};
     bool show_version{false};
     app.add_flag("-v,--version", show_version, "current version");
     app.add_subcommand("help", "Display help information for a subcommand.")->callback([&]() {
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     });
     CLI11_PARSE(app, argc, argv);
     if (show_version) {
-        std::cout << catalyst_version << std::endl;
+        std::cout << catalyst::CATALYST_VERSION << std::endl;
     }
     if (*add_subc)
         if (auto res = catalyst::add::action(*add_res); !res)
