@@ -11,9 +11,11 @@
 #include "catalyst/GLOBALS.hpp"
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
+#include <chrono>
 #include <string>
 
 int main(int argc, char **argv) {
+    auto pre_parse = std::chrono::high_resolution_clock::now();
     CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
     const auto [add_subc, add_res] = catalyst::add::parse(app);
     const auto [init_subc, init_res] = catalyst::init::parse(app);
@@ -26,6 +28,7 @@ int main(int argc, char **argv) {
         std::cout << app.help() << std::endl;
     });
     CLI11_PARSE(app, argc, argv);
+    auto post_parse = std::chrono::high_resolution_clock::now();
     if (show_version) {
         std::cout << catalyst::CATALYST_VERSION << std::endl;
     }
@@ -42,8 +45,16 @@ int main(int argc, char **argv) {
         if (auto res = catalyst::fetch::action(*fetch_res); !res)
             return 1;
     if (*build_subc) {
-        if (auto res = catalyst::build::action(*build_res); !res)
+        if (auto res = catalyst::build::action(*build_res); !res) {
+            std::cerr << res.error() << std::endl;
             return 1;
+        }
     }
+    auto post_action = std::chrono::high_resolution_clock::now();
+    auto parse_duration = std::chrono::duration_cast<std::chrono::milliseconds>(post_parse - pre_parse);
+    auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(post_action - pre_parse);
+
+    std::cout << "parsed in " << parse_duration.count() << " ms" << std::endl;
+    std::cout << "finished action in " << total_duration.count() << " ms" << std::endl;
     return 0;
 }
