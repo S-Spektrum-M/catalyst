@@ -24,6 +24,17 @@ bool dep_missing(const YAML::Node &pc) {
     return false;
 }
 
+
+// FIXME: use better redirection scheme
+std::expected<void, std::string> generate_compile_commands(const fs::path& build_dir) {
+    fs::path real_compdb_path = build_dir / "compile_commands.json";
+    std::string compdb_command = std::format("ninja -C {} -t compdb > {}", build_dir.string(), real_compdb_path.string());
+    if (std::system(compdb_command.c_str()) != 0) {
+        return std::unexpected("failed to generate compile commands");
+    }
+    return {};
+}
+
 std::expected<void, std::string> action(const parse_t &parse_args) {
     // TODO: check if the exsiting build file matches the provided profile
     // profile composition std::vector<
@@ -62,26 +73,11 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             return std::unexpected(res.error());
     }
 
-    // DONE: call "ninja -C build_dir"
-    if (!std::system(std::format("ninja -C {}", build_dir.string()).c_str())) {
-        return std::unexpected("build failed");
-    }
+    std::system(std::format("ninja -C {}", build_dir.string()).c_str());
 
-    // effectively: call "ninja -C build_dir -t compdb >
-    // build_dir/compile_commands.json"
-    fs::path temp_compdb_path = fs::temp_directory_path() / "catalyst-compdb.json";
-    std::string compdb_command =
-        std::format("ninja -C {} -t compdb > {}", build_dir.string(), temp_compdb_path.string());
-    if (std::system(compdb_command.c_str()) != 0) {
-        return std::unexpected("failed to generate compile commands");
-    }
-
-    fs::path compdb_path = build_dir / "compile_commands.json";
-    try {
-        fs::rename(temp_compdb_path, compdb_path);
-    } catch (const fs::filesystem_error &e) {
-        return std::unexpected(std::format("failed to move compile commands: {}", e.what()));
-    }
+    // effectively: call "ninja -C build_dir -t compdb > build_dir/compile_commands.json"
+    if (auto res = generate_compile_commands(build_dir); !res)
+        return res;
 
     return {};
 }
