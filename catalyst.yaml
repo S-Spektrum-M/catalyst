@@ -9,8 +9,8 @@ manifest:
   tooling:
     CC: clang
     CXX: clang++
-    CCFLAGS: "--std=c++2c"
-    CXXFLAGS: "--std=c++2c"
+    CCFLAGS: --std=c++2c -Wall -Wextra -Wpedantic
+    CXXFLAGS: --std=c++2c -Wall -Wextra -Wpedantic
   dirs:
     include:
       - include
@@ -19,7 +19,7 @@ manifest:
     build: build
 dependencies:
   - name: yaml-cpp
-    source: https://github.com/S-Spektrum-M/yaml-cpp
+    source: vcpkg
     version: latest
     using:
       []

@@ -18,10 +18,10 @@ int main(int argc, char **argv) {
     auto pre_parse = std::chrono::high_resolution_clock::now();
     CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
     const auto [add_subc, add_res] = catalyst::add::parse(app);
-    const auto [init_subc, init_res] = catalyst::init::parse(app);
-    const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
-    const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
     const auto [build_subc, build_res] = catalyst::build::parse(app);
+    const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
+    const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
+    const auto [init_subc, init_res] = catalyst::init::parse(app);
     bool show_version{false};
     app.add_flag("-v,--version", show_version, "current version");
     app.add_subcommand("help", "Display help information for a subcommand.")->callback([&]() {

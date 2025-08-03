@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <format>
 #include <iostream>
+#include <print>
 #include <stdexcept>
 #include <string>
 #include <yaml-cpp/node/node.h>
@@ -25,6 +26,47 @@ std::expected<YAML::Node, std::string> fetch_profile(const std::string profile_n
     return YAML::LoadFile(profile_path);
 }
 
+std::expected<void, std::string> fetch_vcpkg(std::string name) {
+    char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
+    if (vcpkg_root_env == nullptr) {
+        return std::unexpected(
+            "VCPKG_ROOT environment variable not set. Please set it to your vcpkg installation directory.");
+    }
+    fs::path vcpkg_root(vcpkg_root_env);
+    fs::path vcpkg_exe = vcpkg_root / "vcpkg";
+#if defined(_WIN32)
+    vcpkg_exe.replace_extension(".exe");
+#endif
+    std::string command = std::format("\"{}\" install {}", vcpkg_exe.string(), name);
+    std::println(std::cout, "Fetching: {} from vcpkg", name);
+    if (std::system(command.c_str()) != 0) {
+        return std::unexpected(std::format("Failed to fetch dependency: {}", name));
+    }
+    return {};
+}
+
+std::expected<void, std::string> fetch_git(std::string build_dir, std::string name, std::string source,
+                                           std::string version) {
+    fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
+    std::string command;
+    if (version == "latest") {
+        command = std::format("git clone --depth 1 {} {}", source, dep_path.string());
+    } else {
+        command = std::format("git clone --depth 1 --branch {} {} {}", version, source, dep_path.string());
+    }
+    std::println(std::cout, "Fetching: {}@{} from {}", name, version, source);
+    if (std::system(command.c_str()) != 0) {
+        return std::unexpected(std::format("Failed to fetch dependency: {}", name));
+    }
+    std::println(std::cout, "Building: {}", name);
+    // NOTE: after build command is impelmented, we can just do "catalyst build <PATH>"
+    command = std::format("cd {} && mkdir build && catalyst generate && ninja -C build", dep_path.string());
+    if (std::system(command.c_str()) != 0) {
+        return std::unexpected(std::format("Failed to build dependency: {}", name));
+    }
+    return {};
+}
+
 std::expected<void, std::string> action(const parse_t &parse_args) {
     if (std::find(parse_args.profiles.begin(), parse_args.profiles.end(), "common") == parse_args.profiles.end()) {
         const_cast<std::vector<std::string> &>(parse_args.profiles).insert(parse_args.profiles.begin(), "common");
@@ -40,38 +82,27 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected(res.error());
     }
     for (auto profile : parse_args.profiles) {
-        if (auto res = fetch_profile(profile); !res) {
+        std::expected<YAML::Node, std::string> res = fetch_profile(profile);
+        if (!res)
             return std::unexpected(res.error());
-        } else {
-            auto deps = res.value()["dependencies"];
-            if (!deps)
-                continue;
-            if (!deps.IsSequence())
-                return std::unexpected("dependencies field is not a sequence");
-            for (auto dep : deps) {
-                if (!dep["name"] || !dep["source"] || !dep["version"]) {
-                    return std::unexpected("Improperly configued dependency.");
-                }
-                std::string name = dep["name"].as<std::string>();
-                std::string source = dep["source"].as<std::string>();
-                std::string version = dep["version"].as<std::string>();
-                std::string command;
-                fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
-                if (version == "latest") {
-                    command = std::format("git clone --depth 1 {} {}", source, dep_path.string());
-                } else {
-                    command = std::format("git clone --depth 1 --branch {} {} {}", version, source, dep_path.string());
-                }
-                std::cout << std::format("Fetching: {}@{} from {}\n", name, version, source);
-                if (std::system(command.c_str()) != 0) {
-                    return std::unexpected(std::format("Failed to fetch dependency: {}", name));
-                }
-                std::cout << std::format("Building: {}\n", name);
-                // NOTE: after build command is impelmented, we can just do "catalyst build <PATH>"
-                command = std::format("cd {} && mkdir build && catalyst generate && ninja -C build", dep_path.string());
-                if (std::system(command.c_str()) != 0) {
-                    return std::unexpected(std::format("Failed to build dependency: {}", name));
-                }
+        auto deps = res.value()["dependencies"];
+        if (!deps)
+            continue;
+        if (!deps.IsSequence())
+            return std::unexpected("dependencies field is not a sequence");
+        for (auto dep : deps) {
+            if (!dep["name"] || !dep["source"] || !dep["version"]) {
+                return std::unexpected("Improperly configued dependency.");
+            }
+            std::string name = dep["name"].as<std::string>();
+            std::string source = dep["source"].as<std::string>();
+            std::string version = dep["version"].as<std::string>();
+            if (source == "vcpkg") {
+                if (auto res = fetch_vcpkg(name); !res)
+                    return std::unexpected(res.error());
+            } else {
+                if (auto res = fetch_git(build_dir, name, source, version); !res)
+                    return std::unexpected(res.error());
             }
         }
     }
