@@ -7,6 +7,9 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <array>
+#include <cstdio>
+#include <sys/wait.h>
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::generate {
@@ -111,9 +114,8 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
                 if (new_profile_manifest_dirs["source"] && new_profile_manifest_dirs["source"].IsSequence())
                     for (auto src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
                         composite["manifest"]["dirs"]["source"].push_back(src);
-                if (new_profile_manifest_dirs["build"]) {
+                if (new_profile_manifest_dirs["build"])
                     composite["manifest"]["dirs"]["build"] = new_profile_manifest_dirs["build"];
-                }
             }
         }
         if (new_profile["features"] && new_profile["features"].IsSequence()) {
@@ -212,15 +214,36 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
     if (auto deps = profile["dependencies"]; deps && deps.IsSequence()) {
         for (const auto &dep : deps) {
             if (dep["name"] && dep["name"].IsScalar()) {
-                std::string linkage = "shared"; // default linkage
+                std::string dep_name = dep["name"].as<std::string>();
                 if (dep["linkage"] && dep["linkage"].IsScalar()) {
-                    linkage = dep["linkage"].as<std::string>();
+                    std::string linkage = dep["linkage"].as<std::string>();
+                    if (linkage == "static" || linkage == "shared") {
+                        ldlibs += " -l" + dep_name;
+                    }
+                    // For "interface", we don't add any library to link against.
+                } else {
+                    // Linkage not explicitly defined, try pkg-config
+                    std::string command = "pkg-config --libs " + dep_name;
+                    std::array<char, 128> buffer;
+                    std::string result;
+                    FILE* pipe = popen(command.c_str(), "r");
+                    if (!pipe) {
+                        // fallback to -l if popen fails
+                        ldlibs += " -l" + dep_name;
+                        continue;
+                    }
+                    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+                        result += buffer.data();
+                    }
+                    int ret = pclose(pipe);
+                    if (WEXITSTATUS(ret) == 0) {
+                        result.erase(result.find_last_not_of(" 	\n") + 1);
+                        ldlibs += " " + result;
+                    } else {
+                        // fallback to -l if pkg-config fails
+                        ldlibs += " -l" + dep_name;
+                    }
                 }
-
-                if (linkage == "static" || linkage == "shared") {
-                    ldlibs += std::format(" -l{}", dep["name"].as<std::string>());
-                }
-                // For "interface", we don't add any library to link against.
             }
         }
     }
@@ -314,7 +337,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         std::replace(obj_name.begin(), obj_name.end(), '/', '_');
         std::replace(obj_name.begin(), obj_name.end(), '\\', '_'); // For Windows paths
         obj_name = obj_name.substr(0, obj_name.find_last_of('.')) + ".o";
-        object_files.push_back(obj_dir / obj_name);
+        object_files.push_back((obj_dir / obj_name).string());
         buildfile << "build " << object_files.back() << ": "
                   << ((src.extension() == ".c") ? "c_compile" : "cxx_compile") << " " << src.string() << "\n";
     }
