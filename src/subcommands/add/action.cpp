@@ -31,7 +31,6 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         newDependency["source"] = parse_args.source;
         newDependency["version"] = parse_args.version;
         newDependency["using"] = parse_args.enabled_features;
-        newDependency["linkage"] = "shared";
         profile_node["dependencies"].push_back(newDependency);
       }
       if (auto write_res = catalyst::YAML_UTILS::profile_write_back(
