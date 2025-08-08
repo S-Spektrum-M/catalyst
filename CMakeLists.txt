@@ -42,6 +42,9 @@ add_executable(catalyst
 )
 
 target_link_libraries(catalyst PRIVATE yaml-cpp::yaml-cpp)
+target_link_libraries(catalyst PRIVATE CLI11::CLI11)
+find_package(CLI11 CONFIG REQUIRED)
+
 
 # Install the executable
 install(TARGETS catalyst DESTINATION bin)

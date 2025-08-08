@@ -206,8 +206,8 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
     }
     if (auto includes = profile["manifest"]["dirs"]["include"]; includes && includes.IsSequence()) {
         for (const auto &dir : includes.as<std::vector<std::string>>()) {
-            cxxflags += " -I" + (current_dir / dir).string();
-            cflags += " -I" + (current_dir / dir).string();
+            cxxflags += " -I" + (fs::absolute(dir)).string();
+            cflags += " -I" + (fs::absolute(dir)).string();
         }
     }
     std::string ldlibs;
@@ -220,6 +220,22 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
                     if (linkage == "static" || linkage == "shared") {
                         ldlibs += " -l" + dep_name;
                     }
+                    std::string cflags_command = "pkg-config --cflags " + dep_name;
+                    std::array<char, 128> cflags_buffer;
+                    std::string cflags_result;
+                    FILE* cflags_pipe = popen(cflags_command.c_str(), "r");
+                    if (cflags_pipe) {
+                        while (fgets(cflags_buffer.data(), cflags_buffer.size(), cflags_pipe) != nullptr) {
+                            cflags_result += cflags_buffer.data();
+                        }
+                        int cflags_ret = pclose(cflags_pipe);
+                        if (WEXITSTATUS(cflags_ret) == 0) {
+                            cflags_result.erase(cflags_result.find_last_not_of(" \t\n") + 1);
+                            cxxflags += " " + cflags_result;
+                            cflags += " " + cflags_result;
+                        }
+                    }
+
                     // For "interface", we don't add any library to link against.
                 } else {
                     // Linkage not explicitly defined, try pkg-config

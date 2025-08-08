@@ -21,5 +21,4 @@ dependencies:
   - name: yaml-cpp
     source: vcpkg
     version: latest
-    using:
-      []
+    using: []
