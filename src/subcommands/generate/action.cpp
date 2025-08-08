@@ -188,6 +188,20 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
 
     std::string cxxflags = profile["manifest"]["tooling"]["CXXFLAGS"].as<std::string>();
     std::string cflags = profile["manifest"]["tooling"]["CCFLAGS"].as<std::string>();
+    std::string ldflags = "-Lcatalyst-libs";
+    char* vcpkg_root = std::getenv("VCPKG_ROOT");
+    if (vcpkg_root != nullptr) {
+#if defined(_WIN32)
+        const char* triplet = "x64-windows";
+#elif defined(__APPLE__)
+        const char* triplet = "x64-osx";
+#else
+        const char* triplet = "x64-linux";
+#endif
+        cxxflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
+        cflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
+        ldflags += std::format(" -L{}", (fs::path(vcpkg_root) / "installed" / triplet / "lib").string());
+    }
     if (auto includes = profile["manifest"]["dirs"]["include"]; includes && includes.IsSequence()) {
         for (const auto &dir : includes.as<std::vector<std::string>>()) {
             cxxflags += " -I" + (current_dir / dir).string();
@@ -198,7 +212,15 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
     if (auto deps = profile["dependencies"]; deps && deps.IsSequence()) {
         for (const auto &dep : deps) {
             if (dep["name"] && dep["name"].IsScalar()) {
-                ldlibs += std::format(" -l{}", dep["name"].as<std::string>());
+                std::string linkage = "shared"; // default linkage
+                if (dep["linkage"] && dep["linkage"].IsScalar()) {
+                    linkage = dep["linkage"].as<std::string>();
+                }
+
+                if (linkage == "static" || linkage == "shared") {
+                    ldlibs += std::format(" -l{}", dep["name"].as<std::string>());
+                }
+                // For "interface", we don't add any library to link against.
             }
         }
     }
@@ -209,7 +231,7 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile) {
               << "cflags = " << cflags << "\n"
               << "builddir = " << build_dir.string() << "\n"
               << "objdir = " << obj_dir.string() << "\n"
-              << "ldflags = -Lcatalyst-libs \n"
+              << "ldflags = " << ldflags << " \n"
               << "ldlibs= " << ldlibs << "\n\n"; // place compiled libraries here
 }
 
@@ -342,8 +364,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     buildfile << "\n\n";
 
     // Default target
-    buildfile << "# Default target to build\n";
+    buildfile << "# Default target to build";
     buildfile << "default " << target_path.string() << "\n";
+
+    std::ofstream profile_comp_file{build_dir / "profile_composition.yaml"};
+    if (!profile_comp_file) {
+        return std::unexpected("Failed to open profile_composition.yaml for writing in " + build_dir.string());
+    }
+    profile_comp_file << profile;
 
     return {};
 }

@@ -1,4 +1,4 @@
-build
+build/*
 .cache
 *.cbuild
 compile_commands.json

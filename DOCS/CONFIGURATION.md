@@ -82,6 +82,7 @@ Each entry is an object with the following keys:
 |`version`|SemVer string or Git commit hash (hash preferred for reproducibility)|
 |`source`|Git URL, `catalyst-hub`, or `vcpkg`|
 |`using`|List of feature flags to enable in the dependency|
+|`linkage`|One of `static`, `shared`, or `interface` (defaults to `shared`)|
 
 > [!NOTE]
 > Catalyst resolves dependencies directly from Git where possible, enabling minimal and reproducible builds.
