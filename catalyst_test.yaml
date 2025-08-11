@@ -1,0 +1,7 @@
+manifest:
+  name: catalyst_tests
+  dirs:
+    source:
+      - src
+      - tests
+    build: test_builds

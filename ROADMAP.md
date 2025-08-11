@@ -1,20 +1,21 @@
  Road Map
+# DONE (0.0.0 - 0.0.1)
+
 - [x] add                  Add dependencies to a catalyst.yaml manifest file
 - [x] init                 Create a new catalyst package in an existing directory
 - [x] generate             Generate the build file
 - [x] fetch                Fetch and compile dependencies from the network
-- [ ] build                Invoke Ninja on the build path.
+- [x] build                Invoke Ninja on the build path.
 
 
-
-## Out of Scope of 0.0.1
-- [ ] bench                Execute all benchmarks of a local package
-- [ ] tidy                 Checks a package to catch common mistakes and improve your C++ code.
-    - renamed from clippy
+## 0.0.2
+- [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
 - [ ] clean                Remove artifacts that catalyst has generated in the past
 - [ ] config               Inspect configuration values
 - [ ] doc                  Build a package's documentation
-- [ ] fix                  Automatically fix lint warnings reported by rustc
+- [ ] fix                  Automatically fix lint warnings reported by clang-tidy
+
+## Out of Scope of 0.0.2
 - [ ] fmt                  Formats all source files.
 - [ ] generate-lockfile    Generate the lockfile for a package
 - [ ] metadata             Output the resolved dependencies of a package, the concrete used versions including overrides, in machine-readable format miri
@@ -42,3 +43,4 @@
 - [ ] logout               Remove an API token from the registry locally
 - [ ] install              Install a Rust binary
 - [ ] uninstall            Remove a Rust binary
+- [ ] bench                Execute all benchmarks of a local package
