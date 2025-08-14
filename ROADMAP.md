@@ -10,6 +10,8 @@
 
 ## 0.0.2
 - [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
+- [x] run                  Run a binary profile's target.
+- [x] test                 Execute all unit and integration tests of a profile.
 - [ ] clean                Remove artifacts that catalyst has generated in the past
 - [ ] config               Inspect configuration values
 - [ ] doc                  Build a package's documentation
@@ -25,11 +27,9 @@
 - [ ] publish              Upload a package to the registry
 - [ ] remove               Remove dependencies from a Cargo.toml manifest file
 - [ ] report               Generate and display various kinds of reports
-- [ ] run                  Run a binary or example of the local package
 - [ ] rustc                Compile a package, and pass extra options to the compiler
 - [ ] rustdoc              Build a package's documentation, using specified custom flags.
 - [ ] search               Search packages in the registry. Default registry is crates.io
-- [ ] test                 Execute all unit and integration tests and build examples of a local package
 - [ ] tree                 Display a tree visualization of a dependency graph
 - [ ] update               Update dependencies as recorded in the local lock file
 - [ ] vendor               Vendor all dependencies for a project locally

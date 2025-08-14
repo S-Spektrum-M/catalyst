@@ -1,7 +1,8 @@
 manifest:
   name: catalyst_tests
+  type: binary
   dirs:
     source:
       - src
       - tests
-    build: test_builds
+    build: build/test

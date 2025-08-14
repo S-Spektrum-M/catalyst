@@ -5,7 +5,7 @@ manifest:
   type: BINARY
   version: 0.0.1
   description: Catalyst is a Declarative Modern C++ Package Manager
-  provides: ""
+  provides: catalyst
   tooling:
     CC: clang
     CXX: clang++
