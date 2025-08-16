@@ -43,3 +43,7 @@ Catalyst also depends on the following libraries:
 ## Contributors
 
 - Maintainer: [Siddharth Mohanty](https://www.linkedin.com/in/siddharth---mohanty)
+
+## License
+
+This project is licensed to you under the Apache 2.0 [License](./LICENSE.md).
