@@ -9,15 +9,15 @@
 
 
 ## 0.0.2
-- [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
 - [x] run                  Run a binary profile's target.
 - [x] test                 Execute all unit and integration tests of a profile.
-- [ ] clean                Remove artifacts that catalyst has generated in the past
 - [ ] config               Inspect configuration values
-- [ ] doc                  Build a package's documentation
-- [ ] fix                  Automatically fix lint warnings reported by clang-tidy
 
 ## Out of Scope of 0.0.2
+- [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
+- [ ] fix                  Automatically fix lint warnings reported by clang-tidy
+- [ ] clean                Remove artifacts that catalyst has generated in the past
+- [ ] doc                  Build a package's documentation
 - [ ] fmt                  Formats all source files.
 - [ ] generate-lockfile    Generate the lockfile for a package
 - [ ] metadata             Output the resolved dependencies of a package, the concrete used versions including overrides, in machine-readable format miri
@@ -38,7 +38,6 @@
 - [ ] help                 Displays help for a catalyst subcommand
 - [ ] info                 Display information about a package
 - [ ] locate-project       Print a JSON representation of a Cargo.toml file's location
-
 - [ ] login                Log in to a registry.
 - [ ] logout               Remove an API token from the registry locally
 - [ ] install              Install a Rust binary
