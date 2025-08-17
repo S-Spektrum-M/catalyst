@@ -21,11 +21,11 @@ Designed to be simple yet powerful, Catalyst emphasizes per-target isolation, cl
 
 ## Configuration
 
-Read [this page](DOCS/CONFIGURATION.md)
+Read [this page](docs/configuration.md)
 
 ## Docs
 
-Documentation can be found [here](./DOCS.md) or by running `catalyst help`.
+Documentation can be found [here](docs/index.md) or by running `catalyst help`.
 
 ## Acknowledgements
 
