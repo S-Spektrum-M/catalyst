@@ -7,6 +7,7 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     CLI::App *init = app.add_subcommand("init", "initialize a profile.");
     auto ret = std::make_unique<parse_t>();
     init->add_option("-n,--name", ret->name, "the name of the project");
+    init->add_option("--path", ret->path, "the default path for the project");
 
     std::map<std::string, parse_t::type_t> type_map{{"binary", parse_t::type_t::BINARY},
                                                     {"staticlib", parse_t::type_t::STATICLIB},
