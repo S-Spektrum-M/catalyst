@@ -11,7 +11,7 @@
 ## 0.0.2
 - [x] run                  Run a binary profile's target.
 - [x] test                 Execute all unit and integration tests of a profile.
-- [ ] config               Inspect configuration values
+- [ ] config               Inspect and modify configuration values
 
 ## Out of Scope of 0.0.2
 - [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
