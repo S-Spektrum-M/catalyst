@@ -1,0 +1,75 @@
+#include "yaml-cpp/node/node.h"
+#include <catalyst/subcommands/configure/action.hpp>
+#include <catalyst/yaml-utils/load_profile_file.hpp>
+#include <catalyst/yaml-utils/profile_write_back.hpp>
+#include <cctype>
+#include <cstdio>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
+#include <yaml-cpp/yaml.h>
+
+namespace catalyst::configure {
+
+bool is_int(const std::string &str);
+
+std::expected<void, std::string> action(const parse_t &parse_args) {
+    // 1. Parse the variable string
+    size_t colon_pos = parse_args.var.find(':');
+    if (colon_pos == std::string::npos) {
+        return std::unexpected("Invalid variable format. Expected "
+                               "'<profile>:<path.to.variable>'");
+    }
+    std::string profile = parse_args.var.substr(0, colon_pos);
+    std::string var_path_str = parse_args.var.substr(colon_pos + 1);
+
+    // 2. Load the profile
+    auto profile_node_or_err = YAML_UTILS::load_profile_file(profile);
+    if (!profile_node_or_err) {
+        return std::unexpected(profile_node_or_err.error());
+    }
+    YAML::Node profile_node = profile_node_or_err.value();
+
+    // 3. Figure out the var path
+    std::vector<std::string> var_path;
+    std::string_view var_path_sv(var_path_str);
+    for (auto it = var_path_sv.begin(); it != var_path_sv.end();) {
+        auto next_dot = std::find(it, var_path_sv.end(), '.');
+        var_path.emplace_back(it, next_dot);
+        it = next_dot;
+        if (it != var_path_sv.end()) {
+            it++;
+        }
+    }
+
+    YAML::Node target_node = profile_node;
+    for (size_t i = 0; i < var_path.size() - 1; ++i) {
+      target_node = target_node[var_path[i]];
+    }
+
+    // 5. Update the value
+    if (is_int(parse_args.val)) {
+      target_node[var_path.back()] = std::stoi(parse_args.val);
+    } else {
+      target_node[var_path.back()] = parse_args.val;
+    }
+
+    // 6. Write back
+    return YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+}
+
+bool is_int(const std::string &str) {
+    if (str.empty())
+        return false;
+
+    for (size_t i = 0; i < str.length(); ++i)
+        if (!isdigit(str[i]))
+            return false;
+
+    return true;
+}
+} // namespace catalyst::configure

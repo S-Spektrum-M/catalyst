@@ -15,5 +15,5 @@ include/catalyst/
             parse_cli.hpp   -- this defines a struct, {subcommand_name}_parse_t, to caputre parsed values, and a function, {subcommand_name}_parse_t parse(int argc, char **argv)
             action.hpp      -- this just provides a single function, void {subcommand_name}_exec(const {subcommand_name}_parse_t &);
     yaml-utils/             -- this provides a number of utility functions for wrangling and emmiting YAML(driven by the yaml-cpp library)
-    log-utils/              -- this provides functioanlity for writing to a a logfile(see: DOCS/logfile.md)
+    log-utils/              -- this provides functioanlity for writing to a a logfile(see: docs/logfile.md)
 ```

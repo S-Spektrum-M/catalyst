@@ -21,11 +21,11 @@ Designed to be simple yet powerful, Catalyst emphasizes per-target isolation, cl
 
 ## Configuration
 
-Read [this page](DOCS/CONFIGURATION.md)
+Read [this page](docs/configuration.md)
 
 ## Docs
 
-Documentation can be found [here](./DOCS.md) or by running `catalyst help`.
+Documentation can be found [here](docs/index.md) or by running `catalyst help`.
 
 ## Acknowledgements
 
@@ -43,3 +43,7 @@ Catalyst also depends on the following libraries:
 ## Contributors
 
 - Maintainer: [Siddharth Mohanty](https://www.linkedin.com/in/siddharth---mohanty)
+
+## License
+
+This project is licensed to you under the Apache 2.0 [License](./LICENSE.md).

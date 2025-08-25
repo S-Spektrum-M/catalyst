@@ -93,7 +93,13 @@ Each entry is an object with the following keys:
 
 ### `features` Schema
 
-Features are named preprocessor flags that can control build-time behavior.
+```
+features:
+    - <FEATURE_NAME>: <DEFAULT_VALUE>
+```
+
+The `features` is a YAML list of togglable features, to control build-time behavior.
+Flags can through arguments to the `generate` and `build ` subcommands.
 
 - Each feature is a boolean and corresponds to a `#define` macro.
 - Features can be validated at compile time using `static_assert`.

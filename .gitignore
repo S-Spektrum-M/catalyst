@@ -1,6 +1,8 @@
 build/*
+test_builds/*
 .cache
 *.cbuild
 compile_commands.json
 catalyst-libs
 .todos.sm
+GEMINI.md
