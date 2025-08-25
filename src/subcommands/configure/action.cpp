@@ -20,12 +20,15 @@ bool is_int(const std::string &str);
 std::expected<void, std::string> action(const parse_t &parse_args) {
     // 1. Parse the variable string
     size_t colon_pos = parse_args.var.find(':');
+    std::string profile;
+    std::string var_path_str;
     if (colon_pos == std::string::npos) {
-        return std::unexpected("Invalid variable format. Expected "
-                               "'<profile>:<path.to.variable>'");
+        profile = "common";
+        var_path_str = parse_args.var;
+    } else {
+        profile = parse_args.var.substr(0, colon_pos);
+        var_path_str = parse_args.var.substr(colon_pos + 1);
     }
-    std::string profile = parse_args.var.substr(0, colon_pos);
-    std::string var_path_str = parse_args.var.substr(colon_pos + 1);
 
     // 2. Load the profile
     auto profile_node_or_err = YAML_UTILS::load_profile_file(profile);
@@ -47,19 +50,23 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     YAML::Node target_node = profile_node;
-    for (size_t i = 0; i < var_path.size() - 1; ++i) {
-      target_node = target_node[var_path[i]];
-    }
-
     // 5. Update the value
-    if (is_int(parse_args.val)) {
-      target_node[var_path.back()] = std::stoi(parse_args.val);
-    } else {
-      target_node[var_path.back()] = parse_args.val;
+    if (!parse_args.val.empty()) {
+        for (size_t i = 0; i < var_path.size() - 1; ++i) {
+            target_node = target_node[var_path[i]];
+        }
+        if (is_int(parse_args.val)) {
+            target_node[var_path.back()] = std::stoi(parse_args.val);
+        } else {
+            target_node[var_path.back()] = parse_args.val;
+        }
+        return YAML_UTILS::profile_write_back(profile, std::move(profile_node));
     }
-
-    // 6. Write back
-    return YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+    for (size_t i = 0; i < var_path.size(); ++i) {
+        target_node = target_node[var_path[i]];
+    }
+    std::cout << target_node << std::endl;
+    return {};
 }
 
 bool is_int(const std::string &str) {

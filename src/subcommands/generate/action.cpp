@@ -347,8 +347,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     const auto &source_set = source_set_res.value();
 
     std::string build_dir_str = profile["manifest"]["dirs"]["build"].as<std::string>();
-    fs::path build_dir(build_dir_str);
-    fs::path obj_dir = "obj";
+    fs::path build_dir = build_dir_str;
+    fs::path obj_dir = build_dir / "obj";
 
     std::error_code ec;
     fs::create_directories(obj_dir, ec);
