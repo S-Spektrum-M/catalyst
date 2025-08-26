@@ -1,9 +1,11 @@
 #include <catalyst/subcommands/run/action.hpp>
+#include <cctype>
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <iostream>
+#include <regex>
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -44,9 +46,16 @@ std::expected<fs::path, std::string> executable_name(const std::string &profile)
 
     YAML::Node profile_node = YAML::LoadFile(profile_file);
     std::string exe, build_dir;
+    auto str_to_lower = [](std::string &input) -> void {
+        auto lower = [](const char c) -> char { return std::tolower(c); };
+        std::transform(input.begin(), input.end(), input.begin(), lower);
+        return;
+    };
+    std::string target_type = profile_node["manifest"]["type"].Scalar();
+    str_to_lower(target_type);
 
-    if (!profile_node["manifest"]["type"].IsDefined() ||
-        profile_node["manifest"]["type"].as<std::string>() == "BINARY") {
+    if (!profile_node["manifest"]["type"].IsDefined() || target_type != "binary") {
+        std::cerr << target_type << std::endl;
         return std::unexpected("profile does not build a binary target");
     }
 
@@ -56,9 +65,9 @@ std::expected<fs::path, std::string> executable_name(const std::string &profile)
         build_dir = profile_node["manifest"]["dirs"]["build"].as<std::string>();
     }
 
-    if (profile_node["manifest"]["provides"]) {
+    if (profile_node["manifest"]["provides"] && profile_node["manifest"]["provides"].as<std::string>() != "") {
         exe = profile_node["manifest"]["provides"].as<std::string>();
-    } else if (profile_node["manifest"]["name"]) {
+    } else if (profile_node["manifest"]["name"] && profile_node["manifest"]["name"].as<std::string>() != "") {
         exe = profile_node["manifest"]["name"].as<std::string>();
     } else {
         return std::unexpected("unable to figure out executable name. "
