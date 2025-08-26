@@ -1,24 +1,23 @@
  Road Map
-# DONE (0.0.0 - 0.0.1)
+# DONE (0.0.0 - 0.0.2)
 
 - [x] add                  Add dependencies to a catalyst.yaml manifest file
 - [x] init                 Create a new catalyst package in an existing directory
 - [x] generate             Generate the build file
 - [x] fetch                Fetch and compile dependencies from the network
 - [x] build                Invoke Ninja on the build path.
-
-
-## 0.0.2
 - [x] run                  Run a binary profile's target.
 - [x] test                 Execute all unit and integration tests of a profile.
-- [ ] config               Inspect and modify configuration values
+- [x] config               Inspect and modify configuration values
 
-## Out of Scope of 0.0.2
-- [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
-- [ ] fix                  Automatically fix lint warnings reported by clang-tidy
+## 0.0.3
 - [ ] clean                Remove artifacts that catalyst has generated in the past
 - [ ] doc                  Build a package's documentation
 - [ ] fmt                  Formats all source files.
+
+## Out of Scope of 0.0.2
+- [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
+- [ ] fix                  Automatically fix lint warnings reported by `clang-tidy`
 - [ ] generate-lockfile    Generate the lockfile for a package
 - [ ] metadata             Output the resolved dependencies of a package, the concrete used versions including overrides, in machine-readable format miri
 - [ ] owner                Manage the owners of a crate on the registry
@@ -27,8 +26,6 @@
 - [ ] publish              Upload a package to the registry
 - [ ] remove               Remove dependencies from a Cargo.toml manifest file
 - [ ] report               Generate and display various kinds of reports
-- [ ] rustc                Compile a package, and pass extra options to the compiler
-- [ ] rustdoc              Build a package's documentation, using specified custom flags.
 - [ ] search               Search packages in the registry. Default registry is crates.io
 - [ ] tree                 Display a tree visualization of a dependency graph
 - [ ] update               Update dependencies as recorded in the local lock file
