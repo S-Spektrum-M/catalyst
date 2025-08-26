@@ -375,7 +375,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         std::replace(obj_name.begin(), obj_name.end(), '/', '_');
         std::replace(obj_name.begin(), obj_name.end(), '\\', '_'); // For Windows paths
         obj_name = obj_name.substr(0, obj_name.find_last_of('.')) + ".o";
-        object_files.push_back((obj_dir / obj_name).string());
+        object_files.push_back((fs::path{"obj"} / obj_name).string());
         buildfile << "build " << object_files.back() << ": "
                   << ((src.extension() == ".c") ? "c_compile" : "cxx_compile") << " " << src.string() << "\n";
     }
