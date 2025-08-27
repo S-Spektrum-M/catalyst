@@ -1,4 +1,4 @@
-#include "catalyst/subcommands/build/parse_cli.hpp"
+#include "catalyst/subcommands/build.hpp"
 #include <CLI/App.hpp>
 
 namespace catalyst::build {

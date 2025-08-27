@@ -1,5 +1,5 @@
-#include "catalyst/subcommands/run/action.hpp"
-#include <catalyst/subcommands/test/action.hpp>
+#include "catalyst/subcommands/run.hpp"
+#include <catalyst/subcommands/test.hpp>
 #include <cstdlib>
 #include <expected>
 #include <filesystem>

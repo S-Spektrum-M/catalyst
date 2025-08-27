@@ -1,4 +1,4 @@
-#include <catalyst/subcommands/clean/parse_cli.hpp>
+#include "catalyst/subcommands/clean.hpp"
 
 namespace catalyst::clean {
     std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {

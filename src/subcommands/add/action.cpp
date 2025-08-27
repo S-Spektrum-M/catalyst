@@ -1,4 +1,4 @@
-#include "catalyst/subcommands/add/action.hpp"
+#include "catalyst/subcommands/add.hpp"
 #include "catalyst/yaml-utils/load_profile_file.hpp"
 #include "catalyst/yaml-utils/profile_write_back.hpp"
 #include <yaml-cpp/node/node.h>

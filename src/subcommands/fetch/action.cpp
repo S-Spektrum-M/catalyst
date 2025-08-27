@@ -1,4 +1,4 @@
-#include "catalyst/subcommands/fetch/action.hpp"
+#include "catalyst/subcommands/fetch.hpp"
 #include <cstdlib>
 #include <expected>
 #include <filesystem>

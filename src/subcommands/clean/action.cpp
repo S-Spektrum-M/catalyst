@@ -1,5 +1,5 @@
-#include "catalyst/subcommands/generate/parse_cli.hpp"
-#include <catalyst/subcommands/clean/action.hpp>
+#include "catalyst/subcommands/generate.hpp"
+#include <catalyst/subcommands/clean.hpp>
 #include <yaml-cpp/node/node.h>
 
 namespace catalyst::clean {

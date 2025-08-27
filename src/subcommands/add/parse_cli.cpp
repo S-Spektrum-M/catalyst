@@ -1,4 +1,4 @@
-#include <catalyst/subcommands/add/parse_cli.hpp>
+#include "catalyst/subcommands/add.hpp"
 
 namespace catalyst::add {
 

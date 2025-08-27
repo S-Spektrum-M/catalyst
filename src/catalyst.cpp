@@ -1,25 +1,15 @@
 #include "catalyst/GLOBALS.hpp"
-#include "catalyst/subcommands/add/action.hpp"
-#include "catalyst/subcommands/add/parse_cli.hpp"
-#include "catalyst/subcommands/build/action.hpp"
-#include "catalyst/subcommands/build/parse_cli.hpp"
-#include "catalyst/subcommands/clean/action.hpp"
-#include "catalyst/subcommands/clean/parse_cli.hpp"
-#include "catalyst/subcommands/configure/action.hpp"
-#include "catalyst/subcommands/configure/parse_cli.hpp"
-#include "catalyst/subcommands/fetch/action.hpp"
-#include "catalyst/subcommands/fetch/parse_cli.hpp"
-#include "catalyst/subcommands/generate/action.hpp"
-#include "catalyst/subcommands/generate/parse_cli.hpp"
-#include "catalyst/subcommands/init/action.hpp"
-#include "catalyst/subcommands/init/parse_cli.hpp"
-#include "catalyst/subcommands/run/action.hpp"
-#include "catalyst/subcommands/run/parse_cli.hpp"
-#include "catalyst/subcommands/test/action.hpp"
-#include "catalyst/subcommands/test/parse_cli.hpp"
+#include "catalyst/subcommands/add.hpp"
+#include "catalyst/subcommands/build.hpp"
+#include "catalyst/subcommands/clean.hpp"
+#include "catalyst/subcommands/configure.hpp"
+#include "catalyst/subcommands/fetch.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/init.hpp"
+#include "catalyst/subcommands/run.hpp"
+#include "catalyst/subcommands/test.hpp"
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
-#include <chrono>
 #include <string>
 
 int main(int argc, char **argv) {

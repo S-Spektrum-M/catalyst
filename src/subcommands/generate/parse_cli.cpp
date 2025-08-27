@@ -1,4 +1,4 @@
-#include "catalyst/subcommands/generate/parse_cli.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::generate {
 

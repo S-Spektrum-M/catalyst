@@ -1,5 +1,5 @@
 #include <CLI/CLI.hpp>
-#include <catalyst/subcommands/configure/parse_cli.hpp>
+#include "catalyst/subcommands/configure.hpp"
 
 namespace catalyst::configure {
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {

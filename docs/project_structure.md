@@ -5,9 +5,7 @@ src/
     catalyst.cpp            -- this represents the entry point to the catalyst executable
     ... TBD                 -- this represents the space for one off future source files
     subcommands/            -- catalyst is fundamentally a subcommand driven program, so it makes sense for the code structure to reflect that
-        add/                -- this is a representative sample of most subcommands
-            parse_cli.cpp   -- every subcommand has a `parse_cli.cpp` to define how we want to parse command line.
-            action.cpp      -- this represents what to do, given a set of command line options and flags.
+        add.hpp             -- this is a representative sample of most subcommands
 include/catalyst/
     ... TBD                 -- this represents the space for one off future header files
     subcommands/            -- catalyst is fundamentally a subcommand driven program, so it makes sense for the code structure to reflect that

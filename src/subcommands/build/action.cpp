@@ -7,10 +7,9 @@
 #include <algorithm>
 #include <yaml-cpp/node/node.h>
 
-#include "catalyst/subcommands/build/parse_cli.hpp"
-#include "catalyst/subcommands/fetch/action.hpp"
-#include "catalyst/subcommands/generate/action.hpp"
-#include "catalyst/subcommands/generate/parse_cli.hpp"
+#include "catalyst/subcommands/build.hpp"
+#include "catalyst/subcommands/fetch.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::build {
 namespace fs = std::filesystem;

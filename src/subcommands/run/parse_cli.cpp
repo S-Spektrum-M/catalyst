@@ -1,4 +1,4 @@
-#include <catalyst/subcommands/run/parse_cli.hpp>
+#include "catalyst/subcommands/run.hpp"
 
 namespace catalyst::run {
 
