@@ -11,7 +11,7 @@
 - [x] config               Inspect and modify configuration values
 
 ## 0.0.3
-- [ ] clean                Remove artifacts that catalyst has generated in the past
+- [x] clean                Remove artifacts that catalyst has generated in the past
 - [ ] doc                  Build a package's documentation
 - [ ] fmt                  Formats all source files.
 
