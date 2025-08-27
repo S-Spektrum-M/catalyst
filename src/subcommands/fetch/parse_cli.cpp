@@ -1,5 +1,5 @@
-#include <CLI/App.hpp>
 #include "catalyst/subcommands/fetch.hpp"
+#include <CLI/App.hpp>
 
 namespace catalyst::fetch {
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {

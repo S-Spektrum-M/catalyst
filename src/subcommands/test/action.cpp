@@ -13,7 +13,5 @@
 namespace fs = std::filesystem;
 
 namespace catalyst::test {
-    std::expected<void, std::string> action(const parse_t &p) {
-        return run::action({"test", p.params});
-    }
+std::expected<void, std::string> action(const parse_t &p) { return run::action({"test", p.params}); }
 } // namespace catalyst::test

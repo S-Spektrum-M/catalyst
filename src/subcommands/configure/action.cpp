@@ -1,5 +1,5 @@
-#include "yaml-cpp/node/node.h"
 #include "catalyst/subcommands/configure.hpp"
+#include "yaml-cpp/node/node.h"
 #include <catalyst/yaml-utils/load_profile_file.hpp>
 #include <catalyst/yaml-utils/profile_write_back.hpp>
 #include <cctype>

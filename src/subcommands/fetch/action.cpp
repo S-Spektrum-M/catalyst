@@ -16,7 +16,6 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name);
 std::expected<void, std::string> fetch_git(std::string build_dir, std::string name, std::string source,
                                            std::string version);
 
-
 std::expected<void, std::string> action(const parse_t &parse_args) {
     if (std::find(parse_args.profiles.begin(), parse_args.profiles.end(), "common") == parse_args.profiles.end()) {
         const_cast<std::vector<std::string> &>(parse_args.profiles).insert(parse_args.profiles.begin(), "common");

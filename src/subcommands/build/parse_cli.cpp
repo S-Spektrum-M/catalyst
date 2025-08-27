@@ -12,4 +12,4 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     build->add_option("-f,--features", ret->enabled_features);
     return {build, std::move(ret)};
 }
-}
+} // namespace catalyst::build

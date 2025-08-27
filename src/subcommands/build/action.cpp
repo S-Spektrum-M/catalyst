@@ -1,10 +1,10 @@
+#include <algorithm>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <yaml-cpp/node/node.h>
 
 #include "catalyst/subcommands/build.hpp"
@@ -16,18 +16,20 @@ namespace fs = std::filesystem;
 
 bool dep_missing(const YAML::Node &pc) {
     fs::path build_dir = pc["manifest"]["dirs"]["build"].as<std::string>();
-    if (!pc["dependencies"]) return false; // program has no dependencies
+    if (!pc["dependencies"])
+        return false; // program has no dependencies
     if (std::any_of(pc["dependencies"].begin(), pc["dependencies"].end(), [&](const YAML::Node &dep) {
-        return !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
-    })) return true;
+            return !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
+        }))
+        return true;
     return false;
 }
 
-
 // FIXME: use better redirection scheme
-std::expected<void, std::string> generate_compile_commands(const fs::path& build_dir) {
+std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir) {
     fs::path real_compdb_path = build_dir / "compile_commands.json";
-    std::string compdb_command = std::format("ninja -C {} -t compdb > {}", build_dir.string(), real_compdb_path.string());
+    std::string compdb_command =
+        std::format("ninja -C {} -t compdb > {}", build_dir.string(), real_compdb_path.string());
     if (std::system(compdb_command.c_str()) != 0) {
         return std::unexpected("failed to generate compile commands");
     }

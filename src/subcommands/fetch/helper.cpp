@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <expected>
-#include <format>
 #include <filesystem>
+#include <format>
 #include <iostream>
 #include <print>
 #include <string>
@@ -64,4 +64,4 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
     }
     return {};
 }
-}
+} // namespace catalyst::fetch

@@ -1,5 +1,5 @@
-#include <CLI/CLI.hpp>
 #include "catalyst/subcommands/configure.hpp"
+#include <CLI/CLI.hpp>
 
 namespace catalyst::configure {
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
@@ -9,4 +9,4 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     configure->add_option("value", ret->val, "The value to assign to the variable.");
     return {configure, std::move(ret)};
 }
-}
+} // namespace catalyst::configure

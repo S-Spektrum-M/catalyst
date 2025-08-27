@@ -9,4 +9,4 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     generate->add_option("-f,--features", ret->enabled_features);
     return {generate, std::move(ret)};
 }
-} // namespace catalyst::add
+} // namespace catalyst::generate
