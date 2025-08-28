@@ -1,4 +1,4 @@
-#include <catalyst/subcommands/test/parse_cli.hpp>
+#include "catalyst/subcommands/test.hpp"
 
 namespace catalyst::test {
 

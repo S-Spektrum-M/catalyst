@@ -1,6 +1,9 @@
-# Catalyst: A Declarative Build System for C/C++
-
-![catalyst-logo](logo.svg)
+<table border="0">
+  <tr>
+    <td><h1>Catalyst: A Declarative Build System for C/C++</h1></td>
+    <td align="right"><img src="logo.svg" alt="catalyst-logo" width="150"></td>
+  </tr>
+</table>
 
 ## Introduction
 

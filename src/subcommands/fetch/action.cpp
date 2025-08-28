@@ -1,4 +1,4 @@
-#include "catalyst/subcommands/fetch/action.hpp"
+#include "catalyst/subcommands/fetch.hpp"
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -15,7 +15,6 @@ std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_
 std::expected<void, std::string> fetch_vcpkg(const std::string &name);
 std::expected<void, std::string> fetch_git(std::string build_dir, std::string name, std::string source,
                                            std::string version);
-
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     if (std::find(parse_args.profiles.begin(), parse_args.profiles.end(), "common") == parse_args.profiles.end()) {

@@ -1,6 +1,6 @@
-#include "catalyst/subcommands/init/action.hpp"
 #include "catalyst/GLOBALS.hpp"
-#include "catalyst/subcommands/init/parse_cli.hpp"
+#include "catalyst/subcommands/init.hpp"
+
 #include "catalyst/yaml-utils/profile_write_back.hpp"
 
 #include <expected>

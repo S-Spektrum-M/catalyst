@@ -1,5 +1,5 @@
+#include "catalyst/subcommands/init.hpp"
 #include <CLI/App.hpp>
-#include <catalyst/subcommands/init/parse_cli.hpp>
 #include <map>
 
 namespace catalyst::init {

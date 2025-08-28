@@ -4,8 +4,8 @@
 
 namespace catalyst {
 #ifdef CATALYST_BUILD_SYS
-    constexpr std::string CATALYST_VERSION = TOSTRING(CATALYST_PROJ_VER);
+constexpr std::string CATALYST_VERSION = TOSTRING(CATALYST_PROJ_VER);
 #else
-    constexpr std::string CATALYST_VERSION = "0.0.2-dev";
+constexpr std::string CATALYST_VERSION = "0.0.2-dev";
 #endif
-};
+}; // namespace catalyst

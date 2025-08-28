@@ -3,7 +3,7 @@ meta:
 manifest:
   name: catalyst
   type: BINARY
-  version: 0.0.2-dev
+  version: 0.0.3
   description: Catalyst is a Declarative Modern C++ Package Manager
   provides: catalyst
   tooling:
@@ -11,6 +11,7 @@ manifest:
     CXX: clang++
     CCFLAGS: --std=c++2c -Wall -Wextra -Wpedantic
     CXXFLAGS: --std=c++2c -Wall -Wextra -Wpedantic
+    FMT: clang-format
   dirs:
     include:
       - include

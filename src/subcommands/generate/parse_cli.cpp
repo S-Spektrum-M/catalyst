@@ -1,4 +1,4 @@
-#include "catalyst/subcommands/generate/parse_cli.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::generate {
 
@@ -9,4 +9,4 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     generate->add_option("-f,--features", ret->enabled_features);
     return {generate, std::move(ret)};
 }
-} // namespace catalyst::add
+} // namespace catalyst::generate

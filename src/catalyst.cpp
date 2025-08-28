@@ -1,25 +1,17 @@
 #include "catalyst/GLOBALS.hpp"
-#include "catalyst/subcommands/add/action.hpp"
-#include "catalyst/subcommands/add/parse_cli.hpp"
-#include "catalyst/subcommands/build/action.hpp"
-#include "catalyst/subcommands/build/parse_cli.hpp"
-#include "catalyst/subcommands/clean/action.hpp"
-#include "catalyst/subcommands/clean/parse_cli.hpp"
-#include "catalyst/subcommands/configure/action.hpp"
-#include "catalyst/subcommands/configure/parse_cli.hpp"
-#include "catalyst/subcommands/fetch/action.hpp"
-#include "catalyst/subcommands/fetch/parse_cli.hpp"
-#include "catalyst/subcommands/generate/action.hpp"
-#include "catalyst/subcommands/generate/parse_cli.hpp"
-#include "catalyst/subcommands/init/action.hpp"
-#include "catalyst/subcommands/init/parse_cli.hpp"
-#include "catalyst/subcommands/run/action.hpp"
-#include "catalyst/subcommands/run/parse_cli.hpp"
-#include "catalyst/subcommands/test/action.hpp"
-#include "catalyst/subcommands/test/parse_cli.hpp"
+#include "catalyst/subcommands/add.hpp"
+#include "catalyst/subcommands/build.hpp"
+#include "catalyst/subcommands/clean.hpp"
+#include "catalyst/subcommands/configure.hpp"
+#include "catalyst/subcommands/fetch.hpp"
+#include "catalyst/subcommands/fmt.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/init.hpp"
+#include "catalyst/subcommands/run.hpp"
+#include "catalyst/subcommands/test.hpp"
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
-#include <chrono>
+#include <print>
 #include <string>
 
 int main(int argc, char **argv) {
@@ -30,6 +22,7 @@ int main(int argc, char **argv) {
     const auto [clean_subc, clean_res] = catalyst::clean::parse(app);
     const auto [configure_subc, configure_res] = catalyst::configure::parse(app);
     const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
+    const auto [fmt_subc, fmt_res] = catalyst::fmt::parse(app);
     const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
     const auto [init_subc, init_res] = catalyst::init::parse(app);
     const auto [run_subc, run_res] = catalyst::run::parse(app);
@@ -46,7 +39,7 @@ int main(int argc, char **argv) {
     CLI11_PARSE(app, argc, argv);
 
     if (show_version) {
-        std::cout << catalyst::CATALYST_VERSION << std::endl;
+        std::print(std::cout, "{}", catalyst::CATALYST_VERSION);
     }
 
     if (*add_subc) {
@@ -78,6 +71,13 @@ int main(int argc, char **argv) {
 
     if (*fetch_subc) {
         if (auto res = catalyst::fetch::action(*fetch_res); !res) {
+            std::cerr << res.error() << std::endl;
+            return 1;
+        }
+    }
+
+    if (*fmt_subc) {
+        if (auto res = catalyst::fmt::action(*fmt_res); !res) {
             std::cerr << res.error() << std::endl;
             return 1;
         }

@@ -1,5 +1,5 @@
-#include "catalyst/subcommands/run/action.hpp"
-#include <catalyst/subcommands/test/action.hpp>
+#include "catalyst/subcommands/run.hpp"
+#include <catalyst/subcommands/test.hpp>
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -13,7 +13,5 @@
 namespace fs = std::filesystem;
 
 namespace catalyst::test {
-    std::expected<void, std::string> action(const parse_t &p) {
-        return run::action({"test", p.params});
-    }
+std::expected<void, std::string> action(const parse_t &p) { return run::action({"test", p.params}); }
 } // namespace catalyst::test

@@ -1,15 +1,15 @@
-#include "catalyst/subcommands/generate/parse_cli.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include <array>
+#include <cstdio>
 #include <expected>
 #include <filesystem>
 #include <fstream>
 #include <ranges>
 #include <regex>
 #include <string>
+#include <sys/wait.h>
 #include <unordered_set>
 #include <vector>
-#include <array>
-#include <cstdio>
-#include <sys/wait.h>
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::generate {
@@ -54,6 +54,7 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
     composite["manifest"]["provides"] = "";
     composite["manifest"]["tooling"]["CC"] = "clang";
     composite["manifest"]["tooling"]["CXX"] = "clang++";
+    composite["manifest"]["tooling"]["FMT"] = "clang-format";
     composite["manifest"]["tooling"]["CCFLAGS"] = "";
     composite["manifest"]["tooling"]["CXXFLAGS"] = "";
     composite["manifest"]["dirs"]["include"] = std::vector<std::string>{};
@@ -99,6 +100,9 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
                 }
                 if (new_profile_manifest_tooling["CXX"]) {
                     composite["manifest"]["tooling"]["CXX"] = new_profile_manifest_tooling["CXX"];
+                }
+                if (new_profile_manifest_tooling["FMT"]) {
+                    composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
                 }
                 if (new_profile_manifest_tooling["CCFLAGS"]) {
                     composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
@@ -182,7 +186,8 @@ std::expected<std::unordered_set<fs::path>, std::string> build_source_set(std::v
     return ret_set;
 }
 
-void write_variables(const YAML::Node &profile, std::ofstream &buildfile, const std::vector<std::string> &enabled_features) {
+void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
+                     const std::vector<std::string> &enabled_features) {
     fs::path current_dir = fs::current_path();
     std::string build_dir_str = profile["manifest"]["dirs"]["build"].as<std::string>();
     fs::path build_dir(build_dir_str);
@@ -205,22 +210,22 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile, const 
         for (const auto &feature : profile["features"]) {
             std::string feature_name = feature.as<std::string>();
             std::string project_name = profile["manifest"]["name"].as<std::string>();
-            bool is_enabled = std::find(enabled_features.begin(), enabled_features.end(), feature_name) != enabled_features.end();
+            bool is_enabled =
+                std::find(enabled_features.begin(), enabled_features.end(), feature_name) != enabled_features.end();
             std::string flag = std::format(" -DFF_{}__{}={}", project_name, feature_name, is_enabled ? "1" : "0");
             cxxflags += flag;
             cflags += flag;
         }
     }
 
-
-    char* vcpkg_root = std::getenv("VCPKG_ROOT");
+    char *vcpkg_root = std::getenv("VCPKG_ROOT");
     if (vcpkg_root != nullptr) {
 #if defined(_WIN32)
-        const char* triplet = "x64-windows";
+        const char *triplet = "x64-windows";
 #elif defined(__APPLE__)
-        const char* triplet = "x64-osx";
+        const char *triplet = "x64-osx";
 #else
-        const char* triplet = "x64-linux";
+        const char *triplet = "x64-linux";
 #endif
         cxxflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
         cflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
@@ -245,7 +250,7 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile, const 
                     std::string cflags_command = "pkg-config --cflags " + dep_name;
                     std::array<char, 128> cflags_buffer;
                     std::string cflags_result;
-                    FILE* cflags_pipe = popen(cflags_command.c_str(), "r");
+                    FILE *cflags_pipe = popen(cflags_command.c_str(), "r");
                     if (cflags_pipe) {
                         while (fgets(cflags_buffer.data(), cflags_buffer.size(), cflags_pipe) != nullptr) {
                             cflags_result += cflags_buffer.data();
@@ -264,7 +269,7 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile, const 
                     std::string command = "pkg-config --libs " + dep_name;
                     std::array<char, 128> buffer;
                     std::string result;
-                    FILE* pipe = popen(command.c_str(), "r");
+                    FILE *pipe = popen(command.c_str(), "r");
                     if (!pipe) {
                         // fallback to -l if popen fails
                         ldlibs += " -l" + dep_name;
