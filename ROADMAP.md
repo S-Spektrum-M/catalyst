@@ -1,21 +1,7 @@
  Road Map
-# DONE (0.0.0 - 0.0.2)
-
-- [x] add                  Add dependencies to a catalyst.yaml manifest file
-- [x] init                 Create a new catalyst package in an existing directory
-- [x] generate             Generate the build file
-- [x] fetch                Fetch and compile dependencies from the network
-- [x] build                Invoke Ninja on the build path.
-- [x] run                  Run a binary profile's target.
-- [x] test                 Execute all unit and integration tests of a profile.
-- [x] config               Inspect and modify configuration values
-
-## 0.0.3
-- [x] clean                Remove artifacts that catalyst has generated in the past
+## Out of Scope of 0.0.3
+- [ ] bench                Execute all benchmarks of a local package
 - [ ] doc                  Build a package's documentation
-- [ ] fmt                  Formats all source files.
-
-## Out of Scope of 0.0.2
 - [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
 - [ ] fix                  Automatically fix lint warnings reported by `clang-tidy`
 - [ ] generate-lockfile    Generate the lockfile for a package
@@ -39,4 +25,16 @@
 - [ ] logout               Remove an API token from the registry locally
 - [ ] install              Install a Rust binary
 - [ ] uninstall            Remove a Rust binary
-- [ ] bench                Execute all benchmarks of a local package
+
+# DONE (0.0.0 - 0.0.3)
+
+- [x] add                  Add dependencies to a catalyst.yaml manifest file
+- [x] init                 Create a new catalyst package in an existing directory
+- [x] generate             Generate the build file
+- [x] fetch                Fetch and compile dependencies from the network
+- [x] build                Invoke Ninja on the build path.
+- [x] run                  Run a binary profile's target.
+- [x] test                 Execute all unit and integration tests of a profile.
+- [x] config               Inspect and modify configuration values
+- [x] clean                Remove artifacts that catalyst has generated in the past
+- [x] fmt                  Formats all source files.
