@@ -1,3 +1,4 @@
+#include "catalyst/hooks.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include <array>
 #include <cstdio>
@@ -130,6 +131,18 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
         if (new_profile["dependencies"] && new_profile["dependencies"].IsSequence()) {
             for (const YAML::Node &dep : new_profile["dependencies"]) {
                 composite["dependencies"].push_back(dep);
+            }
+        }
+        if (new_profile["hooks"]) {
+            for (const auto &hook : new_profile["hooks"]) {
+                std::string hook_name = hook.first.as<std::string>();
+                if (hook.second.IsSequence()) {
+                    for (const auto &item : hook.second) {
+                        composite["hooks"][hook_name].push_back(item);
+                    }
+                } else if (hook.second.IsScalar()) {
+                    composite["hooks"][hook_name].push_back(hook.second);
+                }
             }
         }
     }
@@ -338,6 +351,9 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     if (!pc)
         return std::unexpected(pc.error());
     YAML::Node profile = pc.value();
+    if (auto res = hooks::pre_generate(profile); !res) {
+        return res;
+    }
     fs::path current_dir = fs::current_path();
     std::vector<std::string> relative_source_dirs =
         profile["manifest"]["dirs"]["source"].as<std::vector<std::string>>();
@@ -439,6 +455,9 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
     profile_comp_file << profile;
 
+    if (auto res = hooks::post_generate(profile); !res) {
+        return res;
+    }
     return {};
 }
 } // namespace catalyst::generate

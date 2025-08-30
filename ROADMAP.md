@@ -1,13 +1,16 @@
- Road Map
-## Out of Scope of 0.0.3
-- [ ] bench                Execute all benchmarks of a local package
-- [ ] doc                  Build a package's documentation
+#  Road Map
+
+## WIP 0.0.4
 - [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
 - [ ] fix                  Automatically fix lint warnings reported by `clang-tidy`
+- [ ] pack                 Assemble the local package for distribution
+
+## Out of Scope
+- [ ] bench                Execute all benchmarks of a local package
+- [ ] doc                  Build a package's documentation
 - [ ] generate-lockfile    Generate the lockfile for a package
 - [ ] metadata             Output the resolved dependencies of a package, the concrete used versions including overrides, in machine-readable format miri
 - [ ] owner                Manage the owners of a crate on the registry
-- [ ] package              Assemble the local package into a distributable tarball
 - [ ] pkgid                Print a fully qualified package specification
 - [ ] publish              Upload a package to the registry
 - [ ] remove               Remove dependencies from a Cargo.toml manifest file
@@ -23,8 +26,8 @@
 - [ ] locate-project       Print a JSON representation of a Cargo.toml file's location
 - [ ] login                Log in to a registry.
 - [ ] logout               Remove an API token from the registry locally
-- [ ] install              Install a Rust binary
-- [ ] uninstall            Remove a Rust binary
+- [ ] install              Install a binary
+- [ ] uninstall            Remove a binary
 
 # DONE (0.0.0 - 0.0.3)
 

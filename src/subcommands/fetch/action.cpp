@@ -1,4 +1,6 @@
 #include "catalyst/subcommands/fetch.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/hooks.hpp"
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -17,31 +19,29 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
                                            std::string version);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    if (std::find(parse_args.profiles.begin(), parse_args.profiles.end(), "common") == parse_args.profiles.end()) {
-        const_cast<std::vector<std::string> &>(parse_args.profiles).insert(parse_args.profiles.begin(), "common");
+    auto profiles = parse_args.profiles;
+    if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
+        profiles.insert(profiles.begin(), "common");
     }
-    std::string build_dir;
-    if (auto res = fetch_profile("common"); res) {
-        if (res.value()["manifest"] && res.value()["manifest"]["dirs"] && res.value()["manifest"]["dirs"]["build"]) {
-            build_dir = res.value()["manifest"]["dirs"]["build"].as<std::string>();
-        } else {
-            return std::unexpected("manifest.dirs.build not found in common profile");
-        }
-    } else {
+
+    YAML::Node profile_comp;
+    if (auto res = generate::profile_composition(profiles); !res) {
         return std::unexpected(res.error());
+    } else {
+        profile_comp = res.value();
     }
-    for (auto profile : parse_args.profiles) {
-        std::expected<YAML::Node, std::string> res = fetch_profile(profile);
-        if (!res)
-            return std::unexpected(res.error());
-        auto deps = res.value()["dependencies"];
-        if (!deps)
-            continue;
-        if (!deps.IsSequence())
-            return std::unexpected("dependencies field is not a sequence");
+
+    if (auto res = hooks::pre_fetch(profile_comp); !res) {
+        return res;
+    }
+
+    std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
+
+    auto deps = profile_comp["dependencies"];
+    if (deps && deps.IsSequence()) {
         for (auto dep : deps) {
             if (!dep["name"] || !dep["source"] || !dep["version"]) {
-                return std::unexpected("Improperly configued dependency.");
+                return std::unexpected("Improperly configured dependency.");
             }
             std::string name = dep["name"].as<std::string>();
             std::string source = dep["source"].as<std::string>();
@@ -55,6 +55,11 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             }
         }
     }
+
+    if (auto res = hooks::post_fetch(profile_comp); !res) {
+        return res;
+    }
+
     return {};
 }
 } // namespace catalyst::fetch
