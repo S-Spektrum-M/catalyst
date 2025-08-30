@@ -115,15 +115,7 @@ Flags can through arguments to the `generate` and `build ` subcommands.
 > Hooks will be added to Catalyst in `0.0.2`.
 
 Hooks are optional scripts triggered at various stages of the build lifecycle. They enable incorporating support for
-imperative configs to adapt to the realities of cross-platform development. Support is planned for bash, powershell,
-and python scripts.
-
-|Field|Description|
-|-----|-----------|
-|`prebuild`|Executed before a target is compiled|
-|`postbuild`|Executed after a successful build|
-|`fail`|Executed if the build fails|
-|`publish`|Custom logic for uploading artifacts or pushing metadata|
+imperative steps to adapt to the realities of development. For more information, check out [the hooks documentation](docs/hooks.md).
 
 
 ## `.catalystignore` File Schema
