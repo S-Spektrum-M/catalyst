@@ -1,6 +1,6 @@
+#include "catalyst/hooks.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
-#include "catalyst/hooks.hpp"
 #include <cstdlib>
 #include <expected>
 #include <filesystem>

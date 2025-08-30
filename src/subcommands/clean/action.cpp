@@ -1,6 +1,6 @@
 #include "catalyst/subcommands/generate.hpp"
-#include <catalyst/subcommands/clean.hpp>
 #include <catalyst/hooks.hpp>
+#include <catalyst/subcommands/clean.hpp>
 #include <yaml-cpp/node/node.h>
 
 namespace catalyst::clean {
@@ -9,7 +9,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
         profiles.insert(profiles.begin(), "common");
     }
-    
+
     YAML::Node profile_comp;
     if (auto res = generate::profile_composition(profiles); !res) {
         return std::unexpected(res.error());
@@ -29,7 +29,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     if (auto res = hooks::post_clean(profile_comp); !res) {
         return res;
     }
-    
+
     return {};
 }
 } // namespace catalyst::clean

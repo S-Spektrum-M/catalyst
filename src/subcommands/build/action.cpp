@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include <algorithm>
 #include <expected>
 #include <filesystem>
@@ -38,19 +39,25 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
 }
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
+    catalyst::logger.log(LogLevel::INFO, "Build subcommand invoked.");
     std::vector<std::string> profiles = parse_args.profiles;
     if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
         profiles.insert(profiles.begin(), "common");
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
     YAML::Node profile_comp;
-    if (auto res = generate::profile_composition(profiles); !res)
+    if (auto res = generate::profile_composition(profiles); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
-    else
+    } else
         profile_comp = res.value();
 
+    catalyst::logger.log(LogLevel::INFO, "Running pre-build hooks.");
     if (auto res = hooks::pre_build(profile_comp); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Pre-build hook failed: {}", res.error());
         if (auto hook_res = hooks::on_build_failure(profile_comp); !hook_res) {
+            catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(res.error() +
                                    "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
         }
@@ -62,15 +69,19 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     if (fs::exists(build_dir / "profile_composition.yaml")) {
         YAML::Node existing_pc = YAML::LoadFile((build_dir / "profile_composition.yaml").string());
         if (existing_pc.size() != profile_comp.size()) {
+            catalyst::logger.log(LogLevel::INFO, "Profile composition changed, regenerating build files.");
             regenerate = true;
         }
     }
 
     // DONE: generate the build file if requested or needed
     if (!fs::exists(build_dir / "build.ninja") || parse_args.regen || regenerate) {
+        catalyst::logger.log(LogLevel::INFO, "Generating build files.");
         auto res = catalyst::generate::action({parse_args.profiles, parse_args.enabled_features});
         if (!res) {
+            catalyst::logger.log(LogLevel::ERROR, "Failed to generate build files: {}", res.error());
             if (auto hook_res = hooks::on_build_failure(profile_comp); !hook_res) {
+                catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
                 return std::unexpected(
                     res.error() + "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
             }
@@ -81,10 +92,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     // TODO: check if all deps exist or we've been asked to refetch them
     if (!fs::exists(build_dir / "catalyst-libs") || parse_args.force_refetch || dep_missing(profile_comp)) {
         if (parse_args.force_refetch) {
+            catalyst::logger.log(LogLevel::INFO, "Forcing refetch of dependencies.");
             fs::remove_all(fs::path{build_dir / "catalyst-libs"}); // cleanup
         }
+        catalyst::logger.log(LogLevel::INFO, "Fetching dependencies.");
         if (auto res = catalyst::fetch::action({parse_args.profiles}); !res) {
+            catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependencies: {}", res.error());
             if (auto hook_res = hooks::on_build_failure(profile_comp); !hook_res) {
+                catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
                 return std::unexpected(
                     res.error() + "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
             }
@@ -92,8 +107,11 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Building project.");
     if (std::system(std::format("ninja -C {}", build_dir.string()).c_str()) != 0) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(profile_comp); !hook_res) {
+            catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(
                 "Failed to build project.\nAdditionally, the on_build_failure hook failed with error: " +
                 hook_res.error());
@@ -101,22 +119,30 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected("Failed to build project");
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Generating compile commands.");
     // effectively: call "ninja -C build_dir -t compdb > build_dir/compile_commands.json"
     if (auto res = generate_compile_commands(build_dir); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to generate compile commands: {}", res.error());
         if (auto hook_res = hooks::on_build_failure(profile_comp); !hook_res) {
+            catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(res.error() +
                                    "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
         }
         return res;
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Running post-build hooks.");
     if (auto res = hooks::post_build(profile_comp); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Post-build hook failed: {}", res.error());
         if (auto hook_res = hooks::on_build_failure(profile_comp); !hook_res) {
+            catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(res.error() +
                                    "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
         }
         return res;
     }
+    catalyst::logger.log(LogLevel::INFO, "Build subcommand finished successfully.");
     return {};
 }
+
 } // namespace catalyst::build

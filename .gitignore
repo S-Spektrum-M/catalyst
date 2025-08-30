@@ -6,3 +6,4 @@ compile_commands.json
 catalyst-libs
 .todos.sm
 GEMINI.md
+.catalyst.log
