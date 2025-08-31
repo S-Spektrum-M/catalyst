@@ -40,7 +40,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 return std::unexpected(write_res.error());
             }
             catalyst::logger.log(catalyst::LogLevel::INFO, "Dependency '{}' added to profile '{}'", parse_args.name,
-                                  profile_name);
+                                 profile_name);
         }
     }
     return {};

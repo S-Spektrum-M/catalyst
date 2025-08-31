@@ -27,8 +27,6 @@ inline struct log_t {
         log_file << std::chrono::system_clock::now();
     }
 
-    ~log_t() {
-        log_file.close();
-    }
+    ~log_t() { log_file.close(); }
 } logger;
 } // namespace catalyst

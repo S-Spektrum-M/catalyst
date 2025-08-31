@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -62,6 +63,17 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
     if (std::system(command.c_str()) != 0) {
         return std::unexpected(std::format("Failed to build dependency: {}", name));
     }
+    return {};
+}
+
+std::expected<void, std::string> fetch_system(const std::string &name) {
+    // assuming installed on system
+    catalyst::logger.log(LogLevel::INFO, "Skipping fetch for system dependency: {}. \n Assuming it is installed.",
+                         name);
+    return {};
+}
+
+std::expected<void, std::string> fetch_local() {
     return {};
 }
 } // namespace catalyst::fetch
