@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include <expected>
 #include <filesystem>
@@ -9,6 +10,7 @@
 namespace catalyst::generate {
 
 std::string ver_max(std::string s1, std::string s2) {
+    catalyst::logger.log(LogLevel::INFO, "Comparing versions: {} and {}", s1, s2);
     auto split_ver = [](const std::string &ver) {
         std::vector<int> parts;
         std::istringstream iss(ver);
@@ -28,17 +30,21 @@ std::string ver_max(std::string s1, std::string s2) {
     auto v2 = split_ver(s2);
 
     for (size_t i = 0, lim = std::min(v1.size(), v2.size()); i < lim; ++i)
-        if (v1[i] > v2[i])
+        if (v1[i] > v2[i]) {
+            catalyst::logger.log(LogLevel::INFO, "Version {} is greater.", s1);
             return s1;
-        else if (v1[i] < v2[i])
+        } else if (v1[i] < v2[i]) {
+            catalyst::logger.log(LogLevel::INFO, "Version {} is greater.", s2);
             return s2;
-        else
+        } else
             continue;
 
+    catalyst::logger.log(LogLevel::INFO, "Versions are equal, returning {}.", s1);
     return s1;
 }
 
 std::expected<YAML::Node, std::string> profile_composition(const std::vector<std::string> &p) {
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
     std::vector profiles = p;
     if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end())
         profiles.insert(profiles.cbegin(), std::string{"common"});
@@ -69,7 +75,9 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
             profile_paths.push_back(std::format("catalyst_{}.yaml", profile_name));
     }
     for (const auto &path : profile_paths) {
+        catalyst::logger.log(LogLevel::INFO, "Loading profile: {}", path.string());
         if (!fs::exists(path)) {
+            catalyst::logger.log(LogLevel::ERROR, "Profile not found: {}", path.string());
             return std::unexpected(std::format("Profile: {} not found", path.string()));
         }
         auto new_profile = YAML::LoadFile(path);
@@ -142,6 +150,7 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
             }
         }
     }
+    catalyst::logger.log(LogLevel::INFO, "Profile composition finished.");
     return composite;
 }
 } // namespace catalyst::generate
