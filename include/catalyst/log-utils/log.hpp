@@ -2,7 +2,12 @@
 #include <chrono>
 #include <format>
 #include <fstream>
+#include <iostream>
 #include <string>
+
+// ANSI color codes
+inline const char *RED = "\033[31m";
+inline const char *RESET = "\033[0m";
 
 namespace catalyst {
 enum class LogLevel { INFO, WARN, ERROR };
@@ -39,6 +44,12 @@ class log_t {
         std::string message = std::format(fmt, std::forward<Args>(args)...);
 
         log_file_ << std::format("[{:%Y-%m-%d %H:%M:%S}] [{}] {}\n", now, to_string(level), message);
+
+        if (level == LogLevel::ERROR) {
+            std::cerr << std::format("[{:%Y-%m-%d %H:%M:%S}] ", now) << RED         // Start color
+                      << std::format("[{}] {}", to_string(level), message) << RESET // Reset to default color
+                      << "\n";
+        }
         log_file_.flush(); // Ensure logs are written immediately
     }
 
