@@ -28,8 +28,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     case parse_t::type_t::SHAREDLIB:
         node["manifest"]["type"] = "SHAREDLIB";
         break;
-    case parse_t::type_t::HEADER:
-        node["manifest"]["type"] = "HEADER";
+    case parse_t::type_t::INTERFACE:
+        node["manifest"]["type"] = "INTERFACE";
         break;
     }
     node["manifest"]["version"] = parse_args.version;
