@@ -12,7 +12,7 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     std::map<std::string, parse_t::type_t> type_map{{"binary", parse_t::type_t::BINARY},
                                                     {"staticlib", parse_t::type_t::STATICLIB},
                                                     {"sharedlib", parse_t::type_t::SHAREDLIB},
-                                                    {"header", parse_t::type_t::HEADER}};
+                                                    {"interface", parse_t::type_t::INTERFACE}};
     init->add_option("-t,--type", ret->type, "the project type")
         ->transform(CLI::CheckedTransformer(type_map, CLI::ignore_case));
 
