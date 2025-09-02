@@ -33,7 +33,7 @@ The `manifest` section defines core information about your project and how it sh
 | Field         | Description                                                   | Default |
 | ------------- | ------------------------------------------------------------- |---------|
 | `name`        | The name of the project (must be unique within a workspace)   | The `cwd` when the project was initialized |
-| `type`        | One of `BINARY`, `STATICLIB`, `SHAREDLIB`, or `HEADER` | `BINARY` |
+| `type`        | One of `BINARY`, `STATICLIB`, `SHAREDLIB`, or `INTERFACE` | `BINARY` |
 | `version`     | Project version | `0.0.1` |
 | `description` | Human-readable summary of the project                         | "Your Description Goes Here" |
 | `provides`    | Name or path of the final output artifact (e.g. `'*.so', '*.dll', '*.exe'` etc.), useful for library authors to enable finding the build output. | None. |
