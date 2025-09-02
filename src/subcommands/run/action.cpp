@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/hooks.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/run.hpp"
@@ -18,20 +19,25 @@ namespace catalyst::run {
 std::string command_str(fs::path executable_name, const std::vector<std::string> &params);
 
 std::expected<void, std::string> action(const parse_t &args) {
+    catalyst::logger.log(LogLevel::INFO, "Run subcommand invoked.");
     std::vector<std::string> profiles;
     if (args.profile != "common") {
         profiles.push_back("common");
     }
     profiles.push_back(args.profile);
 
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
     YAML::Node profile_comp;
     if (auto res = generate::profile_composition(profiles); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
     } else {
         profile_comp = res.value();
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Running pre-run hooks.");
     if (auto res = hooks::pre_run(profile_comp); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Pre-run hook failed: {}", res.error());
         return res;
     }
 
@@ -45,10 +51,12 @@ std::expected<void, std::string> action(const parse_t &args) {
     str_to_lower(target_type);
 
     if (!profile_comp["manifest"]["type"].IsDefined() || target_type != "binary") {
+        catalyst::logger.log(LogLevel::ERROR, "Profile does not build a binary target.");
         return std::unexpected("profile does not build a binary target");
     }
 
     if (!profile_comp["manifest"]["dirs"]["build"]) {
+        catalyst::logger.log(LogLevel::ERROR, "Build directory is not defined.");
         return std::unexpected("build directory is not defined");
     } else {
         build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
@@ -59,24 +67,31 @@ std::expected<void, std::string> action(const parse_t &args) {
     } else if (profile_comp["manifest"]["name"] && profile_comp["manifest"]["name"].as<std::string>() != "") {
         exe = profile_comp["manifest"]["name"].as<std::string>();
     } else {
+        catalyst::logger.log(LogLevel::ERROR, "Unable to determine executable name.");
         return std::unexpected("unable to figure out executable name. "
                                "manifest.name and manifest.provides are undefined");
     }
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = command_str(exe_path, args.params);
+    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
     if (int res = std::system(command.c_str()); res) {
+        catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
         return std::unexpected(std::format("exitied with code: {}", res));
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Running post-run hooks.");
     if (auto res = hooks::post_run(profile_comp); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Post-run hook failed: {}", res.error());
         return res;
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Run subcommand finished successfully.");
     return {};
 }
 
 std::string command_str(fs::path executable, const std::vector<std::string> &params) {
+    catalyst::logger.log(LogLevel::INFO, "Constructing command string.");
     std::string command = executable;
     for (const auto &param : params) {
         command += " " + param;

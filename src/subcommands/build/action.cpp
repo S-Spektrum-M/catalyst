@@ -17,21 +17,31 @@ namespace catalyst::build {
 namespace fs = std::filesystem;
 
 bool dep_missing(const YAML::Node &pc) {
+    catalyst::logger.log(LogLevel::INFO, "Checking for missing dependencies.");
     fs::path build_dir = pc["manifest"]["dirs"]["build"].as<std::string>();
-    if (!pc["dependencies"])
+    if (!pc["dependencies"]) {
+        catalyst::logger.log(LogLevel::INFO, "No dependencies declared, skipping check.");
         return false; // program has no dependencies
+    }
     if (std::any_of(pc["dependencies"].begin(), pc["dependencies"].end(), [&](const YAML::Node &dep) {
-            return !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
+            bool missing = !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
+            if (missing) {
+                catalyst::logger.log(LogLevel::WARN, "Missing dependency: {}", dep["name"].as<std::string>());
+            }
+            return missing;
         }))
         return true;
+    catalyst::logger.log(LogLevel::INFO, "All dependencies are present.");
     return false;
 }
 
 // FIXME: use better redirection scheme
 std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir) {
+    catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
     fs::path real_compdb_path = build_dir / "compile_commands.json";
     std::string compdb_command =
         std::format("ninja -C {} -t compdb > {}", build_dir.string(), real_compdb_path.string());
+    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", compdb_command);
     if (std::system(compdb_command.c_str()) != 0) {
         return std::unexpected("failed to generate compile commands");
     }

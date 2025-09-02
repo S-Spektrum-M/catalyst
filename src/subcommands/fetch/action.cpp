@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/hooks.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
@@ -22,19 +23,24 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
 std::expected<void, std::string> fetch_system(const std::string &name);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
+    catalyst::logger.log(LogLevel::INFO, "Fetch subcommand invoked.");
     auto profiles = parse_args.profiles;
     if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
         profiles.insert(profiles.begin(), "common");
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
     YAML::Node profile_comp;
     if (auto res = generate::profile_composition(profiles); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
     } else {
         profile_comp = res.value();
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Running pre-fetch hooks.");
     if (auto res = hooks::pre_fetch(profile_comp); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Pre-fetch hook failed: {}", res.error());
         return res;
     }
 
@@ -44,10 +50,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     if (deps && deps.IsSequence()) {
         for (auto dep : deps) {
             if (!dep["name"] || !dep["source"]) {
+                catalyst::logger.log(LogLevel::ERROR, "Improperly configured dependency.");
                 return std::unexpected("Improperly configured dependency.");
             }
             std::string name = dep["name"].as<std::string>();
             std::string source = dep["source"].as<std::string>();
+            catalyst::logger.log(LogLevel::INFO, "Fetching dependency '{}' from '{}'", name, source);
             if (source == "vcpkg") {
                 if (!dep["version"]) {
                     return std::unexpected(std::format("vcpkg dependency '{}' is missing version.", name));
@@ -70,10 +78,13 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Running post-fetch hooks.");
     if (auto res = hooks::post_fetch(profile_comp); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Post-fetch hook failed: {}", res.error());
         return res;
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Fetch subcommand finished successfully.");
     return {};
 }
 } // namespace catalyst::fetch
