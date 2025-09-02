@@ -11,6 +11,7 @@
 #include "catalyst/subcommands/test.hpp"
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
+#include <catalyst/log-utils/log.hpp>
 #include <print>
 #include <string>
 
@@ -40,73 +41,84 @@ int main(int argc, char **argv) {
 
     if (show_version) {
         std::print(std::cout, "{}", catalyst::CATALYST_VERSION);
+        return 0;
     }
 
     if (*add_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "add");
         if (auto res = catalyst::add::action(*add_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*build_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "build");
         if (auto res = catalyst::build::action(*build_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*clean_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "clean");
         if (auto res = catalyst::clean::action(*clean_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
     if (*configure_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "configure");
         if (auto res = catalyst::configure::action(*configure_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*fetch_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "fetch");
         if (auto res = catalyst::fetch::action(*fetch_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*fmt_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "fmt");
         if (auto res = catalyst::fmt::action(*fmt_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*generate_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "generate");
         if (auto res = catalyst::generate::action(*generate_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*init_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "init");
         if (auto res = catalyst::init::action(*init_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*run_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "run");
         if (auto res = catalyst::run::action(*run_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
 
     if (*test_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "test");
         if (auto res = catalyst::test::action(*test_res); !res) {
-            std::cerr << res.error() << std::endl;
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
