@@ -36,7 +36,9 @@ file(GLOB_RECURSE YAML_UTILS_SOURCES "src/yaml-utils/*.cpp")
 
 add_executable(catalyst
     src/catalyst.cpp
+    src/hooks.cpp
     ${ACTION_SOURCES}
+    src/subcommands/fetch/helper.cpp
     ${PARSE_CLI_SOURCES}
     ${YAML_UTILS_SOURCES}
 )

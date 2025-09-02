@@ -1,21 +1,21 @@
 #include <catalyst/hooks.hpp>
-#include <yaml-cpp/yaml.h>
+#include <expected>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <expected>
+#include <yaml-cpp/yaml.h>
 
 namespace catalyst::hooks {
 
 namespace {
-std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, const std::string& hook_name) {
+std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, const std::string &hook_name) {
     if (!profile_comp["hooks"] || !profile_comp["hooks"][hook_name]) {
         return {}; // No hook defined, so we do nothing.
     }
 
-    const auto& hook_node = profile_comp["hooks"][hook_name];
+    const auto &hook_node = profile_comp["hooks"][hook_name];
     if (hook_node.IsSequence()) {
-        for (const auto& item : hook_node) {
+        for (const auto &item : hook_node) {
             if (item["command"]) {
                 std::string command = item["command"].as<std::string>();
                 std::cout << "[Catalyst Hook: " << hook_name << "] Running command: " << command << std::endl;

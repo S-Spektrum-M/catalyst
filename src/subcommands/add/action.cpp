@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/add.hpp"
 #include "catalyst/yaml-utils/load_profile_file.hpp"
 #include "catalyst/yaml-utils/profile_write_back.hpp"
@@ -6,8 +7,10 @@
 
 namespace catalyst::add {
 std::expected<void, std::string> action(const parse_t &parse_args) {
+    catalyst::logger.log(catalyst::LogLevel::INFO, "Adding dependency: {}", parse_args.name);
     for (const auto &profile_name : parse_args.profiles) {
         if (auto res = catalyst::YAML_UTILS::load_profile_file(profile_name); !res) {
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return std::unexpected(res.error());
         } else {
             YAML::Node &profile_node = res.value();
@@ -33,8 +36,11 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             }
             if (auto write_res = catalyst::YAML_UTILS::profile_write_back(profile_name, std::move(profile_node));
                 !write_res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return std::unexpected(write_res.error());
             }
+            catalyst::logger.log(catalyst::LogLevel::INFO, "Dependency '{}' added to profile '{}'", parse_args.name,
+                                 profile_name);
         }
     }
     return {};

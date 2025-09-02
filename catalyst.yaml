@@ -23,3 +23,6 @@ dependencies:
     source: vcpkg
     version: latest
     using: []
+  - name: cli11
+    source: system
+    linkage: interface

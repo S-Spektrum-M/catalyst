@@ -72,24 +72,83 @@ Define important source and build paths within the project:
 
 ### `dependencies` Schema
 
-The `dependencies` section lists external packages your project depends on.
+The `dependencies` section lists external packages your project depends on. Each entry in the list is a YAML object that defines a single dependency. The `source` field is mandatory and determines the type of the dependency and the schema for the other fields.
 
-Each entry is an object with the following keys:
+Catalyst supports the following dependency sources: `local`, `system`, `vcpkg`, and `git`.
 
-|Field|Description|
-|---------|---------------------------------------------------------------------|
-|`name`|Name of the dependency|
-|`version`|SemVer string or Git commit hash (hash preferred for reproducibility)|
-|`source`|Git URL, `catalyst-hub`, or `vcpkg`|
-|`using`|List of feature flags to enable in the dependency|
-|`linkage`|One of `static`, `shared`, or `interface` (defaults to `shared`)|
+#### `local` dependencies
 
-> [!NOTE]
-> Catalyst resolves dependencies directly from Git where possible, enabling minimal and reproducible builds.
+For dependencies that exist on your local filesystem. Catalyst will build them from source.
 
-> [!NOTE]
-> The SemVer version must correspond to a valid git tag.
-> The git hash must be a valid commit.
+| Field      | Description                                      | Required |
+|------------|--------------------------------------------------|----------|
+| `name`     | Name of the dependency.                          | Yes      |
+| `source`   | Must be `local`.                                 | Yes      |
+| `path`     | Absolute or relative path to the dependency's root directory. | Yes      |
+| `profiles` | A list of profiles to use when building the dependency. | No       |
+| `using`    | A list of features to enable in the dependency.  | No       |
+
+Example:
+```yaml
+- name: my-local-lib
+  source: local
+  path: ../my-local-lib
+  profiles:
+    - release
+```
+
+#### `system` dependencies
+
+For dependencies managed by your system's package manager (e.g., apt, brew, etc.). Catalyst will try to find them using `pkg-config`.
+
+| Field     | Description                                                              | Required |
+|-----------|--------------------------------------------------------------------------|----------|
+| `name`    | Name of the dependency. This should match the name known to `pkg-config`. | Yes      |
+| `source`  | Must be `system`.                                                        | Yes      |
+| `lib`     | Path to the library directory. If not provided, Catalyst will guess.     | No       |
+| `include` | Path to the include directory. If not provided, Catalyst will guess.     | No       |
+
+Example:
+```yaml
+- name: openssl
+  source: system
+```
+
+#### `vcpkg` dependencies
+
+For dependencies managed by `vcpkg`.
+
+| Field     | Description                                     | Required |
+|-----------|-------------------------------------------------|----------|
+| `name`    | Name of the `vcpkg` package.                    | Yes      |
+| `source`  | Must be `vcpkg`.                                | Yes      |
+| `version` | The version of the package to use.              | No       |
+| `using`   | A list of features to enable in the dependency. | No       |
+
+Example:
+```yaml
+- name: yaml-cpp
+  source: vcpkg
+  version: 0.7.0
+```
+
+#### `git` dependencies
+
+For dependencies hosted in a `git` repository. Catalyst will clone and build them.
+
+| Field     | Description                                      | Required |
+|-----------|--------------------------------------------------|----------|
+| `name`    | Name of the dependency.                          | Yes      |
+| `source`  | The URL of the git repository.                   | Yes      |
+| `version` | A git tag or commit hash to checkout.            | Yes      |
+| `using`   | A list of features to enable in the dependency.  | No       |
+
+Example:
+```yaml
+- name: fmt
+  source: https://github.com/fmtlib/fmt.git
+  version: 8.1.1
+```
 
 ### `features` Schema
 
@@ -110,9 +169,6 @@ Flags can through arguments to the `generate` and `build ` subcommands.
 > defines this macro manually, collisions may occur.
 
 ### `hooks` Schema
-
-> [!NOTE]
-> Hooks will be added to Catalyst in `0.0.2`.
 
 Hooks are optional scripts triggered at various stages of the build lifecycle. They enable incorporating support for
 imperative steps to adapt to the realities of development. For more information, check out [the hooks documentation](docs/hooks.md).

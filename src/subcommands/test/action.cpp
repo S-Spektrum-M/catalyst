@@ -1,6 +1,6 @@
-#include "catalyst/subcommands/test.hpp"
-#include "catalyst/subcommands/generate.hpp"
 #include "catalyst/hooks.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/test.hpp"
 #include <cctype>
 #include <cstdlib>
 #include <expected>
