@@ -1,8 +1,13 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
+#include <algorithm>
+#include <atomic>
 #include <cstdlib>
+#include <execution>
 #include <filesystem>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -35,26 +40,45 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::vector<std::filesystem::path> files_to_format;
     for (const auto &dir : source_dirs) {
         for (const auto &entry : std::filesystem::recursive_directory_iterator(dir)) {
-            if (entry.is_regular_file() && (entry.path().extension() == ".cpp" || entry.path().extension() == ".hpp")) {
-                files_to_format.push_back(entry.path());
+            if (entry.is_regular_file()) {
+                if (std::string extension = entry.path().extension();
+                    extension == ".cc" || extension == ".cpp" || extension == ".c") {
+                    files_to_format.push_back(entry.path());
+                }
             }
         }
     }
 
     for (const auto &dir : include_dirs) {
         for (const auto &entry : std::filesystem::recursive_directory_iterator(dir)) {
-            if (entry.is_regular_file() && (entry.path().extension() == ".cpp" || entry.path().extension() == ".hpp")) {
-                files_to_format.push_back(entry.path());
+            if (entry.is_regular_file()) {
+                if (std::string extension = entry.path().extension(); extension == ".hpp" || extension == ".h") {
+                    files_to_format.push_back(entry.path());
+                }
             }
         }
     }
 
-    for (const auto &file : files_to_format) {
-        std::string command = formatter + " -i " + file.string();
-        int res = std::system(command.c_str());
-        if (res != 0) {
-            return std::unexpected("Error running clang-format on " + file.string());
+    std::atomic<bool> formatting_error = false;
+    std::string error_message;
+    std::mutex error_mutex;
+
+    std::for_each(std::execution::par, files_to_format.begin(), files_to_format.end(), [&](const auto &file) -> void {
+        if (formatting_error) {
+            return;
         }
+        catalyst::logger.log(LogLevel::INFO, "Formatting {}", file.string());
+        if (int res = std::system(std::format("{} -i {}", formatter, file.string()).c_str()); res) {
+            std::lock_guard<std::mutex> lock(error_mutex);
+            if (!formatting_error) {
+                formatting_error = true;
+                error_message = "Error running clang-format on " + file.string();
+            }
+        }
+    });
+
+    if (formatting_error) {
+        return std::unexpected(error_message);
     }
 
     return {};
