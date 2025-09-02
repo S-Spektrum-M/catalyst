@@ -15,15 +15,19 @@
 
 namespace catalyst::fmt {
 std::expected<void, std::string> action(const parse_t &parse_args) {
+    catalyst::logger.log(LogLevel::INFO, "Fmt subcommand invoked.");
     const std::vector<std::string> &profiles = parse_args.profiles;
     YAML::Node profile_comp;
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
     if (auto res = generate::profile_composition(profiles); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
     } else {
         profile_comp = res.value();
     }
 
     std::string formatter = profile_comp["manifest"]["tooling"]["FMT"].as<std::string>();
+    catalyst::logger.log(LogLevel::INFO, "Using formatter: {}", formatter);
 
     namespace fs = std::filesystem;
 
@@ -73,6 +77,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             if (!formatting_error) {
                 formatting_error = true;
                 error_message = "Error running clang-format on " + file.string();
+                catalyst::logger.log(LogLevel::ERROR, "{}", error_message);
             }
         }
     });
@@ -81,6 +86,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected(error_message);
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Fmt subcommand finished successfully.");
     return {};
 }
 } // namespace catalyst::fmt

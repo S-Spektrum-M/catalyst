@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/hooks.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/node/node.h"
@@ -22,13 +23,19 @@ std::vector<std::string> intermediate_targets(std::ofstream &buildfile, const st
 void final_target(const YAML::Node &profile, const auto &object_files, std::ofstream &buildfile);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
+    catalyst::logger.log(LogLevel::INFO, "Generate subcommand invoked.");
 
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
     auto profile_res = profile_composition(parse_args.profiles);
-    if (!profile_res)
+    if (!profile_res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", profile_res.error());
         return std::unexpected(profile_res.error());
+    }
     YAML::Node profile = profile_res.value();
 
+    catalyst::logger.log(LogLevel::INFO, "Running pre-generate hooks.");
     if (auto res = hooks::pre_generate(profile); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Pre-generate hook failed: {}", res.error());
         return res;
     }
 
@@ -40,20 +47,26 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         absolute_source_dirs.push_back((current_dir / dir).string());
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Building source set.");
     auto source_set_res = build_source_set(absolute_source_dirs, parse_args.profiles);
-    if (!source_set_res)
+    if (!source_set_res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to build source set: {}", source_set_res.error());
         return std::unexpected(source_set_res.error());
+    }
 
     std::unordered_set<std::filesystem::path> source_set = source_set_res.value();
 
     fs::path build_dir = profile["manifest"]["dirs"]["build"].as<std::string>();
     fs::path obj_dir = build_dir / "obj";
 
+    catalyst::logger.log(LogLevel::INFO, "Creating object directory: {}", obj_dir.string());
     fs::create_directories(obj_dir);
     if (!fs::exists(obj_dir) || !fs::is_directory(obj_dir)) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to create object directory: {}", obj_dir.string());
         return std::unexpected("Failed to create object directory: " + obj_dir.string());
     }
 
+    catalyst::logger.log(LogLevel::INFO, "Writing build file to: {}", (build_dir / "build.ninja").string());
     std::ofstream buildfile{build_dir / "build.ninja"};
 
     if (!buildfile) {
@@ -68,20 +81,25 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::vector<std::string> object_files = intermediate_targets(buildfile, source_set);
     final_target(profile, object_files, buildfile);
 
+    catalyst::logger.log(LogLevel::INFO, "Writing profile composition to: {}", (build_dir / "profile_composition.yaml").string());
     std::ofstream profile_comp_file{build_dir / "profile_composition.yaml"};
     if (!profile_comp_file) {
         return std::unexpected("Failed to open profile_composition.yaml for writing in " + build_dir.string());
     }
     profile_comp_file << profile;
 
+    catalyst::logger.log(LogLevel::INFO, "Running post-generate hooks.");
     if (auto res = hooks::post_generate(profile); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Post-generate hook failed: {}", res.error());
         return res;
     }
+    catalyst::logger.log(LogLevel::INFO, "Generate subcommand finished successfully.");
     return {};
 }
 
 std::vector<std::string> intermediate_targets(std::ofstream &buildfile,
                                               const std::unordered_set<std::filesystem::path> &source_set) {
+    catalyst::logger.log(LogLevel::INFO, "Generating intermediate targets.");
     fs::path current_dir = fs::current_path();
     buildfile << "# Source File Compilation\n";
     std::vector<std::string> object_files;
@@ -100,6 +118,7 @@ std::vector<std::string> intermediate_targets(std::ofstream &buildfile,
 }
 
 void final_target(const YAML::Node &profile, const auto &object_files, std::ofstream &buildfile) {
+    catalyst::logger.log(LogLevel::INFO, "Generating final target.");
     // Build edge for the final target
     std::string type = profile["manifest"]["type"].as<std::string>();
     std::string target_prefix;
@@ -136,6 +155,7 @@ void final_target(const YAML::Node &profile, const auto &object_files, std::ofst
 
     std::string target_name = profile["manifest"]["name"].as<std::string>();
     fs::path target_path{target_prefix + target_name + target_suffix};
+    catalyst::logger.log(LogLevel::INFO, "Final target name: {}", target_path.string());
     buildfile << "# Build edge for the final target\n";
     buildfile << "build " << target_path.string() << ": " << link_rule;
     for (const auto &obj : object_files) {

@@ -19,10 +19,12 @@ namespace fs = std::filesystem;
 static std::expected<void, std::string> resolve_local_dependency(const YAML::Node &dep, std::string &cxxflags,
                                                                  std::string &ccflags, std::string &ldflags,
                                                                  std::string &ldlibs) {
+    catalyst::logger.log(LogLevel::INFO, "Resolving local dependency: {}", dep["name"].as<std::string>());
     auto project_dir = fs::current_path();
     fs::path dep_path;
     if (dep["path"]) {
         dep_path = dep["path"].as<std::string>();
+        catalyst::logger.log(LogLevel::INFO, "Changing directory to: {}", dep_path.string());
         fs::current_path(dep_path);
     } else {
         return std::unexpected(
@@ -34,6 +36,7 @@ static std::expected<void, std::string> resolve_local_dependency(const YAML::Nod
         profiles = dep["profiles"].as<std::vector<std::string>>();
     if (dep["using"] && dep["using"].IsSequence())
         features = dep["using"].as<std::vector<std::string>>();
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles for local dependency.");
     auto pc = catalyst::generate::profile_composition(profiles);
 
     if (!pc) {
@@ -42,6 +45,7 @@ static std::expected<void, std::string> resolve_local_dependency(const YAML::Nod
     }
     YAML::Node profile = pc.value();
 
+    catalyst::logger.log(LogLevel::INFO, "Building local dependency.");
     auto _ = catalyst::build::action(build::parse_t{
         .regen = true,
         .force_rebuild = true,
@@ -49,12 +53,14 @@ static std::expected<void, std::string> resolve_local_dependency(const YAML::Nod
         .profiles = profiles,
         .enabled_features = features,
     });
+    catalyst::logger.log(LogLevel::INFO, "Changing directory back to: {}", project_dir.string());
     fs::current_path(project_dir);
 
     // Add include directories
     if (auto includes = profile["manifest"]["dirs"]["include"]; includes && includes.IsSequence()) {
         for (const auto &dir : includes.as<std::vector<std::string>>()) {
             auto include_path = fs::absolute(dep_path / dir);
+            catalyst::logger.log(LogLevel::INFO, "Adding include path: {}", include_path.string());
             cxxflags += std::format(" -I{}", include_path.string());
             ccflags += std::format(" -I{}", include_path.string());
         }
@@ -64,12 +70,14 @@ static std::expected<void, std::string> resolve_local_dependency(const YAML::Nod
     if (auto build_dir_node = profile["manifest"]["dirs"]["build"]) {
         auto build_dir = build_dir_node.as<std::string>();
         auto lib_path = fs::absolute(dep_path / build_dir);
+        catalyst::logger.log(LogLevel::INFO, "Adding library path: {}", lib_path.string());
         ldflags += std::format(" -L{}", lib_path.string());
     }
 
     // Add library
     if (auto dep_name_node = profile["manifest"]["name"]) {
         auto dep_name = dep_name_node.as<std::string>();
+        catalyst::logger.log(LogLevel::INFO, "Adding library: {}", dep_name);
         ldlibs += std::format(" -l{}", dep_name);
     }
 
@@ -79,6 +87,7 @@ static std::expected<void, std::string> resolve_local_dependency(const YAML::Nod
 static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags,
                                           [[maybe_unused]] std::string &ldflags, std::string &ldlibs) {
     std::string dep_name = dep["name"].as<std::string>();
+    catalyst::logger.log(LogLevel::INFO, "Resolving pkg-config dependency: {}", dep_name);
 
     if (dep["linkage"] && dep["linkage"].IsScalar()) {
         std::string linkage = dep["linkage"].as<std::string>();
@@ -86,6 +95,7 @@ static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cx
             ldlibs += " -l" + dep_name;
         }
         std::string cflags_command = std::format("pkg-config --cflags {}", dep_name);
+        catalyst::logger.log(LogLevel::INFO, "Executing command: {}", cflags_command);
         std::array<char, 128> cflags_buffer;
         std::string cflags_result;
         FILE *cflags_pipe = popen(cflags_command.c_str(), "r");
@@ -96,12 +106,14 @@ static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cx
             int cflags_ret = pclose(cflags_pipe);
             if (WEXITSTATUS(cflags_ret) == 0) {
                 cflags_result.erase(cflags_result.find_last_not_of(" \t\n") + 1);
+                catalyst::logger.log(LogLevel::INFO, "Adding cflags: {}", cflags_result);
                 cxxflags += " " + cflags_result;
                 ccflags += " " + cflags_result;
             }
         }
     } else {
         std::string command = std::format("pkg-config --libs {}", dep_name);
+        catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
         std::array<char, 128> buffer;
         std::string result;
         FILE *pipe = popen(command.c_str(), "r");
@@ -115,6 +127,7 @@ static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cx
         int ret = pclose(pipe);
         if (WEXITSTATUS(ret) == 0) {
             result.erase(result.find_last_not_of(" \t\n") + 1);
+            catalyst::logger.log(LogLevel::INFO, "Adding libs: {}", result);
             ldlibs += " " + result;
         } else {
             ldlibs += " -l" + dep_name;
@@ -125,6 +138,7 @@ static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cx
 static void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags,
                                       std::string &ldflags, std::string &ldlibs) {
     std::string dep_name = dep["name"].as<std::string>();
+    catalyst::logger.log(LogLevel::INFO, "Resolving system dependency: {}", dep_name);
     bool used_explicit_paths = false;
 
     std::string linkage = "shared";
@@ -179,6 +193,7 @@ static void resolve_system_dependency(const YAML::Node &dep, std::string &cxxfla
 
 void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
                      const std::vector<std::string> &enabled_features) {
+    catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
     fs::path current_dir = fs::current_path();
     std::string build_dir_str = profile["manifest"]["dirs"]["build"].as<std::string>();
     fs::path build_dir(build_dir_str);
@@ -263,6 +278,7 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
 }
 
 void write_rules(std::ofstream &buildfile) {
+    catalyst::logger.log(LogLevel::INFO, "Writing rules to build file.");
     buildfile << "# Rules for compiling\n";
     buildfile << "rule cxx_compile\n";
     buildfile << "  command = $cxx $cxxflags -MD -MF $out.d -c $in -o $out\n";
