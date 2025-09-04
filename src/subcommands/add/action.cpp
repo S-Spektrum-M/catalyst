@@ -38,7 +38,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             }
             if (auto write_res = catalyst::YAML_UTILS::profile_write_back(profile_name, std::move(profile_node));
                 !write_res) {
-                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", write_res.error());
                 return std::unexpected(write_res.error());
             }
             catalyst::logger.log(catalyst::LogLevel::INFO, "Dependency '{}' added to profile '{}'", parse_args.name,

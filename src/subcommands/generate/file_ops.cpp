@@ -16,6 +16,86 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
+#include "catalyst/log-utils/log.hpp" // Assuming your logger is accessible
+#include "yaml-cpp/yaml.h"
+#include <filesystem>
+#include <format>
+#include <string>
+#include <vector>
+
+namespace fs = std::filesystem;
+
+/**
+ * @brief Resolves a vcpkg dependency by searching its package directory for libraries.
+ * * @param dep The YAML node for the dependency.
+ * @param triplet The target triplet (e.g., "x64-windows", "x64-linux").
+ * @param ldflags A reference to the string of linker flags to be appended to.
+ * @param ldlibs A reference to the string of library links to be appended to.
+ */
+static void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet, std::string &ldflags,
+                                     std::string &ldlibs) {
+    const char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
+    if (vcpkg_root_env == nullptr) {
+        // The check in write_variables should already catch this, but it's good practice.
+        catalyst::logger.log(LogLevel::WARN, "VCPKG_ROOT is not set, cannot resolve vcpkg dependency '{}'.",
+                             dep["name"].as<std::string>());
+        return;
+    }
+
+    std::string dep_name = dep["name"].as<std::string>();
+    catalyst::logger.log(LogLevel::INFO, "Resolving vcpkg dependency: {}", dep_name);
+
+    // Construct the path to the library directory within the specific package folder
+    // $VCPKG_ROOT/packages/<package>_<triplet>/lib
+    fs::path vcpkg_root(vcpkg_root_env);
+    fs::path package_dir_name = std::format("{}_{}", dep_name, triplet);
+    fs::path lib_path = vcpkg_root / "packages" / package_dir_name / "lib";
+
+    if (!fs::exists(lib_path) || !fs::is_directory(lib_path)) {
+        catalyst::logger.log(LogLevel::WARN, "Could not find library directory for vcpkg package '{}' at: {}", dep_name,
+                             lib_path.string());
+        // Fallback: just add the library by name and hope the linker finds it in the global vcpkg lib dir.
+        ldlibs += std::format(" -l{}", dep_name);
+        return;
+    }
+
+    // Add this specific library path to the linker search paths.
+    // This is often redundant if the global vcpkg lib path is already added, but it's more explicit.
+    ldflags += std::format(" -L{}", lib_path.string());
+    catalyst::logger.log(LogLevel::INFO, "Adding library path: {}", lib_path.string());
+
+// Define the library file extensions based on the operating system.
+#if defined(_WIN32)
+    const std::vector<std::string> extensions = {".lib"};
+#elif defined(__APPLE__)
+    const std::vector<std::string> extensions = {".a", ".dylib"};
+#else // Linux and other Unix-like systems
+    const std::vector<std::string> extensions = {".a", ".so"};
+#endif
+
+    // Iterate through the directory and find matching library files.
+    for (const auto &entry : fs::directory_iterator(lib_path)) {
+        if (entry.is_regular_file()) {
+            const fs::path &file_path = entry.path();
+            std::string file_ext = file_path.extension().string();
+
+            // Check if the file has one of the target extensions
+            for (const auto &expected_ext : extensions) {
+                if (file_ext == expected_ext) {
+                    // Convert file path to a linker flag (e.g., "libfmt.a" -> "-lfmt")
+                    std::string stem = file_path.stem().string();
+                    if (stem.rfind("lib", 0) == 0) { // Check if it starts with "lib"
+                        stem = stem.substr(3);
+                    }
+                    ldlibs += std::format(" -l{}", stem);
+                    catalyst::logger.log(LogLevel::INFO, "Found and added library: {}", stem);
+                    break; // Found a matching extension, move to the next file
+                }
+            }
+        }
+    }
+}
+
 static std::expected<void, std::string> resolve_local_dependency(const YAML::Node &dep, std::string &cxxflags,
                                                                  std::string &ccflags, std::string &ldflags,
                                                                  std::string &ldlibs) {
@@ -260,6 +340,14 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
                     logger.log(LogLevel::ERROR, "Failed to resolve local dependency {}: {}",
                                dep["name"].as<std::string>(), res.error());
                 }
+            } else if (source == "vcpkg") {
+                if (!dep["triplet"] || !dep["triplet"].IsScalar()) {
+                    catalyst::logger.log(LogLevel::ERROR, "vcpkg dependency: {} does not define field: triplet",
+                                         dep["name"].as<std::string>());
+                    return;
+                }
+                auto triplet = dep["triplet"].as<std::string>();
+                resolve_vcpkg_dependency(dep, triplet, ldflags, ldlibs);
             } else {
                 resolve_pkg_config_dependency(dep, cxxflags, ccflags, ldflags, ldlibs);
             }

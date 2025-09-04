@@ -1,5 +1,5 @@
-#include "catalyst/log-utils/log.hpp"
 #include "catalyst/hooks.hpp"
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/node/node.h"
 #include <expected>
@@ -81,7 +81,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::vector<std::string> object_files = intermediate_targets(buildfile, source_set);
     final_target(profile, object_files, buildfile);
 
-    catalyst::logger.log(LogLevel::INFO, "Writing profile composition to: {}", (build_dir / "profile_composition.yaml").string());
+    catalyst::logger.log(LogLevel::INFO, "Writing profile composition to: {}",
+                         (build_dir / "profile_composition.yaml").string());
     std::ofstream profile_comp_file{build_dir / "profile_composition.yaml"};
     if (!profile_comp_file) {
         return std::unexpected("Failed to open profile_composition.yaml for writing in " + build_dir.string());

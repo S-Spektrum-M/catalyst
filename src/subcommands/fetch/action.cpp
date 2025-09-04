@@ -1,5 +1,5 @@
-#include "catalyst/log-utils/log.hpp"
 #include "catalyst/hooks.hpp"
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include <cstdlib>
