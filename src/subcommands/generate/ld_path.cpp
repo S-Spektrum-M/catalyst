@@ -1,7 +1,9 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/log-utils/log.hpp" // Assuming your logger is accessible
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/node/node.h"
+#include "yaml-cpp/yaml.h"
 #include <array>
 #include <cstdio>
 #include <expected>
@@ -16,24 +18,8 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
-#include "catalyst/log-utils/log.hpp" // Assuming your logger is accessible
-#include "yaml-cpp/yaml.h"
-#include <filesystem>
-#include <format>
-#include <string>
-#include <vector>
-
-namespace fs = std::filesystem;
-
-/**
- * @brief Resolves a vcpkg dependency by searching its package directory for libraries.
- * * @param dep The YAML node for the dependency.
- * @param triplet The target triplet (e.g., "x64-windows", "x64-linux").
- * @param ldflags A reference to the string of linker flags to be appended to.
- * @param ldlibs A reference to the string of library links to be appended to.
- */
-static void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet, std::string &ldflags,
-                                     std::string &ldlibs) {
+void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet, std::string &ldflags,
+                              std::string &ldlibs) {
     const char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
     if (vcpkg_root_env == nullptr) {
         // The check in write_variables should already catch this, but it's good practice.
@@ -96,9 +82,9 @@ static void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &t
     }
 }
 
-static std::expected<void, std::string> resolve_local_dependency(const YAML::Node &dep, std::string &cxxflags,
-                                                                 std::string &ccflags, std::string &ldflags,
-                                                                 std::string &ldlibs) {
+std::expected<void, std::string> resolve_local_dependency(const YAML::Node &dep, std::string &cxxflags,
+                                                          std::string &ccflags, std::string &ldflags,
+                                                          std::string &ldlibs) {
     catalyst::logger.log(LogLevel::INFO, "Resolving local dependency: {}", dep["name"].as<std::string>());
     auto project_dir = fs::current_path();
     fs::path dep_path;
@@ -164,8 +150,8 @@ static std::expected<void, std::string> resolve_local_dependency(const YAML::Nod
     return {};
 }
 
-static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags,
-                                          [[maybe_unused]] std::string &ldflags, std::string &ldlibs) {
+void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags,
+                                   [[maybe_unused]] std::string &ldflags, std::string &ldlibs) {
     std::string dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::INFO, "Resolving pkg-config dependency: {}", dep_name);
 
@@ -215,8 +201,8 @@ static void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cx
     }
 }
 
-static void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags,
-                                      std::string &ldflags, std::string &ldlibs) {
+void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags, std::string &ldflags,
+                               std::string &ldlibs) {
     std::string dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::INFO, "Resolving system dependency: {}", dep_name);
     bool used_explicit_paths = false;

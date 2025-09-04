@@ -7,8 +7,6 @@
 #include <expected>
 #include <filesystem>
 #include <format>
-#include <iostream>
-#include <regex>
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -74,6 +72,17 @@ std::expected<void, std::string> action(const parse_t &args) {
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = command_str(exe_path, args.params);
+    if (auto res = catalyst::generate::lib_path(profile_comp); !res) {
+        return std::unexpected("failed to generate LD_LIBRARY_PATH");
+    } else {
+#if defined(_WIN32)
+        _putenv_s("PATH", res.value().c_str());
+#elif defined(__APPLE__)
+        setenv("DYLD_LIBRARY_PATH", res.value().c_str(), 1);
+#else
+        setenv("LD_LIBRARY_PATH", res.value().c_str(), 1);
+#endif
+    }
     catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
     if (int res = std::system(command.c_str()); res) {
         catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
