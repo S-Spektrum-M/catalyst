@@ -345,8 +345,8 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
               << "cxx = " << profile["manifest"]["tooling"]["CXX"].as<std::string>() << "\n"
               << "cxxflags = " << cxxflags << "\n"
               << "cflags = " << ccflags << "\n"
-              << "builddir = " << build_dir.string() << "\n"
-              << "objdir = " << obj_dir.string() << "\n"
+              // << "builddir = " << build_dir.string() << "\n"
+              // << "objdir = " << obj_dir.string() << "\n"
               << "ldflags = " << ldflags << " \n"
               << "ldlibs= " << ldlibs << "\n\n"; // place compiled libraries here
 }
@@ -360,7 +360,7 @@ void write_rules(std::ofstream &buildfile) {
     buildfile << "  depfile = $out.d\n";
     buildfile << "  deps = gcc\n\n";
 
-    buildfile << "rule c_compile\n";
+    buildfile << "rule cc_compile\n";
     buildfile << "  command = $cc $cflags -MD -MF $out.d -c $in -o $out\n";
     buildfile << "  description = CC $out\n";
     buildfile << "  depfile = $out.d\n";
