@@ -22,7 +22,6 @@ void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet,
                               std::string &ldlibs) {
     const char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
     if (vcpkg_root_env == nullptr) {
-        // The check in write_variables should already catch this, but it's good practice.
         catalyst::logger.log(LogLevel::WARN, "VCPKG_ROOT is not set, cannot resolve vcpkg dependency '{}'.",
                              dep["name"].as<std::string>());
         return;
