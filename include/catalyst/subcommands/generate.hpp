@@ -30,7 +30,6 @@ void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cxxflags,
 void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags, std::string &ldflags,
                                std::string &ldlibs);
 std::expected<std::string, std::string> lib_path(const YAML::Node &profile);
-
 std::expected<find_res, std::string> find_dep(const std::string &build_dir, const YAML::Node &dep);
 std::expected<find_res, std::string> find_local(const YAML::Node &dep);
 std::expected<find_res, std::string> find_system(const YAML::Node &dep);
