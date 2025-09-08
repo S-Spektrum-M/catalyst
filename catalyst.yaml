@@ -32,9 +32,3 @@ dependencies:
   - name: cli11
     source: system
     linkage: interface
-  - name: nlohmann-json
-    source: vcpkg
-    linkage: interface
-    triplet: x64-linux
-    version: latest
-    using: []

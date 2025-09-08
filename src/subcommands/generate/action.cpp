@@ -14,8 +14,6 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
-std::expected<std::unordered_set<fs::path>, std::string> build_source_set(std::vector<std::string> source_dirs,
-                                                                          const std::vector<std::string> &profiles);
 void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
                      const std::vector<std::string> &enabled_features);
 void write_rules(std::ofstream &buildfile);

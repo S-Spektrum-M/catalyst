@@ -9,6 +9,7 @@
 #include "catalyst/subcommands/init.hpp"
 #include "catalyst/subcommands/run.hpp"
 #include "catalyst/subcommands/test.hpp"
+#include "catalyst/subcommands/tidy.hpp"
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
 #include <catalyst/log-utils/log.hpp>
@@ -28,6 +29,7 @@ int main(int argc, char **argv) {
     const auto [init_subc, init_res] = catalyst::init::parse(app);
     const auto [run_subc, run_res] = catalyst::run::parse(app);
     const auto [test_subc, test_res] = catalyst::test::parse(app);
+    const auto [tidy_subc, tidy_res] = catalyst::tidy::parse(app);
 
     bool show_version{false};
 
@@ -118,6 +120,14 @@ int main(int argc, char **argv) {
     if (*test_subc) {
         catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "test");
         if (auto res = catalyst::test::action(*test_res); !res) {
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+            return 1;
+        }
+    }
+
+    if (*tidy_subc) {
+        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "tidy");
+        if (auto res = catalyst::tidy::action(*tidy_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
