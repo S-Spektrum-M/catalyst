@@ -1,7 +1,7 @@
 #  Road Map
 
 ## WIP 0.0.4
-- [ ] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
+- [x] tidy                 Checks a package using an external `clang-tidy` call to catch common mistakes.
 - [ ] fix                  Automatically fix lint warnings reported by `clang-tidy`
 - [ ] pack                 Assemble the local package for distribution
 
