@@ -337,7 +337,7 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
               // << "builddir = " << build_dir.string() << "\n"
               // << "objdir = " << obj_dir.string() << "\n"
               << "ldflags = " << ldflags << " \n"
-              << "ldlibs= " << ldlibs << "\n\n"; // place compiled libraries here
+              << "ldlibs = " << ldlibs << "\n\n"; // place compiled libraries here
 }
 
 void write_rules(std::ofstream &buildfile) {
