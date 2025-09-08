@@ -2,6 +2,7 @@
 #include <CLI/App.hpp>
 #include <expected>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -35,4 +36,7 @@ std::expected<find_res, std::string> find_local(const YAML::Node &dep);
 std::expected<find_res, std::string> find_system(const YAML::Node &dep);
 std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep);
 std::expected<find_res, std::string> find_git(const std::string &build_dir, const YAML::Node &dep);
+
+std::expected<std::unordered_set<std::filesystem::path>, std::string>
+build_source_set(std::vector<std::string> source_dirs, const std::vector<std::string> &profiles);
 } // namespace catalyst::generate

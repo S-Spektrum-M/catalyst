@@ -58,6 +58,7 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
     composite["manifest"]["tooling"]["CC"] = "clang";
     composite["manifest"]["tooling"]["CXX"] = "clang++";
     composite["manifest"]["tooling"]["FMT"] = "clang-format";
+    composite["manifest"]["tooling"]["LINTER"] = "clang-tidy";
     composite["manifest"]["tooling"]["CCFLAGS"] = "";
     composite["manifest"]["tooling"]["CXXFLAGS"] = "";
     composite["manifest"]["dirs"]["include"] = std::vector<std::string>{};
@@ -108,6 +109,9 @@ std::expected<YAML::Node, std::string> profile_composition(const std::vector<std
                 }
                 if (new_profile_manifest_tooling["FMT"]) {
                     composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
+                }
+                if (new_profile_manifest_tooling["LINTER"]) {
+                    composite["manifest"]["tooling"]["LINTER"] = new_profile_manifest_tooling["LINTER"];
                 }
                 if (new_profile_manifest_tooling["CCFLAGS"]) {
                     composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
