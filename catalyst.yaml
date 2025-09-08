@@ -32,3 +32,6 @@ dependencies:
   - name: cli11
     source: system
     linkage: interface
+  - name: nlohmann-json
+    source: system
+    linkage: interface
