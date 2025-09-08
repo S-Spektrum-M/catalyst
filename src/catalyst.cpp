@@ -13,10 +13,20 @@
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
 #include <catalyst/log-utils/log.hpp>
+#include <format>
 #include <print>
 #include <string>
 
 int main(int argc, char **argv) {
+    auto concat = [&argc, &argv]() -> std::string {
+        int ac = argc;
+        std::string res;
+        for (int ii = 0; ii < ac; ++ii)
+            res += std::string{argv[ii]} + " ";
+        return res;
+    };
+    catalyst::logger.log(catalyst::LogLevel::INFO, "{}", concat());
+
     CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
 
     const auto [add_subc, add_res] = catalyst::add::parse(app);

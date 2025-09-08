@@ -3,6 +3,7 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <print>
 #include <string>
 
 // ANSI color codes
@@ -62,8 +63,12 @@ class log_t {
     }
 
   private:
-    log_t() : log_file_{".catalyst.log", std::ios_base::app} {}
+    log_t() : log_file_{".catalyst.log", std::ios_base::app} {
+        auto now = std::chrono::system_clock::now();
+        std::println(log_file_, "[beginblock {:%Y-%m-%d %H:%M:%S}]", now);
+    }
     ~log_t() {
+        std::println(log_file_, "[endblock]");
         if (log_file_.is_open()) {
             log_file_.close();
         }
