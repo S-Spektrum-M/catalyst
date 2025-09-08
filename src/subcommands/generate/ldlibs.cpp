@@ -12,6 +12,7 @@ namespace catalyst::generate {
 
 std::string ld_filter(std::string &ldflags);
 
+// NOTE: used for run::action. Needs to be updated to use find_*.
 std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
     catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
     fs::path current_dir = fs::current_path();

@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <print>
 #include <string>
 #include <sys/wait.h>
 #include <vector>
@@ -256,6 +257,7 @@ void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std
     }
 }
 
+// used to write to the buildfile.
 void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
                      const std::vector<std::string> &enabled_features) {
     catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
@@ -313,28 +315,15 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
     std::string ldlibs;
     if (auto deps = profile["dependencies"]; deps && deps.IsSequence()) {
         for (const auto &dep : deps) {
-            if (!dep["name"] || !dep["name"].IsScalar())
+            if (auto res = find_dep(build_dir_str, dep); !res) {
+                catalyst::logger.log(LogLevel::ERROR, "{}", res.error());
                 continue;
-
-            std::string source = dep["source"] ? dep["source"].as<std::string>() : "";
-
-            if (source == "system") {
-                resolve_system_dependency(dep, cxxflags, ccflags, ldflags, ldlibs);
-            } else if (source == "local") {
-                if (auto res = resolve_local_dependency(dep, cxxflags, ccflags, ldflags, ldlibs); !res) {
-                    logger.log(LogLevel::ERROR, "Failed to resolve local dependency {}: {}",
-                               dep["name"].as<std::string>(), res.error());
-                }
-            } else if (source == "vcpkg") {
-                if (!dep["triplet"] || !dep["triplet"].IsScalar()) {
-                    catalyst::logger.log(LogLevel::ERROR, "vcpkg dependency: {} does not define field: triplet",
-                                         dep["name"].as<std::string>());
-                    return;
-                }
-                auto triplet = dep["triplet"].as<std::string>();
-                resolve_vcpkg_dependency(dep, triplet, ldflags, ldlibs);
             } else {
-                resolve_pkg_config_dependency(dep, cxxflags, ccflags, ldflags, ldlibs);
+                auto [lib_path, inc_path, libs] = res.value();
+                ldflags += " " + lib_path;
+                ldlibs += " " + libs;
+                ccflags += " " + inc_path;
+                cxxflags += " " + inc_path;
             }
         }
     }
@@ -343,7 +332,8 @@ void write_variables(const YAML::Node &profile, std::ofstream &buildfile,
               << "cc = " << profile["manifest"]["tooling"]["CC"].as<std::string>() << "\n"
               << "cxx = " << profile["manifest"]["tooling"]["CXX"].as<std::string>() << "\n"
               << "cxxflags = " << cxxflags << "\n"
-              << "cflags = " << ccflags << "\n"
+              << "cflags = " << ccflags
+              << "\n"
               // << "builddir = " << build_dir.string() << "\n"
               // << "objdir = " << obj_dir.string() << "\n"
               << "ldflags = " << ldflags << " \n"

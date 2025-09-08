@@ -10,9 +10,9 @@ using std::string;
 
 namespace catalyst::generate {
 std::expected<find_res, std::string> find_dep(const std::string &build_dir, const YAML::Node &dep) {
-    if (!dep["src"] || !dep["src"].IsScalar())
+    if (!dep["source"] || !dep["source"].IsScalar())
         return std::unexpected(std::format("dependency: {} does not define field src", dep["name"].as<std::string>()));
-    std::string source_type = dep["src"].as<std::string>();
+    std::string source_type = dep["source"].as<std::string>();
     if (source_type == "local") {
         return find_local(dep);
     } else if (source_type == "system") {
