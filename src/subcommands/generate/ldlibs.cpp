@@ -3,20 +3,20 @@
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/yaml.h"
 #include <filesystem>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 namespace fs = std::filesystem;
 namespace catalyst::generate {
 
 std::string ld_filter(std::string &ldflags);
 
+// NOTE: used for run::action. Needs to be updated to use find_*.
 std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
     catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
     fs::path current_dir = fs::current_path();
-    std::string build_dir_str = profile["manifest"]["dirs"]["build"].as<std::string>();
-    fs::path build_dir(build_dir_str);
+    fs::path build_dir{profile["manifest"]["dirs"]["build"].as<std::string>()};
     fs::path obj_dir = "obj";
 
     std::string cxxflags{""}; // irrelevant for this function
@@ -62,7 +62,21 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
                 auto triplet = dep["triplet"].as<std::string>();
                 resolve_vcpkg_dependency(dep, triplet, ldflags, ldlibs);
             } else {
-                resolve_pkg_config_dependency(dep, cxxflags, ccflags, ldflags, ldlibs);
+                // an emulation of a local node
+                YAML::Node node;
+                std::string name = dep["name"].as<std::string>();
+                node["name"] = dep["name"];
+                node["path"] = fs::path{fs::path(build_dir) / "catalyst-libs" / name}.string();
+                // TODO: check if these actually exist
+                node["using"] = dep["using"];
+                if (dep["profiles"] && dep["profiles"].IsSequence())
+                    node["profiles"] = dep["profiles"];
+                if (dep["using"] && dep["using"].IsSequence())
+                    node["using"] = dep["using"];
+                if (auto res = resolve_local_dependency(node, cxxflags, ccflags, ldflags, ldlibs); !res) {
+                    logger.log(LogLevel::ERROR, "Failed to resolve git dependency {}: {}",
+                               node["name"].as<std::string>(), res.error());
+                }
             }
         }
     }
@@ -83,11 +97,11 @@ std::string ld_filter(std::string &ldflags) {
     for (size_t i = 0; i < tokens.size(); ++i) {
         result += tokens[i];
         if (i < tokens.size() - 1) {
-            #if defined(_WIN32)
-                result += ";";
-            #else
-                result += ":";
-            #endif
+#if defined(_WIN32)
+            result += ";";
+#else
+            result += ":";
+#endif
         }
     }
     return result;

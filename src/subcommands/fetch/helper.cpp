@@ -66,14 +66,6 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
-    std::println(std::cout, "Building: {}", name);
-    // NOTE: after build command is impelmented, we can just do "catalyst build <PATH>"
-    command = std::format("cd {} && mkdir build && catalyst generate && ninja -C build", dep_path.string());
-    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
-    if (std::system(command.c_str()) != 0) {
-        catalyst::logger.log(LogLevel::ERROR, "Failed to build dependency: {}", name);
-        return std::unexpected(std::format("Failed to build dependency: {}", name));
-    }
     return {};
 }
 

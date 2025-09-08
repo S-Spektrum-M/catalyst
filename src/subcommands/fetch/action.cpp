@@ -68,12 +68,17 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             } else if (source == "local") {
                 std::println(std::cout, "Skipping fetch for local dependency: {}", name);
             } else {
-                if (!dep["version"]) {
-                    return std::unexpected(std::format("git dependency '{}' is missing version.", name));
+                fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
+                if (fs::exists(dep_path)) {
+                    std::println(std::cout, "Skipping fetch for existing git dependency: {}", name);
+                } else {
+                    if (!dep["version"] || !dep["version"].IsScalar()) {
+                        return std::unexpected(std::format("git dependency '{}' is missing version.", name));
+                    }
+                    std::string version = dep["version"].as<std::string>();
+                    if (auto res = fetch_git(build_dir, name, source, version); !res)
+                        return std::unexpected(res.error());
                 }
-                std::string version = dep["version"].as<std::string>();
-                if (auto res = fetch_git(build_dir, name, source, version); !res)
-                    return std::unexpected(res.error());
             }
         }
     }
