@@ -20,7 +20,8 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
     try {
         fs::current_path(dep_path);
     } catch (const fs::filesystem_error &e) {
-        return std::unexpected(std::format("Git dependency path not found: {}. Did you run 'catalyst fetch'?", dep_path.string()));
+        return std::unexpected(
+            std::format("Git dependency path not found: {}. Did you run 'catalyst fetch'?", dep_path.string()));
     }
 
     std::vector<std::string> profiles{};

@@ -6,7 +6,5 @@
 using json = nlohmann::json;
 
 namespace catalyst::build {
-void build_compdb() {
-    std::cout << std::setw(4) << json::meta() << std::endl;
-}
+void build_compdb() { std::cout << std::setw(4) << json::meta() << std::endl; }
 }; // namespace catalyst::build
