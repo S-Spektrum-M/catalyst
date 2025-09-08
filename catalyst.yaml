@@ -33,5 +33,8 @@ dependencies:
     source: system
     linkage: interface
   - name: nlohmann-json
-    source: system
+    source: vcpkg
     linkage: interface
+    triplet: x64-linux
+    version: latest
+    using: []

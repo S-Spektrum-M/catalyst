@@ -34,10 +34,12 @@ std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
 
     std::string library_path, libs;
 
-    if (!fs::exists(lib_path) || !fs::is_directory(lib_path)) {
-        catalyst::logger.log(LogLevel::WARN, "Could not find library directory for vcpkg package '{}' at: {}", dep_name,
-                             lib_path.string());
-        libs += std::format(" -l{}", dep_name);
+    if (linkage == "static" || linkage == "shared") {
+        if (!fs::exists(lib_path) || !fs::is_directory(lib_path)) {
+            catalyst::logger.log(LogLevel::WARN, "Could not find library directory for vcpkg package '{}' at: {}",
+                                 dep_name, lib_path.string());
+            libs += std::format(" -l{}", dep_name);
+        }
     }
 
     library_path += std::format(" -L{}", lib_path.string());
