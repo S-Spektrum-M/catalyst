@@ -1,0 +1,139 @@
+#compdef catalyst
+
+_catalyst() {
+    local context state line
+    typeset -A opt_args
+
+    local -a subcommands
+    subcommands=(
+        'add:add a dependency'
+        'build:build a dependency'
+        'clean:clean a dependency'
+        'configure:set a configuration variable'
+        'fetch:fetch all dependencies for a profile'
+        'fmt:format the project files'
+        'generate:generate a build script'
+        'init:initialize a profile'
+        'run:run a dependency'
+        'test:test the project'
+        'tidy:run linting'
+    )
+
+    if (( CURRENT == 2 )); then
+        _describe 'subcommand' subcommands
+        return
+    fi
+
+    case $words[2] in
+        add)
+            _catalyst_add
+            ;;
+        build)
+            _catalyst_build
+            ;;
+        clean)
+            _catalyst_clean
+            ;;
+        configure)
+            _catalyst_configure
+            ;;
+        fetch)
+            _catalyst_fetch
+            ;;
+        fmt)
+            # No options for fmt
+            ;;
+        generate)
+            _catalyst_generate
+            ;;
+        init)
+            _catalyst_init
+            ;;
+        run)
+            _catalyst_run
+            ;;
+        test)
+            _catalyst_test
+            ;;
+        tidy)
+            _catalyst_tidy
+            ;;
+    esac
+}
+
+_catalyst_add() {
+    _arguments \
+        '(-v --version)'{-v,--version}'[version]:version:' \
+        '(-s --src)'{-s,--src}'[source]:source:_files' \
+        '(-p --profiles)'{-p,--profiles}'[profiles]:profiles:' \
+        '(-f --features)'{-f,--features}'[features]:features:' \
+        '*:dependency name:'
+}
+
+_catalyst_build() {
+    _arguments \
+        '(-p --profile)'{-p,--profile}'[profile]:profile:' \
+        '(-P --params)'{-P,--params}'[params]:params:' \
+        '*:target:'
+}
+
+_catalyst_clean() {
+    _arguments \
+        '(-p --profile)'{-p,--profile}'[profile]:profile:' \
+        '*:target:'
+}
+
+_catalyst_configure() {
+    _arguments \
+        '1:variable:' \
+        '2:value:'
+}
+
+_catalyst_fetch() {
+    _arguments \
+        '--profiles[profiles]:profiles:'
+}
+
+_catalyst_generate() {
+    _arguments \
+        '(-p --profiles)'{-p,--profiles}'[profiles]:profiles:' \
+        '(-f --features)'{-f,--features}'[features]:features:'
+}
+
+_catalyst_init() {
+    _arguments \
+        '(-n --name)'{-n,--name}'[name]:name:' \
+        '--path[path]:path:_directories' \
+        '(-t --type)'{-t,--type}'[type]:type:(library executable)' \
+        '(-v --version)'{-v,--version}'[version]:version:' \
+        '(-d --description)'{-d,--description}'[description]:description:' \
+        '--provides[provides]:provides:' \
+        '--cc[c_compiler]:c_compiler:_command_names -e' \
+        '--cxx[cxx_compiler]:cxx_compiler:_command_names -e' \
+        '--ccflags[c_compiler_flags]:c_compiler_flags:' \
+        '--cxxflags[cxx_compiler_flags]:cxx_compiler_flags:' \
+        '--include-dirs[include_dirs]:include_dirs:_directories' \
+        '--source-dirs[source_dirs]:source_dirs:_directories' \
+        '--build-dir[build_dir]:build_dir:_directories' \
+        '(-p --profile)'{-p,--profile}'[profile]:profile:'
+}
+
+_catalyst_run() {
+    _arguments \
+        '(-p --profile)'{-p,--profile}'[profile]:profile:' \
+        '(-P --params)'{-P,--params}'[params]:params:' \
+        '*:target:'
+}
+
+_catalyst_test() {
+    _arguments \
+        '(-P --params)'{-P,--params}'[params]:params:' \
+        '*:test:'
+}
+
+_catalyst_tidy() {
+    _arguments \
+        '(-p --profiles)'{-p,--profiles}'[profiles]:profiles:'
+}
+
+_catalyst "$@"
