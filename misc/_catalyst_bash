@@ -1,0 +1,294 @@
+#!/bin/bash
+
+_catalyst() {
+    local cur prev words cword
+    _init_completion || return
+
+    local subcommands="add build clean configure fetch fmt generate init run test tidy"
+
+    # If we're completing the first argument (subcommand)
+    if [[ $cword -eq 1 ]]; then
+        COMPREPLY=($(compgen -W "$subcommands" -- "$cur"))
+        return
+    fi
+
+    # Handle subcommand-specific completion
+    case "${words[1]}" in
+        add)
+            _catalyst_add
+            ;;
+        build)
+            _catalyst_build
+            ;;
+        clean)
+            _catalyst_clean
+            ;;
+        configure)
+            _catalyst_configure
+            ;;
+        fetch)
+            _catalyst_fetch
+            ;;
+        fmt)
+            # No options for fmt
+            ;;
+        generate)
+            _catalyst_generate
+            ;;
+        init)
+            _catalyst_init
+            ;;
+        run)
+            _catalyst_run
+            ;;
+        test)
+            _catalyst_test
+            ;;
+        tidy)
+            _catalyst_tidy
+            ;;
+    esac
+}
+
+_catalyst_add() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -v|--version)
+            # Complete version values
+            return
+            ;;
+        -s|--src)
+            # Complete file paths
+            _filedir
+            return
+            ;;
+        -p|--profiles)
+            # Complete profile names
+            return
+            ;;
+        -f|--features)
+            # Complete feature names
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-v --version -s --src -p --profiles -f --features" -- "$cur"))
+    fi
+}
+
+_catalyst_build() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -p|--profile)
+            # Complete profile names
+            return
+            ;;
+        -P|--params)
+            # Complete parameter values
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-p --profile -P --params" -- "$cur"))
+    fi
+}
+
+_catalyst_clean() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -p|--profile)
+            # Complete profile names
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-p --profile" -- "$cur"))
+    fi
+}
+
+_catalyst_configure() {
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+
+    # First argument is variable name, second is value
+    if [[ $COMP_CWORD -eq 2 ]]; then
+        # Complete variable names (you might want to add specific variables here)
+        return
+    elif [[ $COMP_CWORD -eq 3 ]]; then
+        # Complete values for the variable
+        return
+    fi
+}
+
+_catalyst_fetch() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        --profiles)
+            # Complete profile names
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--profiles" -- "$cur"))
+    fi
+}
+
+_catalyst_generate() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -p|--profiles)
+            # Complete profile names
+            return
+            ;;
+        -f|--features)
+            # Complete feature names
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-p --profiles -f --features" -- "$cur"))
+    fi
+}
+
+_catalyst_init() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -n|--name)
+            # Complete name
+            return
+            ;;
+        --path)
+            # Complete directory paths
+            _filedir -d
+            return
+            ;;
+        -t|--type)
+            COMPREPLY=($(compgen -W "library executable" -- "$cur"))
+            return
+            ;;
+        -v|--version)
+            # Complete version
+            return
+            ;;
+        -d|--description)
+            # Complete description
+            return
+            ;;
+        --provides)
+            # Complete provides
+            return
+            ;;
+        --cc)
+            # Complete C compiler commands
+            compgen -c -- "$cur"
+            return
+            ;;
+        --cxx)
+            # Complete C++ compiler commands
+            compgen -c -- "$cur"
+            return
+            ;;
+        --ccflags)
+            # Complete C compiler flags
+            return
+            ;;
+        --cxxflags)
+            # Complete C++ compiler flags
+            return
+            ;;
+        --include-dirs|--source-dirs|--build-dir)
+            # Complete directory paths
+            _filedir -d
+            return
+            ;;
+        -p|--profile)
+            # Complete profile names
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-n --name --path -t --type -v --version -d --description --provides --cc --cxx --ccflags --cxxflags --include-dirs --source-dirs --build-dir -p --profile" -- "$cur"))
+    fi
+}
+
+_catalyst_run() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -p|--profile)
+            # Complete profile names
+            return
+            ;;
+        -P|--params)
+            # Complete parameter values
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-p --profile -P --params" -- "$cur"))
+    fi
+}
+
+_catalyst_test() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -P|--params)
+            # Complete parameter values
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-P --params" -- "$cur"))
+    fi
+}
+
+_catalyst_tidy() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case "$prev" in
+        -p|--profiles)
+            # Complete profile names
+            return
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "-p --profiles" -- "$cur"))
+    fi
+}
+
+# Register the completion function
+complete -F _catalyst catalyst
