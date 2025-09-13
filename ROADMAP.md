@@ -55,6 +55,7 @@ data. It will hold the composed `YAML::Node` and provide type-safe methods to ac
 ### Phase 2: Refactor Subcommands
 
 -   [ ] Refactor `generate` subcommand: The `generate` subcommand will be the first to be refactored to use the new `Configuration` class. This will involve replacing all direct `YAML::Node` access with calls to the new type-safe accessors.
+    - [ ] update hooks to use `Configuration`
 -   [ ] Refactor `add` subcommand: Refactor the `add` subcommand to use the `Configuration` class for modifying the `catalyst.yaml` file.
 -   [ ] Refactor remaining subcommands: Refactor all other subcommands that use `yaml-cpp` to use the new `Configuration` class.
 
