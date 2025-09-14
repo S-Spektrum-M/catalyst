@@ -1,6 +1,9 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/yaml-utils/Configuration.hpp"
+#include "yaml-cpp/node/node.h"
 #include <catalyst/hooks.hpp>
 #include <expected>
+#include <format>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -107,6 +110,66 @@ std::expected<void, std::string> pre_link(const YAML::Node &profile_comp) {
 
 std::expected<void, std::string> post_link(const YAML::Node &profile_comp) {
     return execute_hook(profile_comp, "post-link");
+}
+
+std::expected<void, std::string> pre_build(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-build");
+}
+
+std::expected<void, std::string> post_build(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-build");
+}
+
+std::expected<void, std::string> on_build_failure(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "on-build-failure");
+}
+
+std::expected<void, std::string> pre_generate(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-generate");
+}
+
+std::expected<void, std::string> post_generate(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-generate");
+}
+
+std::expected<void, std::string> pre_fetch(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-fetch");
+}
+
+std::expected<void, std::string> post_fetch(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-fetch");
+}
+
+std::expected<void, std::string> pre_clean(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-clean");
+}
+
+std::expected<void, std::string> post_clean(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-clean");
+}
+
+std::expected<void, std::string> pre_run(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-run");
+}
+
+std::expected<void, std::string> post_run(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-run");
+}
+
+std::expected<void, std::string> pre_test(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-test");
+}
+
+std::expected<void, std::string> post_test(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-test");
+}
+
+std::expected<void, std::string> pre_link(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "pre-link");
+}
+
+std::expected<void, std::string> post_link(const YAML_UTILS::Configuration &profile_comp) {
+    return execute_hook(profile_comp.get_root(), "post-link");
 }
 
 std::expected<void, std::string> on_compile([[maybe_unused]] const std::filesystem::path &file) {
