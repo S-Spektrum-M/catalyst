@@ -1,9 +1,10 @@
 #include "catalyst/yaml-utils/Configuration.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "yaml-cpp/node/node.h"
+#include "yaml-cpp/node/parse.h"
 #include <algorithm>
+#include <cstring>
 #include <filesystem>
-#include <iterator>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -16,34 +17,6 @@ using namespace catalyst::YAML_UTILS;
 namespace fs = std::filesystem;
 
 namespace {
-void merge(YAML::Node &target, const YAML::Node &source) {
-    if (target.IsMap() && source.IsMap()) {
-        for (auto it = source.begin(); it != source.end(); ++it) {
-            const auto &key = it->first;
-            const auto &value = it->second;
-
-            bool key_found = false;
-            for (auto tj = target.begin(); tj != target.end(); ++tj) {
-                if (tj->first.as<std::string>() == key.as<std::string>()) {
-                    merge(tj->second, value);
-                    key_found = true;
-                    break;
-                }
-            }
-
-            if (!key_found) {
-                target[key] = value;
-            }
-        }
-    } else if (target.IsSequence() && source.IsSequence()) {
-        for (const auto &item : source) {
-            target.push_back(item);
-        }
-    } else {
-        target = source;
-    }
-}
-
 YAML::Node getDefaultConfiguration() {
     YAML::Node root;
     root["meta"]["min_ver"] = "0.0.1";
@@ -64,7 +37,6 @@ YAML::Node getDefaultConfiguration() {
     root["features"] = std::vector<std::string>{};
     return root;
 }
-
 std::string ver_max(std::string s1, std::string s2) {
     catalyst::logger.log(LogLevel::INFO, "Comparing versions: {} and {}", s1, s2);
     auto split_ver = [](const std::string &ver) {
@@ -99,62 +71,133 @@ std::string ver_max(std::string s1, std::string s2) {
     return s1;
 }
 
-} // namespace
-
-Configuration::Configuration(const std::vector<std::string> &profiles) {
-    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
-    root = getDefaultConfiguration();
-
-    std::vector<std::string> profile_names = profiles;
-    if (std::find(profile_names.begin(), profile_names.end(), "common") == profile_names.end()) {
-        profile_names.insert(profile_names.cbegin(), "common");
+void merge(YAML::Node &composite, const fs::path &profile_path) {
+    YAML::Node new_profile = YAML::LoadFile(profile_path);
+    if (new_profile["meta"]["min_ver"].IsDefined()) {
+        composite["meta"]["min_ver"] =
+            ver_max(composite["meta"]["min_ver"].as<std::string>(), new_profile["meta"]["min_ver"].as<std::string>());
     }
 
-    std::vector<YAML::Node> loaded_profiles;
-    for (const auto &profile_name : profile_names) {
-        fs::path path{};
-        if (profile_name == "common") {
-            path = "catalyst.yaml";
-        } else {
-            path = std::format("catalyst_{}.yaml", profile_name);
+    if (YAML::Node new_profile_manifest = new_profile["manifest"]; new_profile_manifest.IsDefined()) {
+        if (new_profile_manifest["name"]) {
+            composite["manifest"]["name"] = new_profile_manifest["name"];
         }
-
-        if (fs::exists(path)) {
-            catalyst::logger.log(LogLevel::INFO, "Loading profile: {}", path.string());
-            try {
-                loaded_profiles.push_back(YAML::LoadFile(path.string()));
-            } catch (const YAML::Exception &e) {
-                catalyst::logger.log(LogLevel::ERROR, "Failed to load profile {}: {}", path.string(), e.what());
+        if (new_profile_manifest["type"]) {
+            composite["manifest"]["type"] = new_profile_manifest["type"];
+        }
+        if (new_profile_manifest["version"]) {
+            composite["manifest"]["version"] = new_profile_manifest["version"];
+        }
+        if (new_profile_manifest["provides"]) {
+            composite["manifest"]["provides"] = new_profile_manifest["provides"];
+        }
+        if (YAML::Node new_profile_manifest_tooling = new_profile_manifest["tooling"]; new_profile_manifest_tooling) {
+            if (new_profile_manifest_tooling["CC"]) {
+                composite["manifest"]["tooling"]["CC"] = new_profile_manifest_tooling["CC"];
             }
-        } else {
-            catalyst::logger.log(LogLevel::WARN, "Profile not found: {}", path.string());
+            if (new_profile_manifest_tooling["CXX"]) {
+                composite["manifest"]["tooling"]["CXX"] = new_profile_manifest_tooling["CXX"];
+            }
+            if (new_profile_manifest_tooling["FMT"]) {
+                composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
+            }
+            if (new_profile_manifest_tooling["LINTER"]) {
+                composite["manifest"]["tooling"]["LINTER"] = new_profile_manifest_tooling["LINTER"];
+            }
+            if (new_profile_manifest_tooling["CCFLAGS"]) {
+                composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
+            }
+            if (new_profile_manifest_tooling["CXXFLAGS"]) {
+                composite["manifest"]["tooling"]["CXXFLAGS"] = new_profile_manifest_tooling["CXXFLAGS"];
+            }
+        }
+        if (YAML::Node new_profile_manifest_dirs = new_profile_manifest["dirs"]; new_profile_manifest_dirs) {
+            if (new_profile_manifest_dirs["include"] && new_profile_manifest_dirs["include"].IsSequence())
+                for (auto inc : new_profile_manifest_dirs["include"].as<std::vector<std::string>>())
+                    composite["manifest"]["dirs"]["include"].push_back(inc);
+            if (new_profile_manifest_dirs["source"] && new_profile_manifest_dirs["source"].IsSequence())
+                for (auto src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
+                    composite["manifest"]["dirs"]["source"].push_back(src);
+            if (new_profile_manifest_dirs["build"])
+                composite["manifest"]["dirs"]["build"] = new_profile_manifest_dirs["build"];
         }
     }
-
-    for (const auto &profile : loaded_profiles) {
-        merge(root, profile);
-    }
-
-    std::string final_min_ver = "0.0.1";
-    for (const auto &profile : loaded_profiles) {
-        if (profile["meta"] && profile["meta"]["min_ver"]) {
-            final_min_ver = ver_max(final_min_ver, profile["meta"]["min_ver"].as<std::string>());
+    if (new_profile["features"] && new_profile["features"].IsSequence()) {
+        for (const auto &feature : new_profile["features"]) {
+            composite["features"].push_back(feature.as<std::string>());
         }
     }
-    root["meta"]["min_ver"] = final_min_ver;
-
-    catalyst::logger.log(LogLevel::INFO, "Profile composition finished.");
+    if (new_profile["dependencies"] && new_profile["dependencies"].IsSequence()) {
+        for (const YAML::Node &dep : new_profile["dependencies"]) {
+            composite["dependencies"].push_back(dep);
+        }
+    }
+    if (new_profile["hooks"] && new_profile["hooks"].IsDefined()) {
+        for (const auto &hook : new_profile["hooks"]) {
+            std::string hook_name = hook.first.as<std::string>();
+            if (hook.second.IsSequence()) {
+                for (const auto &item : hook.second) {
+                    composite["hooks"][hook_name].push_back(item);
+                }
+            } else if (hook.second.IsScalar()) {
+                composite["hooks"][hook_name].push_back(hook.second);
+            }
+        }
+    }
 }
-
-bool Configuration::has(const std::string &key) const {
+std::vector<std::string> split_path(const std::string &key) {
     std::stringstream ss(key);
     std::string segment;
     std::vector<std::string> segments;
     while (std::getline(ss, segment, '.')) {
         segments.push_back(segment);
     }
+    return segments;
+}
+std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
+    auto segments = split_path(key);
+    YAML::Node current = YAML::Node(root);
 
+    for (const auto &s : segments) {
+        if (!current[s]) {
+            return std::nullopt;
+        }
+        current = current[s];
+    }
+    return current;
+}
+} // namespace
+
+Configuration::Configuration(const std::vector<std::string> &profiles) {
+    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
+
+    std::vector profile_names = profiles;
+    if (std::find(profile_names.begin(), profile_names.end(), "common") == profile_names.end())
+        profile_names.insert(profile_names.cbegin(), std::string{"common"});
+
+    root = getDefaultConfiguration();
+
+    for (const auto &profile_name : profile_names) {
+        fs::path profile_path{};
+        if (profile_name == "common")
+            profile_path = "catalyst.yaml";
+        else
+            profile_path = std::format("catalyst_{}.yaml", profile_name);
+        if (!fs::exists(profile_path)) {
+            catalyst::logger.log(LogLevel::ERROR, "Profile not found: {}", profile_path.string());
+            throw std::runtime_error(std::format("Profile: {} not found", profile_path.string()));
+        }
+        auto new_profile = YAML::LoadFile(profile_path);
+        merge(root, profile_path);
+    }
+
+    catalyst::logger.log(LogLevel::INFO, "Profile composition finished.");
+}
+
+bool Configuration::has(const std::string &key) const {
+    auto segments = split_path(key);
     YAML::Node current = root;
+
     for (const auto &segment : segments) {
         if (!current[segment]) {
             return false;
@@ -165,97 +208,61 @@ bool Configuration::has(const std::string &key) const {
 }
 
 std::optional<std::string> Configuration::get_string(const std::string &key) const {
-    std::stringstream ss(key);
-    std::string segment;
-    std::vector<std::string> segments;
-    while (std::getline(ss, segment, '.')) {
-        segments.push_back(segment);
-    }
-
-    YAML::Node current = root;
-    for (const auto &s : segments) {
-        if (!current[s]) {
-            return std::nullopt;
-        }
-        current = current[s];
+    YAML::Node final;
+    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+        return std::nullopt;
+    } else {
+        final = res.value();
     }
 
     try {
-        return current.as<std::string>();
+        return final.as<std::string>();
     } catch (const YAML::Exception &) {
         return std::nullopt;
     }
 }
 
 std::optional<int> Configuration::get_int(const std::string &key) const {
-    std::stringstream ss(key);
-    std::string segment;
-    std::vector<std::string> segments;
-    while (std::getline(ss, segment, '.')) {
-        segments.push_back(segment);
-    }
-
-    YAML::Node current = root;
-    for (const auto &s : segments) {
-        if (!current[s]) {
-            return std::nullopt;
-        }
-        current = current[s];
+    YAML::Node final;
+    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+        return std::nullopt;
+    } else {
+        final = res.value();
     }
 
     try {
-        return current.as<int>();
+        return final.as<int>();
     } catch (const YAML::Exception &) {
         return std::nullopt;
     }
 }
 
 std::optional<bool> Configuration::get_bool(const std::string &key) const {
-    std::stringstream ss(key);
-    std::string segment;
-    std::vector<std::string> segments;
-    while (std::getline(ss, segment, '.')) {
-        segments.push_back(segment);
-    }
-
-    YAML::Node current = root;
-    for (const auto &s : segments) {
-        if (!current[s]) {
-            return std::nullopt;
-        }
-        current = current[s];
+    YAML::Node final;
+    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+        return std::nullopt;
+    } else {
+        final = res.value();
     }
 
     try {
-        return current.as<bool>();
+        return final.as<bool>();
     } catch (const YAML::Exception &) {
         return std::nullopt;
     }
 }
 
-std::optional<std::vector<std::string>>
-Configuration::get_string_vector(const std::string &key) const {
-    std::stringstream ss(key);
-    std::string segment;
-    std::vector<std::string> segments;
-    while (std::getline(ss, segment, '.')) {
-        segments.push_back(segment);
+std::optional<std::vector<std::string>> Configuration::get_string_vector(const std::string &key) const {
+    YAML::Node final;
+    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+        return std::nullopt;
+    } else {
+        final = res.value();
     }
 
-    YAML::Node current = root;
-    for (const auto &s : segments) {
-        if (!current[s]) {
-            return std::nullopt;
-        }
-        current = current[s];
+    try {
+        return final.as<std::vector<std::string>>();
+    } catch (const YAML::Exception &) {
+        return std::nullopt;
     }
-
-    if (current.IsSequence()) {
-        try {
-            return current.as<std::vector<std::string>>();
-        } catch (const YAML::Exception &) {
-            return std::nullopt;
-        }
-    }
-    return std::nullopt;
 }
