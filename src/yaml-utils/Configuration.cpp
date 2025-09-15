@@ -196,7 +196,7 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
 
 bool Configuration::has(const std::string &key) const {
     auto segments = split_path(key);
-    YAML::Node current = root;
+    YAML::Node current = YAML::Clone(root);
 
     for (const auto &segment : segments) {
         if (!current[segment]) {
