@@ -35,12 +35,13 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     // 2. Load the profile
     catalyst::logger.log(LogLevel::INFO, "Loading profile file for '{}'", profile);
-    auto profile_node_or_err = YAML_UTILS::load_profile_file(profile);
-    if (!profile_node_or_err) {
-        catalyst::logger.log(LogLevel::ERROR, "Failed to load profile: {}", profile_node_or_err.error());
-        return std::unexpected(profile_node_or_err.error());
+    YAML::Node profile_node;
+    if (auto res = YAML_UTILS::load_profile_file(profile); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to load profile: {}", res.error());
+        return std::unexpected(res.error());
+    } else {
+        profile_node = res.value();
     }
-    YAML::Node profile_node = profile_node_or_err.value();
 
     // 3. Figure out the var path
     std::vector<std::string> var_path;
