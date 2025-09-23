@@ -18,14 +18,14 @@
 #include <string>
 
 int main(int argc, char **argv) {
-    auto concat = [&argc, &argv]() -> std::string {
+    auto concat_argv = [&argc, &argv]() -> std::string {
         int ac = argc;
         std::string res;
         for (int ii = 0; ii < ac; ++ii)
             res += std::string{argv[ii]} + " ";
         return res;
     };
-    catalyst::logger.log(catalyst::LogLevel::INFO, "{}", concat());
+    catalyst::logger.log(catalyst::LogLevel::INFO, "{}", concat_argv());
 
     CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
 
@@ -49,7 +49,12 @@ int main(int argc, char **argv) {
         std::cout << app.help() << std::endl;
     });
 
-    CLI11_PARSE(app, argc, argv);
+    try {
+        (app).parse(argc, argv);
+    } catch (const CLI ::ParseError &e) {
+        catalyst::logger.log(catalyst::LogLevel::ERROR, "Failed to pass provided arguments: {}", concat_argv());
+        return (app).exit(e);
+    };
 
     if (show_version) {
         std::print(std::cout, "{}", catalyst::CATALYST_VERSION);
