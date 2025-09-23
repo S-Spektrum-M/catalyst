@@ -43,4 +43,31 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Clean subcommand finished successfully.");
     return {};
 }
+
+std::expected<void, std::string> action2(const parse_t &parse_args) {
+    catalyst::logger.log(LogLevel::INFO, "Clean subcommand invoked.");
+    YAML_UTILS::Configuration config{parse_args.profiles};
+
+    catalyst::logger.log(LogLevel::INFO, "Running pre-clean hooks.");
+    if (auto res = hooks::pre_clean(config); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Pre-clean hook failed: {}", res.error());
+        return res;
+    }
+
+    std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
+    catalyst::logger.log(LogLevel::INFO, "Cleaning build directory: {}", build_dir);
+    if (std::system(std::format("ninja -C {} -t clean", build_dir).c_str()) != 0) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
+        return std::unexpected("error in cleaning.");
+    }
+
+    catalyst::logger.log(LogLevel::INFO, "Running post-clean hooks.");
+    if (auto res = hooks::post_clean(config); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Post-clean hook failed: {}", res.error());
+        return res;
+    }
+
+    catalyst::logger.log(LogLevel::INFO, "Clean subcommand finished successfully.");
+    return {};
+}
 } // namespace catalyst::clean

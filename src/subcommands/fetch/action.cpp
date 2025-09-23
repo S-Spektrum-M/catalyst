@@ -24,30 +24,17 @@ std::expected<void, std::string> fetch_system(const std::string &name);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Fetch subcommand invoked.");
-    auto profiles = parse_args.profiles;
-    if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
-        profiles.insert(profiles.begin(), "common");
-    }
-
     catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
-    YAML::Node profile_comp;
-    if (auto res = generate::profile_composition(profiles); !res) {
-        catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
-        return std::unexpected(res.error());
-    } else {
-        profile_comp = res.value();
-    }
+    YAML_UTILS::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::INFO, "Running pre-fetch hooks.");
-    if (auto res = hooks::pre_fetch(profile_comp); !res) {
+    if (auto res = hooks::pre_fetch(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-fetch hook failed: {}", res.error());
         return res;
     }
 
-    std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
-
-    auto deps = profile_comp["dependencies"];
-    if (deps && deps.IsSequence()) {
+    std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
+    if (auto deps = config.get_root()["dependencies"]; deps && deps.IsSequence()) {
         for (auto dep : deps) {
             if (!dep["name"] || !dep["source"]) {
                 catalyst::logger.log(LogLevel::ERROR, "Improperly configured dependency.");
@@ -84,7 +71,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Running post-fetch hooks.");
-    if (auto res = hooks::post_fetch(profile_comp); !res) {
+    if (auto res = hooks::post_fetch(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-fetch hook failed: {}", res.error());
         return res;
     }

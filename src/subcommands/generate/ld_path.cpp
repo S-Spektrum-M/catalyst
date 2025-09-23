@@ -258,95 +258,81 @@ void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std
     }
 }
 
-void write_variables(const catalyst::YAML_UTILS::Configuration &config,
-                     std::ofstream &buildfile,
+// used to write to the buildfile.
+void write_variables(const catalyst::YAML_UTILS::Configuration &config, std::ofstream &buildfile,
                      const std::vector<std::string> &enabled_features) {
-  catalyst::logger.log(LogLevel::INFO, "Writing build variables.");
-  buildfile << "# Build variables extracted from profiles\n";
 
-  // Helper lambda to write a key-value pair to the buildfile
-  auto write_var = [&](const std::string &key, const std::string &value) {
-    if (!value.empty()) {
-      buildfile << key << " = " << value << "\n";
+    catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
+    fs::path current_dir = fs::current_path();
+    std::string build_dir_str = config.get_string("manifest.dirs.build").value_or("build");
+    fs::path build_dir{build_dir_str};
+    fs::path obj_dir = "obj";
+
+    std::string cxxflags =
+                    std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
+                                config.get_string("manifest.tooling.CCFLAGS").value_or(""),
+                                config.get_string("manifest.name").value_or("name"),
+                                config.get_string("manifest.version").value_or("0.0.0")),
+                ccflags =
+                    std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
+                                config.get_string("manifest.tooling.CCFLAGS").value_or(""),
+                                config.get_string("manifest.name").value_or("name"),
+                                config.get_string("manifest.version").value_or("0.0.0")),
+                ldflags = "-Lcatalyst-libs";
+
+    if (const char *vcpkg_root = std::getenv("VCPKG_ROOT"); vcpkg_root != nullptr) {
+#if defined(_WIN32)
+        const char *triplet = "x64-windows";
+#elif defined(__APPLE__)
+        const char *triplet = "x64-osx";
+#else
+        const char *triplet = "x64-linux";
+#endif
+        cxxflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
+        ccflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
+        ldflags += std::format(" -L{}", (fs::path(vcpkg_root) / "installed" / triplet / "lib").string());
+    } else {
+        logger.log(LogLevel::INFO, "VCPKG_ROOT environment variable is not defined.");
     }
-  };
 
-  // --- Toolchain Variables ---
-  // Use .value_or() to provide sensible defaults if keys are not in the YAML
-  write_var("cxx", config.get_string("toolchain.cxx").value_or("g++"));
-  write_var("cc", config.get_string("toolchain.cc").value_or("gcc"));
-  write_var("ar", config.get_string("toolchain.ar").value_or("ar"));
+    // Add feature flags
+    std::vector<std::string> features = config.get_string_vector("features").value_or({});
+    for (const auto &feature : features) {
+        bool is_enabled =
+            std::find(enabled_features.begin(), enabled_features.end(), feature) != enabled_features.end();
+        std::string flag = std::format(" -DFF_{}__{}={}", config.get_string("manifest.name").value_or("name"), feature,
+                                       is_enabled ? "1" : "0");
+        cxxflags += flag;
+        ccflags += flag;
+    }
 
-  // --- Flag & Path Aggregation ---
-  std::vector<std::string> cflags, cxxflags, ldflags, includes, lib_paths, libs;
+    std::vector<std::string> inc_dirs = config.get_string_vector("manifest.dirs.include").value();
+    for (const auto &inc_dir : inc_dirs) {
+        cxxflags += std::format(" -I{}", fs::absolute(inc_dir).string());
+        ccflags += std::format(" -I{}", fs::absolute(inc_dir).string());
+    }
 
-  // Helper to merge vectors
-  auto merge_vectors = [](std::vector<std::string> &dest,
-                          const std::vector<std::string> &src) {
-    dest.insert(dest.end(), src.begin(), src.end());
-  };
+    std::string ldlibs;
+    for (const auto &dep : config.get_root()["dependencies"]) {
+        if (auto res = find_dep(build_dir_str, dep); !res) {
+            catalyst::logger.log(LogLevel::ERROR, "{}", res.error());
+            continue;
+        } else {
+            auto [lib_path, inc_path, libs] = res.value();
+            ldflags += " " + lib_path;
+            ldlibs += " " + libs;
+            ccflags += " " + inc_path;
+            cxxflags += " " + inc_path;
+        }
+    }
 
-  // 1. Get base flags and paths
-  if (auto res = config.get_string_vector("build.cflags"))
-    merge_vectors(cflags, res.value());
-  if (auto res = config.get_string_vector("build.cxxflags"))
-    merge_vectors(cxxflags, res.value());
-  if (auto res = config.get_string_vector("build.ldflags"))
-    merge_vectors(ldflags, res.value());
-  if (auto res = config.get_string_vector("manifest.dirs.include"))
-    merge_vectors(includes, res.value());
-  if (auto res = config.get_string_vector("manifest.dirs.lib"))
-    merge_vectors(lib_paths, res.value());
-  if (auto res = config.get_string_vector("manifest.libs"))
-    merge_vectors(libs, res.value());
-
-  // 2. Append feature-specific flags and libraries
-  catalyst::logger.log(LogLevel::INFO, "Applying variables for enabled features.");
-  for (const auto &feature : enabled_features) {
-    std::string base_path = "features." + feature;
-    if (auto res = config.get_string_vector(base_path + ".cxxflags"))
-      merge_vectors(cxxflags, res.value());
-    if (auto res = config.get_string_vector(base_path + ".cflags"))
-      merge_vectors(cflags, res.value());
-    if (auto res = config.get_string_vector(base_path + ".ldflags"))
-      merge_vectors(ldflags, res.value());
-    if (auto res = config.get_string_vector(base_path + ".libs"))
-      merge_vectors(libs, res.value());
-  }
-
-  // --- Format and Write Aggregated Variables ---
-  std::stringstream ss;
-
-  // CFlags
-  for (const auto &flag : cflags) ss << flag << " ";
-  write_var("cflags", ss.str());
-  ss.str("");
-
-  // CXXFlags
-  for (const auto &flag : cxxflags) ss << flag << " ";
-  write_var("cxxflags", ss.str());
-  ss.str("");
-
-  // LDFlags
-  for (const auto &flag : ldflags) ss << flag << " ";
-  write_var("ldflags", ss.str());
-  ss.str("");
-
-  // Include Directories (with -I prefix)
-  for (const auto &dir : includes) ss << "-I" << dir << " ";
-  write_var("include_dirs", ss.str());
-  ss.str("");
-
-  // Library Paths (with -L prefix)
-  for (const auto& path : lib_paths) ss << "-L" << path << " ";
-  write_var("lib_paths", ss.str());
-  ss.str("");
-
-  // Libraries (with -l prefix)
-  for (const auto &lib : libs) ss << "-l" << lib << " ";
-  write_var("libs", ss.str());
-
-  buildfile << "\n";
+    buildfile << "# Variables\n"
+              << "cc = " << config.get_string("manifest.tooling.CC").value_or("clang") << "\n"
+              << "cxx = " << config.get_string("manifest.tooling.CXX").value_or("clang++") << "\n"
+              << "cxxflags = " << cxxflags << "\n"
+              << "cflags = " << ccflags << "\n"
+              << "ldflags = " << ldflags << " \n"
+              << "ldlibs = " << ldlibs << "\n\n"; // place compiled libraries here
 }
 
 void write_rules(std::ofstream &buildfile) {

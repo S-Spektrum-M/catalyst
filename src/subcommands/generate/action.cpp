@@ -20,7 +20,7 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config, std::ofs
                      const std::vector<std::string> &enabled_features);
 void write_rules(std::ofstream &buildfile);
 std::vector<std::string> intermediate_targets(std::ofstream &buildfile, const std::unordered_set<fs::path> &source_set);
-void final_target(const YAML::Node &profile, const auto &object_files, std::ofstream &buildfile);
+void final_target(const YAML_UTILS::Configuration &config, const auto &object_files, std::ofstream &buildfile);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generate subcommand invoked.");
@@ -82,7 +82,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     write_variables(config, buildfile, parse_args.enabled_features);
     write_rules(buildfile);
     std::vector<std::string> object_files = intermediate_targets(buildfile, source_set);
-    final_target(config.get_root(), object_files, buildfile);
+    final_target(config, object_files, buildfile);
 
     catalyst::logger.log(LogLevel::INFO, "Writing profile composition to: {}",
                          (build_dir / "profile_composition.yaml").string());
@@ -115,19 +115,18 @@ std::vector<std::string> intermediate_targets(std::ofstream &buildfile,
         obj_name = obj_name.substr(0, obj_name.find_last_of('.')) + ".o";
         object_files.push_back((fs::path{"obj"} / obj_name).string());
         buildfile << "build " << object_files.back() << ": "
-                  << ((src.extension() == ".c" || src.extension() == ".cu") ? "cc_compile" : "cxx_compile") << " " << src.string() << "\n";
+                  << ((src.extension() == ".c" || src.extension() == ".cu") ? "cc_compile" : "cxx_compile") << " "
+                  << src.string() << "\n";
     }
     buildfile << "\n";
     return object_files;
 }
 
-void final_target(const YAML::Node &profile, const auto &object_files, std::ofstream &buildfile) {
+void final_target(const YAML_UTILS::Configuration &config, const auto &object_files, std::ofstream &buildfile) {
     catalyst::logger.log(LogLevel::INFO, "Generating final target.");
     // Build edge for the final target
-    std::string type = profile["manifest"]["type"].as<std::string>();
-    std::string target_prefix;
-    std::string target_suffix;
-    std::string link_rule;
+    std::string type = config.get_string("manifest.type").value_or("BINARY");
+    std::string target_prefix, target_suffix, link_rule;
 
     if (type == "STATICLIB") {
         link_rule = "static_link";
@@ -157,7 +156,7 @@ void final_target(const YAML::Node &profile, const auto &object_files, std::ofst
 #endif
     }
 
-    std::string target_name = profile["manifest"]["name"].as<std::string>();
+    std::string target_name = config.get_string("manifest.name").value_or("name");
     fs::path target_path{target_prefix + target_name + target_suffix};
     catalyst::logger.log(LogLevel::INFO, "Final target name: {}", target_path.string());
     buildfile << "# Build edge for the final target\n";
