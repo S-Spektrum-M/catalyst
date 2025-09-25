@@ -1,5 +1,4 @@
 #include "catalyst/log-utils/log.hpp"
-#include "catalyst/log-utils/log.hpp" // Assuming your logger is accessible
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
