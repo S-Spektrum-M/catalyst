@@ -13,12 +13,14 @@ namespace catalyst::fetch {
 namespace fs = std::filesystem;
 
 std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name) {
+    catalyst::logger.log(LogLevel::INFO, "Fetching profile: {}", profile_name);
     fs::path profile_path;
     if (profile_name == "common")
         profile_path = "catalyst.yaml";
     else
         profile_path = std::format("catalyst_{}.yaml", profile_name);
     if (!fs::exists(profile_path)) {
+        catalyst::logger.log(LogLevel::ERROR, "Configuration file not found for profile: {}", profile_name);
         return std::unexpected(
             std::format("configuration: {} for profile: {} does not exist", profile_path.string(), profile_name));
     }
@@ -26,8 +28,10 @@ std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_
 }
 
 std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
+    catalyst::logger.log(LogLevel::INFO, "Fetching vcpkg dependency: {}", name);
     char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
     if (vcpkg_root_env == nullptr) {
+        catalyst::logger.log(LogLevel::ERROR, "VCPKG_ROOT environment variable not set.");
         return std::unexpected(
             "VCPKG_ROOT environment variable not set. Please set it to your vcpkg installation directory.");
     }
@@ -37,8 +41,10 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
     vcpkg_exe.replace_extension(".exe");
 #endif
     std::string command = std::format("\"{}\" install {}", vcpkg_exe.string(), name);
+    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
     std::println(std::cout, "Fetching: {} from vcpkg", name);
     if (std::system(command.c_str()) != 0) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
     return {};
@@ -46,6 +52,7 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
 
 std::expected<void, std::string> fetch_git(std::string build_dir, std::string name, std::string source,
                                            std::string version) {
+    catalyst::logger.log(LogLevel::INFO, "Fetching git dependency: {}@{} from {}", name, version, source);
     fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
     std::println(std::cout, "Fetching: {}@{} from {}", name, version, source);
     std::string command;
@@ -54,26 +61,19 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
     } else {
         command = std::format("git clone --depth 1 --branch {} {} {}", version, source, dep_path.string());
     }
+    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
     if (std::system(command.c_str()) != 0) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
-    }
-    std::println(std::cout, "Building: {}", name);
-    // NOTE: after build command is impelmented, we can just do "catalyst build <PATH>"
-    command = std::format("cd {} && mkdir build && catalyst generate && ninja -C build", dep_path.string());
-    if (std::system(command.c_str()) != 0) {
-        return std::unexpected(std::format("Failed to build dependency: {}", name));
     }
     return {};
 }
 
 std::expected<void, std::string> fetch_system(const std::string &name) {
     // assuming installed on system
-    catalyst::logger.log(LogLevel::INFO, "Skipping fetch for system dependency: {}. \n Assuming it is installed.",
-                         name);
+    catalyst::logger.log(LogLevel::INFO, "Skipping fetch for system dependency: {}", name);
     return {};
 }
 
-std::expected<void, std::string> fetch_local() {
-    return {};
-}
+std::expected<void, std::string> fetch_local() { return {}; }
 } // namespace catalyst::fetch

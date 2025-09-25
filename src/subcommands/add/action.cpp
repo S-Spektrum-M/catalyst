@@ -18,6 +18,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             if (profile_node["dependencies"]) {
                 for (YAML::Node dependency : profile_node["dependencies"]) {
                     if (dependency["name"] && dependency["name"].as<std::string>() == parse_args.name) {
+                        catalyst::logger.log(catalyst::LogLevel::INFO, "Updating dependency {}", parse_args.name);
                         dependency["source"] = parse_args.source;
                         dependency["version"] = parse_args.version;
                         dependency["using"] = parse_args.enabled_features;
@@ -27,6 +28,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 }
             }
             if (!dependency_found) {
+                catalyst::logger.log(catalyst::LogLevel::INFO, "Creating new dependency {}", parse_args.name);
                 YAML::Node newDependency;
                 newDependency["name"] = parse_args.name;
                 newDependency["source"] = parse_args.source;
@@ -36,7 +38,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             }
             if (auto write_res = catalyst::YAML_UTILS::profile_write_back(profile_name, std::move(profile_node));
                 !write_res) {
-                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", write_res.error());
                 return std::unexpected(write_res.error());
             }
             catalyst::logger.log(catalyst::LogLevel::INFO, "Dependency '{}' added to profile '{}'", parse_args.name,

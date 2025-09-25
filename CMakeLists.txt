@@ -39,6 +39,8 @@ add_executable(catalyst
     src/hooks.cpp
     ${ACTION_SOURCES}
     src/subcommands/fetch/helper.cpp
+    src/subcommands/generate/file_ops.cpp
+    src/subcommands/generate/profile_comp.cpp
     ${PARSE_CLI_SOURCES}
     ${YAML_UTILS_SOURCES}
 )

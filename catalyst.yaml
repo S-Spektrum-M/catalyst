@@ -1,9 +1,9 @@
 meta:
-  min_ver: 0.0.1
+  min_ver: 1.0.0
 manifest:
   name: catalyst
   type: BINARY
-  version: 0.0.3
+  version: 1.0.0
   description: Catalyst is a Declarative Modern C++ Package Manager
   provides: catalyst
   tooling:
@@ -19,8 +19,14 @@ manifest:
       - src
     build: build
 dependencies:
+  - name: boost-process
+    source: vcpkg
+    triplet: x64-linux
+    version: latest
+    using: []
   - name: yaml-cpp
     source: vcpkg
+    triplet: x64-linux
     version: latest
     using: []
   - name: cli11

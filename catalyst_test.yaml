@@ -1,5 +1,6 @@
 manifest:
   name: catalyst_tests
+  provides: catalyst_tests
   type: binary
   dirs:
     source:

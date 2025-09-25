@@ -1,3 +1,4 @@
+#include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/configure.hpp"
 #include "yaml-cpp/node/node.h"
 #include <catalyst/yaml-utils/load_profile_file.hpp>
@@ -18,6 +19,7 @@ namespace catalyst::configure {
 bool is_int(const std::string &str);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
+    catalyst::logger.log(LogLevel::INFO, "Configure subcommand invoked.");
     // 1. Parse the variable string
     size_t colon_pos = parse_args.var.find(':');
     std::string profile;
@@ -29,13 +31,17 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         profile = parse_args.var.substr(0, colon_pos);
         var_path_str = parse_args.var.substr(colon_pos + 1);
     }
+    catalyst::logger.log(LogLevel::INFO, "Configuring variable '{}' in profile '{}'", var_path_str, profile);
 
     // 2. Load the profile
-    auto profile_node_or_err = YAML_UTILS::load_profile_file(profile);
-    if (!profile_node_or_err) {
-        return std::unexpected(profile_node_or_err.error());
+    catalyst::logger.log(LogLevel::INFO, "Loading profile file for '{}'", profile);
+    YAML::Node profile_node;
+    if (auto res = YAML_UTILS::load_profile_file(profile); !res) {
+        catalyst::logger.log(LogLevel::ERROR, "Failed to load profile: {}", res.error());
+        return std::unexpected(res.error());
+    } else {
+        profile_node = res.value();
     }
-    YAML::Node profile_node = profile_node_or_err.value();
 
     // 3. Figure out the var path
     std::vector<std::string> var_path;
@@ -52,6 +58,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     YAML::Node target_node = profile_node;
     // 5. Update the value
     if (!parse_args.val.empty()) {
+        catalyst::logger.log(LogLevel::INFO, "Updating value to '{}'", parse_args.val);
         for (size_t i = 0; i < var_path.size() - 1; ++i) {
             target_node = target_node[var_path[i]];
         }
@@ -60,12 +67,18 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         } else {
             target_node[var_path.back()] = parse_args.val;
         }
-        return YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+        auto res = YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+        if (!res) {
+            catalyst::logger.log(LogLevel::ERROR, "Failed to write back profile: {}", res.error());
+        }
+        return res;
     }
+    catalyst::logger.log(LogLevel::INFO, "No value provided, printing existing value.");
     for (size_t i = 0; i < var_path.size(); ++i) {
         target_node = target_node[var_path[i]];
     }
     std::cout << target_node << std::endl;
+    catalyst::logger.log(LogLevel::INFO, "Configure subcommand finished successfully.");
     return {};
 }
 

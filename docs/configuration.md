@@ -139,7 +139,8 @@ For dependencies hosted in a `git` repository. Catalyst will clone and build the
 | Field     | Description                                      | Required |
 |-----------|--------------------------------------------------|----------|
 | `name`    | Name of the dependency.                          | Yes      |
-| `source`  | The URL of the git repository.                   | Yes      |
+| `source`  | Must be `git`.                   | Yes      |
+| `url`  | The URL of the git repository.                   | Yes      |
 | `version` | A git tag or commit hash to checkout.            | Yes      |
 | `using`   | A list of features to enable in the dependency.  | No       |
 
