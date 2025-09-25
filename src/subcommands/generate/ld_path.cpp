@@ -269,7 +269,7 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config, std::ofs
 
     std::string cxxflags =
                     std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
-                                config.get_string("manifest.tooling.CCFLAGS").value_or(""),
+                                config.get_string("manifest.tooling.CXXFLAGS").value_or(""),
                                 config.get_string("manifest.name").value_or("name"),
                                 config.get_string("manifest.version").value_or("0.0.0")),
                 ccflags =
