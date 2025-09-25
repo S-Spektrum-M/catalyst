@@ -43,9 +43,9 @@ std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
     std::string include_path;
     if (auto includes = profile["manifest"]["dirs"]["include"]; includes && includes.IsSequence()) {
         for (const auto &dir : includes.as<std::vector<std::string>>()) {
-            auto include_path = fs::absolute(dep_path / dir);
-            catalyst::logger.log(LogLevel::INFO, "Adding include path: {}", include_path.string());
-            include_path += std::format(" -I{}", include_path.string());
+            auto curr = fs::absolute(dep_path / dir);
+            catalyst::logger.log(LogLevel::INFO, "Adding include path: {}", curr.string());
+            include_path += std::format(" -I{}", curr.string());
         }
     }
 
