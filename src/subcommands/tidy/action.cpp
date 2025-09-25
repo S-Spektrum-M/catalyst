@@ -25,7 +25,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         profile_comp = res.value();
 
     if (!profile_comp["manifest"]["tooling"]["LINTER"] || !profile_comp["manifest"]["tooling"]["LINTER"].IsScalar())
-        return std::unexpected("feild: manifest.tooling.LINTER is not defined");
+        return std::unexpected("field: manifest.tooling.LINTER is not defined");
 
     std::string LINTER = profile_comp["manifest"]["tooling"]["LINTER"].as<std::string>();
     // call the linter on the source_set (we can expect clang-tidy like arg syntax) and go on about our day
