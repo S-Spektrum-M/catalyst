@@ -1,9 +1,22 @@
-build/*
-test_builds/*
-.cache
+# Build artifacts
+build/
+test_builds/
+
+# Cache and local files
+.cache/
 *.cbuild
 compile_commands.json
-catalyst-libs
+catalyst-libs/
 .todos.sm
 GEMINI.md
 .catalyst.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
+*~
