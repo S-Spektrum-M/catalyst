@@ -1,3 +1,14 @@
-# NOTE: these are better suited for my vim/monitor config, I'm not imposing this as a requirement.
+# Based on the LLVM coding standards
+BasedOnStyle: LLVM
 IndentWidth: 4
 ColumnLimit: 120
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: None
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+BinPackArguments: false
+BinPackParameters: false
+FixNamespaceComments: true
+IncludeBlocks: Regroup
+IndentCaseLabels: true
+SortIncludes: true
