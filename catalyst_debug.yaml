@@ -1,4 +1,4 @@
 manifest:
   tooling:
-    CCFLAGS: -g --std=c++2c -Wall -Wextra -Wpedantic
-    CXXFLAGS: -g --std=c++2c -Wall -Wextra -Wpedantic
+    CCFLAGS: -g --std=c++23 -Wall -Wextra -Wpedantic
+    CXXFLAGS: -g --std=c++23 -Wall -Wextra -Wpedantic

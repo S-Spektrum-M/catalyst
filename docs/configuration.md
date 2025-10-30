@@ -24,7 +24,7 @@ The `meta` section defines Catalyst specific information.
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `min_ver` | The minimum required catalyst version to build the project. | Equivalent to ``catalyst --version`` |
+| `min_ver` | The minimum required catalyst version to build the project. | `0.0.0` |
 
 ### `manifest` Schema
 
@@ -147,7 +147,7 @@ For dependencies hosted in a `git` repository. Catalyst will clone and build the
 Example:
 ```yaml
 - name: fmt
-  source: https://github.com/fmtlib/fmt.git
+  url: https://github.com/fmtlib/fmt.git
   version: 8.1.1
 ```
 

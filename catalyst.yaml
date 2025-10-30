@@ -9,8 +9,8 @@ manifest:
   tooling:
     CC: clang
     CXX: clang++
-    CCFLAGS: --std=c++2c -Wall -Wextra -Wpedantic
-    CXXFLAGS: --std=c++2c -Wall -Wextra -Wpedantic
+    CCFLAGS: --std=c++23 -Wall -Wextra -Wpedantic
+    CXXFLAGS: --std=c++23 -Wall -Wextra -Wpedantic
     FMT: clang-format
   dirs:
     include:

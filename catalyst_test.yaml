@@ -4,6 +4,6 @@ manifest:
   type: binary
   dirs:
     source:
-      - src
+      # - src
       - tests
     build: build/test
