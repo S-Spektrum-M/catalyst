@@ -58,6 +58,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::mutex queue_mutex;
     std::vector<std::thread> threads;
 
+    std::mutex err_log_mt;
     for (unsigned i = 0; i < num_threads; ++i) {
         threads.emplace_back([&]() {
             while (true) {
@@ -73,9 +74,11 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
                 std::string command = LINTER + " " + file_to_process.string();
                 if (int res = std::system(command.c_str()); res != 0) {
+                    err_log_mt.lock();
                     catalyst::logger.log(LogLevel::ERROR, "Linter failed for {}: exit code {}",
                                          file_to_process.string(), res);
                     has_errors = true;
+                    err_log_mt.unlock();
                 }
             }
         });
