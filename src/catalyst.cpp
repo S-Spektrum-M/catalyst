@@ -10,6 +10,7 @@
 #include "catalyst/subcommands/run.hpp"
 #include "catalyst/subcommands/test.hpp"
 #include "catalyst/subcommands/tidy.hpp"
+
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
 #include <catalyst/log-utils/log.hpp>
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
     bool show_version{false};
 
     app.add_flag("-v,--version", show_version, "current version");
+    app.add_flag("-V,--verbose", catalyst::logger.verbose_logging, "verbose stdout logging output");
 
     app.add_subcommand("help", "Display help information for a subcommand.")->callback([&]() {
         std::cout << app.help() << std::endl;

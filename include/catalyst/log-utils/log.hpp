@@ -57,15 +57,8 @@ public:
 
         log_file_ << generate_json_log_event(now, level, message) << "\n";
 
-        if (verbose_logging || level == LogLevel::ERROR) {
+        if (verbose_logging || level != LogLevel::DEBUG) {
             const char *color = RESET;
-            if (level == LogLevel::ERROR) {
-                color = RED;
-            } else if (level == LogLevel::WARN) {
-                color = ORANGE;
-            } else if (level == LogLevel::INFO) {
-                color = BLUE;
-            }
             switch (level) {
                 case LogLevel::DEBUG:
                     color = PURPLE;
