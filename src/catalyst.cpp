@@ -17,6 +17,7 @@
 #include <format>
 #include <print>
 #include <string>
+#include <lua.hpp>
 
 int main(int argc, char **argv) {
     auto concat_argv = [&argc, &argv]() -> std::string {
@@ -26,7 +27,7 @@ int main(int argc, char **argv) {
             res += std::string{argv[ii]} + " ";
         return res;
     };
-    catalyst::logger.log(catalyst::LogLevel::INFO, "{}", concat_argv());
+    catalyst::logger.log(catalyst::LogLevel::DEBUG, "{}", concat_argv());
 
     CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
 
@@ -64,7 +65,7 @@ int main(int argc, char **argv) {
     }
 
     if (*add_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "add");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add");
         if (auto res = catalyst::add::action(*add_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -72,7 +73,7 @@ int main(int argc, char **argv) {
     }
 
     if (*build_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "build");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "build");
         if (auto res = catalyst::build::action(*build_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -80,14 +81,14 @@ int main(int argc, char **argv) {
     }
 
     if (*clean_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "clean");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "clean");
         if (auto res = catalyst::clean::action(*clean_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
     }
     if (*configure_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "configure");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "configure");
         if (auto res = catalyst::configure::action(*configure_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -95,7 +96,7 @@ int main(int argc, char **argv) {
     }
 
     if (*fetch_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "fetch");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "fetch");
         if (auto res = catalyst::fetch::action(*fetch_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -103,7 +104,7 @@ int main(int argc, char **argv) {
     }
 
     if (*fmt_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "fmt");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "fmt");
         if (auto res = catalyst::fmt::action(*fmt_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
     }
 
     if (*generate_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "generate");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "generate");
         if (auto res = catalyst::generate::action(*generate_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -119,7 +120,7 @@ int main(int argc, char **argv) {
     }
 
     if (*init_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "init");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "init");
         if (auto res = catalyst::init::action(*init_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -127,7 +128,7 @@ int main(int argc, char **argv) {
     }
 
     if (*run_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "run");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "run");
         if (auto res = catalyst::run::action(*run_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -135,7 +136,7 @@ int main(int argc, char **argv) {
     }
 
     if (*test_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "test");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "test");
         if (auto res = catalyst::test::action(*test_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
@@ -143,7 +144,7 @@ int main(int argc, char **argv) {
     }
 
     if (*tidy_subc) {
-        catalyst::logger.log(catalyst::LogLevel::INFO, "Executing {} subcommand", "tidy");
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "tidy");
         if (auto res = catalyst::tidy::action(*tidy_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;

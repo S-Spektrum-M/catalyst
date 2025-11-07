@@ -15,7 +15,7 @@ namespace catalyst::init {
 namespace fs = std::filesystem;
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    catalyst::logger.log(LogLevel::INFO, "Init subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Init subcommand invoked.");
     // TODO: change directory to parse_args->path;
     YAML::Node node;
     node["meta"]["min_ver"] = catalyst::CATALYST_VERSION;
@@ -77,14 +77,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         profile_path = std::format("{}/catalyst_{}.yaml", parse_args.path.string(), parse_args.profile);
 
     if (!fs::exists(profile_path)) {
-        catalyst::logger.log(LogLevel::INFO, "Creating new profile file: {}", profile_path.string());
+        catalyst::logger.log(LogLevel::DEBUG, "Creating new profile file: {}", profile_path.string());
     }
 
     std::ofstream profile_file = std::ofstream(profile_path);
     YAML::Emitter emmiter;
     emmiter << node;
     profile_file << emmiter.c_str() << std::endl;
-    catalyst::logger.log(LogLevel::INFO, "Init subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Init subcommand finished successfully.");
     return {};
 }
 

@@ -38,7 +38,7 @@ YAML::Node getDefaultConfiguration() {
     return root;
 }
 std::string ver_max(std::string s1, std::string s2) {
-    catalyst::logger.log(LogLevel::INFO, "Comparing versions: {} and {}", s1, s2);
+    catalyst::logger.log(LogLevel::DEBUG, "Comparing versions: {} and {}", s1, s2);
     auto split_ver = [](const std::string &ver) {
         std::vector<int> parts;
         std::istringstream iss(ver);
@@ -59,15 +59,15 @@ std::string ver_max(std::string s1, std::string s2) {
 
     for (size_t i = 0, lim = std::min(v1.size(), v2.size()); i < lim; ++i)
         if (v1[i] > v2[i]) {
-            catalyst::logger.log(LogLevel::INFO, "Version {} is greater.", s1);
+            catalyst::logger.log(LogLevel::DEBUG, "Version {} is greater.", s1);
             return s1;
         } else if (v1[i] < v2[i]) {
-            catalyst::logger.log(LogLevel::INFO, "Version {} is greater.", s2);
+            catalyst::logger.log(LogLevel::DEBUG, "Version {} is greater.", s2);
             return s2;
         } else
             continue;
 
-    catalyst::logger.log(LogLevel::INFO, "Versions are equal, returning {}.", s1);
+    catalyst::logger.log(LogLevel::DEBUG, "Versions are equal, returning {}.", s1);
     return s1;
 }
 
@@ -169,7 +169,7 @@ std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
 } // namespace
 
 Configuration::Configuration(const std::vector<std::string> &profiles) {
-    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
 
     std::vector profile_names = profiles;
     if (std::find(profile_names.begin(), profile_names.end(), "common") == profile_names.end())
@@ -184,14 +184,14 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
         else
             profile_path = std::format("catalyst_{}.yaml", profile_name);
         if (!fs::exists(profile_path)) {
-            catalyst::logger.log(LogLevel::ERROR, "Profile not found: {}", profile_path.string());
+            catalyst::logger.log(LogLevel::DEBUG, "Profile not found: {}", profile_path.string());
             throw std::runtime_error(std::format("Profile: {} not found", profile_path.string()));
         }
         auto new_profile = YAML::LoadFile(profile_path);
         merge(root, profile_path);
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Profile composition finished.");
+    catalyst::logger.log(LogLevel::DEBUG, "Profile composition finished.");
 }
 
 bool Configuration::has(const std::string &key) const {
