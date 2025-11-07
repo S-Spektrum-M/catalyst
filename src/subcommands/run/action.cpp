@@ -17,14 +17,14 @@ namespace catalyst::run {
 std::string command_str(fs::path executable_name, const std::vector<std::string> &params);
 
 std::expected<void, std::string> action(const parse_t &args) {
-    catalyst::logger.log(LogLevel::INFO, "Run subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Run subcommand invoked.");
     std::vector<std::string> profiles;
     if (args.profile != "common") {
         profiles.push_back("common");
     }
     profiles.push_back(args.profile);
 
-    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
     if (auto res = generate::profile_composition(profiles); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
@@ -33,7 +33,7 @@ std::expected<void, std::string> action(const parse_t &args) {
         profile_comp = res.value();
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Running pre-run hooks.");
+    catalyst::logger.log(LogLevel::DEBUG, "Running pre-run hooks.");
     if (auto res = hooks::pre_run(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-run hook failed: {}", res.error());
         return res;
@@ -83,24 +83,24 @@ std::expected<void, std::string> action(const parse_t &args) {
         setenv("LD_LIBRARY_PATH", res.value().c_str(), 1);
 #endif
     }
-    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", command);
+    catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
     if (int res = std::system(command.c_str()); res) {
         catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
         return std::unexpected(std::format("exitied with code: {}", res));
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Running post-run hooks.");
+    catalyst::logger.log(LogLevel::DEBUG, "Running post-run hooks.");
     if (auto res = hooks::post_run(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-run hook failed: {}", res.error());
         return res;
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Run subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Run subcommand finished successfully.");
     return {};
 }
 
 std::string command_str(fs::path executable, const std::vector<std::string> &params) {
-    catalyst::logger.log(LogLevel::INFO, "Constructing command string.");
+    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
     std::string command = executable;
     for (const auto &param : params) {
         command += " " + param;

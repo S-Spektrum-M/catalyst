@@ -23,11 +23,11 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
 std::expected<void, std::string> fetch_system(const std::string &name);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    catalyst::logger.log(LogLevel::INFO, "Fetch subcommand invoked.");
-    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
+    catalyst::logger.log(LogLevel::DEBUG, "Fetch subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML_UTILS::Configuration config{parse_args.profiles};
 
-    catalyst::logger.log(LogLevel::INFO, "Running pre-fetch hooks.");
+    catalyst::logger.log(LogLevel::DEBUG, "Running pre-fetch hooks.");
     if (auto res = hooks::pre_fetch(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-fetch hook failed: {}", res.error());
         return res;
@@ -42,7 +42,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             }
             std::string name = dep["name"].as<std::string>();
             std::string source = dep["source"].as<std::string>();
-            catalyst::logger.log(LogLevel::INFO, "Fetching dependency '{}' from '{}'", name, source);
+            catalyst::logger.log(LogLevel::DEBUG, "Fetching dependency '{}' from '{}'", name, source);
             if (source == "vcpkg") {
                 if (!dep["version"]) {
                     return std::unexpected(std::format("vcpkg dependency '{}' is missing version.", name));
@@ -70,13 +70,13 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Running post-fetch hooks.");
+    catalyst::logger.log(LogLevel::DEBUG, "Running post-fetch hooks.");
     if (auto res = hooks::post_fetch(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-fetch hook failed: {}", res.error());
         return res;
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Fetch subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Fetch subcommand finished successfully.");
     return {};
 }
 } // namespace catalyst::fetch

@@ -18,10 +18,10 @@ namespace catalyst::build {
 namespace fs = std::filesystem;
 
 bool dep_missing(const YAML_UTILS::Configuration &config) {
-    catalyst::logger.log(LogLevel::INFO, "Checking for missing dependencies.");
+    catalyst::logger.log(LogLevel::DEBUG, "Checking for missing dependencies.");
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
     if (!config.has("dependencies")) {
-        catalyst::logger.log(LogLevel::INFO, "No dependencies declared, skipping check.");
+        catalyst::logger.log(LogLevel::DEBUG, "No dependencies declared, skipping check.");
         return false;
     }
     // TODO: needs to be updated to respect actual dependency types
@@ -34,7 +34,7 @@ bool dep_missing(const YAML_UTILS::Configuration &config) {
             return missing;
         }))
         return true;
-    catalyst::logger.log(LogLevel::INFO, "All dependencies are present.");
+    catalyst::logger.log(LogLevel::DEBUG, "All dependencies are present.");
     return false;
 }
 
@@ -44,7 +44,7 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
     fs::path real_compdb_path = build_dir / "compile_commands.json";
     std::string compdb_command =
         std::format("ninja -C {} -t compdb > {}", build_dir.string(), real_compdb_path.string());
-    catalyst::logger.log(LogLevel::INFO, "Executing command: {}", compdb_command);
+    catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", compdb_command);
     if (std::system(compdb_command.c_str()) != 0) {
         return std::unexpected("failed to generate compile commands");
     }
@@ -52,13 +52,13 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
 }
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    catalyst::logger.log(LogLevel::INFO, "Build subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Build subcommand invoked.");
     std::vector<std::string> profiles = parse_args.profiles;
     if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
         profiles.insert(profiles.begin(), "common");
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML_UTILS::Configuration config{profiles};
 
     catalyst::logger.log(LogLevel::INFO, "Running pre-build hooks.");
@@ -103,7 +103,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     // TODO: check if all deps exist or we've been asked to refetch them
     if (!fs::exists(build_dir / "catalyst-libs") || parse_args.force_refetch || dep_missing(config)) {
         if (parse_args.force_refetch) {
-            catalyst::logger.log(LogLevel::INFO, "Forcing refetch of dependencies.");
+            catalyst::logger.log(LogLevel::INFO, "Forcefully refetching dependencies.");
             fs::remove_all(fs::path{build_dir / "catalyst-libs"}); // cleanup
         }
         catalyst::logger.log(LogLevel::INFO, "Fetching dependencies.");

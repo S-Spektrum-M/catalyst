@@ -14,7 +14,7 @@ std::string ld_filter(std::string &ldflags);
 
 // NOTE: used for run::action. Needs to be updated to use find_*.
 std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
-    catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
+    catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
     fs::path current_dir = fs::current_path();
     fs::path build_dir{profile["manifest"]["dirs"]["build"].as<std::string>()};
     fs::path obj_dir = "obj";
@@ -35,7 +35,7 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
         ccflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
         ldflags += std::format(" -L{}", (fs::path(vcpkg_root) / "installed" / triplet / "lib").string());
     } else {
-        logger.log(LogLevel::INFO, "VCPKG_ROOT environment variable is not defined.");
+        logger.log(LogLevel::WARN, "VCPKG_ROOT environment variable is not defined.");
     }
 
     std::string ldlibs;

@@ -15,10 +15,10 @@
 
 namespace catalyst::fmt {
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    catalyst::logger.log(LogLevel::INFO, "Fmt subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Fmt subcommand invoked.");
     const std::vector<std::string> &profiles = parse_args.profiles;
     YAML::Node profile_comp;
-    catalyst::logger.log(LogLevel::INFO, "Composing profiles.");
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     if (auto res = generate::profile_composition(profiles); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
@@ -27,7 +27,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     std::string formatter = profile_comp["manifest"]["tooling"]["FMT"].as<std::string>();
-    catalyst::logger.log(LogLevel::INFO, "Using formatter: {}", formatter);
+    catalyst::logger.log(LogLevel::DEBUG, "Using formatter: {}", formatter);
 
     namespace fs = std::filesystem;
 
@@ -71,7 +71,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         if (formatting_error) {
             return;
         }
-        catalyst::logger.log(LogLevel::INFO, "Formatting {}", file.string());
+        catalyst::logger.log(LogLevel::DEBUG, "Formatting {}", file.string());
         if (int res = std::system(std::format("{} -i {}", formatter, file.string()).c_str()); res) {
             std::lock_guard<std::mutex> lock(error_mutex);
             if (!formatting_error) {
@@ -86,7 +86,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected(error_message);
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Fmt subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Fmt subcommand finished successfully.");
     return {};
 }
 } // namespace catalyst::fmt

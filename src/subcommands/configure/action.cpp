@@ -19,7 +19,7 @@ namespace catalyst::configure {
 bool is_int(const std::string &str);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    catalyst::logger.log(LogLevel::INFO, "Configure subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Configure subcommand invoked.");
     // 1. Parse the variable string
     size_t colon_pos = parse_args.var.find(':');
     std::string profile;
@@ -31,10 +31,10 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         profile = parse_args.var.substr(0, colon_pos);
         var_path_str = parse_args.var.substr(colon_pos + 1);
     }
-    catalyst::logger.log(LogLevel::INFO, "Configuring variable '{}' in profile '{}'", var_path_str, profile);
+    catalyst::logger.log(LogLevel::DEBUG, "Configuring variable '{}' in profile '{}'", var_path_str, profile);
 
     // 2. Load the profile
-    catalyst::logger.log(LogLevel::INFO, "Loading profile file for '{}'", profile);
+    catalyst::logger.log(LogLevel::DEBUG, "Loading profile file for '{}'", profile);
     YAML::Node profile_node;
     if (auto res = YAML_UTILS::load_profile_file(profile); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to load profile: {}", res.error());
@@ -58,7 +58,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     YAML::Node target_node = profile_node;
     // 5. Update the value
     if (!parse_args.val.empty()) {
-        catalyst::logger.log(LogLevel::INFO, "Updating value to '{}'", parse_args.val);
+        catalyst::logger.log(LogLevel::DEBUG, "Updating value to '{}'", parse_args.val);
         for (size_t i = 0; i < var_path.size() - 1; ++i) {
             target_node = target_node[var_path[i]];
         }
@@ -73,12 +73,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
         return res;
     }
-    catalyst::logger.log(LogLevel::INFO, "No value provided, printing existing value.");
+    catalyst::logger.log(LogLevel::DEBUG, "No value provided, printing existing value.");
     for (size_t i = 0; i < var_path.size(); ++i) {
         target_node = target_node[var_path[i]];
     }
     std::cout << target_node << std::endl;
-    catalyst::logger.log(LogLevel::INFO, "Configure subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Configure subcommand finished successfully.");
     return {};
 }
 

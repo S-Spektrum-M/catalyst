@@ -30,7 +30,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::string LINTER = profile_comp["manifest"]["tooling"]["LINTER"].as<std::string>();
     // call the linter on the source_set (we can expect clang-tidy like arg syntax) and go on about our day
 
-    catalyst::logger.log(LogLevel::INFO, "Building source set.");
+    catalyst::logger.log(LogLevel::DEBUG, "Building source set.");
 
     namespace fs = std::filesystem;
 
@@ -50,7 +50,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     unsigned int num_threads = std::thread::hardware_concurrency();
-    catalyst::logger.log(LogLevel::INFO, "Running linter on {} files using {} threads.", source_set.size(),
+    catalyst::logger.log(LogLevel::DEBUG, "Running linter on {} files using {} threads.", source_set.size(),
                          num_threads);
 
     std::queue<fs::path, std::deque<fs::path>> work_queue(std::deque<fs::path>(source_set.begin(), source_set.end()));
@@ -92,7 +92,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected("Linter finished with errors.");
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Tidy subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Tidy subcommand finished successfully.");
     return {};
 }
 } // namespace catalyst::tidy

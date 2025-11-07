@@ -16,7 +16,7 @@ inline const char *RESET = "\033[0m";
 namespace catalyst {
 enum class LogLevel {
     DEBUG, // hidden info (unless asked for opt in with -V)
-    INFO, // facing milestones
+    INFO, // user facing milestones
     WARN, // warnings
     ERROR  // errors
 };
