@@ -1,6 +1,6 @@
 # Build artifacts
-build/
-test_builds/
+build/*
+test_builds/*
 
 # Cache and local files
 .cache/
