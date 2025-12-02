@@ -43,7 +43,7 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
     fs::path real_compdb_path = build_dir / "compile_commands.json";
     std::string compdb_command =
-        std::format("ninja -C {} -t compdb > {}", build_dir.string(), real_compdb_path.string());
+        std::format("ninja -C {} -t compdb cc_compile cxx_compile > {}", build_dir.string(), real_compdb_path.string());
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", compdb_command);
     if (std::system(compdb_command.c_str()) != 0) {
         return std::unexpected("failed to generate compile commands");
