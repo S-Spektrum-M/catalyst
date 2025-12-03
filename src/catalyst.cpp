@@ -17,7 +17,6 @@
 #include <format>
 #include <print>
 #include <string>
-#include <lua.hpp>
 
 int main(int argc, char **argv) {
     auto concat_argv = [&argc, &argv]() -> std::string {
