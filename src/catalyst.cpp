@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
     const auto [add_git_subc, add_git_res] = catalyst::add::git::parse(*add_subc);
     const auto [add_system_subc, add_system_res] = catalyst::add::system::parse(*add_subc);
     const auto [add_local_subc, add_local_res] = catalyst::add::local::parse(*add_subc);
+    const auto [add_vcpkg_subc, add_vcpkg_res] = catalyst::add::vcpkg::parse(*add_subc);
 
     bool show_version{false};
 
@@ -86,7 +87,12 @@ int main(int argc, char **argv) {
                 catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return 1;
             }
-        }
+        } else if (*add_vcpkg_subc) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add vcpkg");
+            if (auto res = catalyst::add::vcpkg::action(*add_vcpkg_res); !res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                return 1;
+            }
         }
     }
 
