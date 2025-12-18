@@ -23,7 +23,18 @@ struct parse_t {
 };
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
 std::expected<void, std::string> action(const parse_t &);
-}; // namespace git
+} // namespace git
+
+namespace system {
+struct parse_t {
+    std::string name;
+    std::string lib_path;
+    std::string inc_path;
+    std::vector<std::string> profiles{{"common"}};
+};
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
+std::expected<void, std::string> action(const parse_t &);
+} // namespace system
 
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
 std::expected<void, std::string> action(const parse_t &);
