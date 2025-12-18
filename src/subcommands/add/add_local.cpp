@@ -1,0 +1,74 @@
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/yaml-utils/load_profile_file.hpp"
+#include "catalyst/yaml-utils/profile_write_back.hpp"
+#include "yaml-cpp/node/node.h"
+
+#include <catalyst/subcommands/add.hpp>
+#include <expected>
+#include <string>
+
+static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
+                                                              const catalyst::add::local::parse_t &args);
+
+namespace catalyst::add::local {
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &add) {
+    CLI::App *add_local = add.add_subcommand("local", "add a local dependency");
+    auto ret = std::make_unique<parse_t>();
+
+    add_local->add_option("name", ret->name)->required();
+    add_local->add_option("path", ret->path)->required();
+    add_local->add_option("-p,--profiles", ret->profiles);
+    add_local->add_option("-f,--features", ret->enabled_features);
+
+    return {add_local, std::move(ret)};
+}
+
+std::expected<void, std::string> action(const parse_t &parse_args) {
+    for (const auto &profile_name : parse_args.profiles) {
+        if (auto res = add_to_profile(profile_name, parse_args); !res)
+            return std::unexpected(res.error());
+    }
+    return {};
+}
+
+}; // namespace catalyst::add::local
+
+static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
+                                                              const catalyst::add::local::parse_t &args) {
+    auto res = catalyst::YAML_UTILS::load_profile_file(profile);
+    if (!res) {
+        catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+        return std::unexpected(res.error());
+    }
+    YAML::Node profile_node = res.value();
+
+    if (!profile_node["dependencies"]) {
+        profile_node["dependencies"] = YAML::Node(YAML::NodeType::Sequence);
+    }
+
+    YAML::Node dependencies = profile_node["dependencies"];
+
+    bool dependency_found = false;
+    for (const auto &dep : dependencies) {
+        if (dep["name"] && dep["name"].as<std::string>() == args.name) {
+            dependency_found = true;
+            break;
+        }
+    }
+
+    if (dependency_found) {
+        return std::unexpected("Dependency '" + args.name + "' already exists in profile '" + profile + "'.");
+    }
+
+    YAML::Node new_dep;
+    new_dep["name"] = args.name;
+    new_dep["source"] = "local";
+    new_dep["path"] = args.path;
+    if (!args.enabled_features.empty()) {
+        new_dep["using"] = args.enabled_features;
+    }
+
+    dependencies.push_back(new_dep);
+
+    return catalyst::YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+}

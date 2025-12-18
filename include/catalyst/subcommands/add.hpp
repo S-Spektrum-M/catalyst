@@ -36,6 +36,17 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
 std::expected<void, std::string> action(const parse_t &);
 } // namespace system
 
+namespace local {
+struct parse_t {
+    std::string name;
+    std::string path;
+    std::vector<std::string> profiles{{"common"}};
+    std::vector<std::string> enabled_features{};
+};
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
+std::expected<void, std::string> action(const parse_t &);
+} // namespace local
+
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
 std::expected<void, std::string> action(const parse_t &);
 } // namespace catalyst::add

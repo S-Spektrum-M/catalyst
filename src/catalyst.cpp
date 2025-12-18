@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
     const auto [tidy_subc, tidy_res] = catalyst::tidy::parse(app);
     const auto [add_git_subc, add_git_res] = catalyst::add::git::parse(*add_subc);
     const auto [add_system_subc, add_system_res] = catalyst::add::system::parse(*add_subc);
+    const auto [add_local_subc, add_local_res] = catalyst::add::local::parse(*add_subc);
 
     bool show_version{false};
 
@@ -79,7 +80,13 @@ int main(int argc, char **argv) {
                 catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return 1;
             }
-        } else if (false) { // TODO: add future TYPE subcommands
+        } else if (*add_local_subc) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add local");
+            if (auto res = catalyst::add::local::action(*add_local_res); !res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                return 1;
+            }
+        }
         }
     }
 
