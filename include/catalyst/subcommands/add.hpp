@@ -13,6 +13,52 @@ struct parse_t {
     std::vector<std::string> enabled_features{};
 };
 
+namespace git {
+struct parse_t {
+    std::string name;
+    std::string remote;
+    std::string version;
+    std::vector<std::string> profiles{{"common"}};
+    std::vector<std::string> enabled_features{};
+};
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
+std::expected<void, std::string> action(const parse_t &);
+} // namespace git
+
+namespace system {
+struct parse_t {
+    std::string name;
+    std::string lib_path;
+    std::string inc_path;
+    std::vector<std::string> profiles{{"common"}};
+};
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
+std::expected<void, std::string> action(const parse_t &);
+} // namespace system
+
+namespace local {
+struct parse_t {
+    std::string name;
+    std::string path;
+    std::vector<std::string> profiles{{"common"}};
+    std::vector<std::string> enabled_features{};
+};
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
+std::expected<void, std::string> action(const parse_t &);
+} // namespace local
+
+namespace vcpkg {
+struct parse_t {
+    std::string name;
+    std::string triplet;
+    std::string version;
+    std::vector<std::string> profiles{{"common"}};
+    std::vector<std::string> enabled_features{};
+};
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
+std::expected<void, std::string> action(const parse_t &);
+} // namespace vcpkg
+
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
 std::expected<void, std::string> action(const parse_t &);
 } // namespace catalyst::add

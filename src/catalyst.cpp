@@ -15,6 +15,7 @@
 #include <CLI/CLI.hpp>
 #include <catalyst/log-utils/log.hpp>
 #include <format>
+#include <iostream>
 #include <print>
 #include <string>
 
@@ -41,6 +42,10 @@ int main(int argc, char **argv) {
     const auto [run_subc, run_res] = catalyst::run::parse(app);
     const auto [test_subc, test_res] = catalyst::test::parse(app);
     const auto [tidy_subc, tidy_res] = catalyst::tidy::parse(app);
+    const auto [add_git_subc, add_git_res] = catalyst::add::git::parse(*add_subc);
+    const auto [add_system_subc, add_system_res] = catalyst::add::system::parse(*add_subc);
+    const auto [add_local_subc, add_local_res] = catalyst::add::local::parse(*add_subc);
+    const auto [add_vcpkg_subc, add_vcpkg_res] = catalyst::add::vcpkg::parse(*add_subc);
 
     bool show_version{false};
 
@@ -64,10 +69,30 @@ int main(int argc, char **argv) {
     }
 
     if (*add_subc) {
-        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add");
-        if (auto res = catalyst::add::action(*add_res); !res) {
-            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
-            return 1;
+        if (*add_git_subc) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add git");
+            if (auto res = catalyst::add::git::action(*add_git_res); !res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                return 1;
+            }
+        } else if (*add_system_subc) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add system");
+            if (auto res = catalyst::add::system::action(*add_system_res); !res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                return 1;
+            }
+        } else if (*add_local_subc) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add local");
+            if (auto res = catalyst::add::local::action(*add_local_res); !res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                return 1;
+            }
+        } else if (*add_vcpkg_subc) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add vcpkg");
+            if (auto res = catalyst::add::vcpkg::action(*add_vcpkg_res); !res) {
+                catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+                return 1;
+            }
         }
     }
 
