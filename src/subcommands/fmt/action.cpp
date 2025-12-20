@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include <algorithm>
@@ -6,6 +7,7 @@
 #include <cstdlib>
 #include <execution>
 #include <filesystem>
+#include <format>
 #include <iostream>
 #include <mutex>
 #include <string>
@@ -72,7 +74,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             return;
         }
         catalyst::logger.log(LogLevel::DEBUG, "Formatting {}", file.string());
-        if (int res = std::system(std::format("{} -i {}", formatter, file.string()).c_str()); res) {
+        if (int res = catalyst::process_exec(std::format("{} -i {}", formatter, file.string())).value().get(); res) {
             std::lock_guard<std::mutex> lock(error_mutex);
             if (!formatting_error) {
                 error_message = "Error running clang-format on " + file.string();
