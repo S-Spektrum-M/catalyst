@@ -1,6 +1,7 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <expected>
 #include <format>
 #include <string>

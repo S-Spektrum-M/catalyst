@@ -2,6 +2,7 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/yaml.h"
+
 #include <filesystem>
 #include <sstream>
 #include <string>
@@ -50,12 +51,15 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
                 resolve_system_dependency(dep, cxxflags, ccflags, ldflags, ldlibs);
             } else if (source == "local") {
                 if (auto res = resolve_local_dependency(dep, cxxflags, ccflags, ldflags, ldlibs); !res) {
-                    logger.log(LogLevel::ERROR, "Failed to resolve local dependency {}: {}",
-                               dep["name"].as<std::string>(), res.error());
+                    logger.log(LogLevel::ERROR,
+                               "Failed to resolve local dependency {}: {}",
+                               dep["name"].as<std::string>(),
+                               res.error());
                 }
             } else if (source == "vcpkg") {
                 if (!dep["triplet"] || !dep["triplet"].IsScalar()) {
-                    catalyst::logger.log(LogLevel::ERROR, "vcpkg dependency: {} does not define field: triplet",
+                    catalyst::logger.log(LogLevel::ERROR,
+                                         "vcpkg dependency: {} does not define field: triplet",
                                          dep["name"].as<std::string>());
                     return std::unexpected("unable to calculate ld_lib_path");
                 }
@@ -74,8 +78,10 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
                 if (dep["using"] && dep["using"].IsSequence())
                     node["using"] = dep["using"];
                 if (auto res = resolve_local_dependency(node, cxxflags, ccflags, ldflags, ldlibs); !res) {
-                    logger.log(LogLevel::ERROR, "Failed to resolve git dependency {}: {}",
-                               node["name"].as<std::string>(), res.error());
+                    logger.log(LogLevel::ERROR,
+                               "Failed to resolve git dependency {}: {}",
+                               node["name"].as<std::string>(),
+                               res.error());
                 }
             }
         }

@@ -3,6 +3,7 @@
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/tidy.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <atomic>
 #include <cstdlib>
 #include <deque>
@@ -51,8 +52,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     unsigned int num_threads = std::thread::hardware_concurrency();
-    catalyst::logger.log(LogLevel::DEBUG, "Running linter on {} files using {} threads.", source_set.size(),
-                         num_threads);
+    catalyst::logger.log(
+        LogLevel::DEBUG, "Running linter on {} files using {} threads.", source_set.size(), num_threads);
 
     std::queue<fs::path, std::deque<fs::path>> work_queue(std::deque<fs::path>(source_set.begin(), source_set.end()));
     std::atomic<bool> has_errors = false;
@@ -76,8 +77,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 std::string command = LINTER + " " + file_to_process.string();
                 if (int res = catalyst::process_exec(command).value().get(); res != 0) {
                     err_log_mt.lock();
-                    catalyst::logger.log(LogLevel::ERROR, "Linter failed for {}: exit code {}",
-                                         file_to_process.string(), res);
+                    catalyst::logger.log(
+                        LogLevel::ERROR, "Linter failed for {}: exit code {}", file_to_process.string(), res);
                     has_errors = true;
                     err_log_mt.unlock();
                 }

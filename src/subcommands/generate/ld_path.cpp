@@ -4,6 +4,7 @@
 #include "catalyst/yaml-utils/Configuration.hpp"
 #include "yaml-cpp/node/node.h"
 #include "yaml-cpp/yaml.h"
+
 #include <array>
 #include <cstdio>
 #include <expected>
@@ -19,11 +20,14 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
-void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet, std::string &ldflags,
+void resolve_vcpkg_dependency(const YAML::Node &dep,
+                              const std::string &triplet,
+                              std::string &ldflags,
                               std::string &ldlibs) {
     const char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
     if (vcpkg_root_env == nullptr) {
-        catalyst::logger.log(LogLevel::WARN, "VCPKG_ROOT is not set, cannot resolve vcpkg dependency '{}'.",
+        catalyst::logger.log(LogLevel::WARN,
+                             "VCPKG_ROOT is not set, cannot resolve vcpkg dependency '{}'.",
                              dep["name"].as<std::string>());
         return;
     }
@@ -38,7 +42,9 @@ void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet,
     fs::path lib_path = vcpkg_root / "packages" / package_dir_name / "lib";
 
     if (!fs::exists(lib_path) || !fs::is_directory(lib_path)) {
-        catalyst::logger.log(LogLevel::WARN, "Could not find library directory for vcpkg package '{}' at: {}", dep_name,
+        catalyst::logger.log(LogLevel::WARN,
+                             "Could not find library directory for vcpkg package '{}' at: {}",
+                             dep_name,
                              lib_path.string());
         // Fallback: just add the library by name and hope the linker finds it in the global vcpkg lib dir.
         ldlibs += std::format(" -l{}", dep_name);
@@ -52,11 +58,11 @@ void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet,
 
 // Define the library file extensions based on the operating system.
 #if defined(_WIN32)
-    const std::vector<std::string> extensions = { ".lib" };
+    const std::vector<std::string> extensions = {".lib"};
 #elif defined(__APPLE__)
-    const std::vector<std::string> extensions = { ".a", ".dylib" };
+    const std::vector<std::string> extensions = {".a", ".dylib"};
 #else // Linux and other Unix-like systems
-    const std::vector<std::string> extensions = { ".a", ".so" };
+    const std::vector<std::string> extensions = {".a", ".so"};
 #endif
 
     // Iterate through the directory and find matching library files.
@@ -82,9 +88,8 @@ void resolve_vcpkg_dependency(const YAML::Node &dep, const std::string &triplet,
     }
 }
 
-std::expected<void, std::string> resolve_local_dependency(const YAML::Node &dep, std::string &cxxflags,
-                                                          std::string &ccflags, std::string &ldflags,
-                                                          std::string &ldlibs) {
+std::expected<void, std::string> resolve_local_dependency(
+    const YAML::Node &dep, std::string &cxxflags, std::string &ccflags, std::string &ldflags, std::string &ldlibs) {
     catalyst::logger.log(LogLevel::DEBUG, "Resolving local dependency: {}", dep["name"].as<std::string>());
     auto project_dir = fs::current_path();
     fs::path dep_path;
@@ -150,8 +155,11 @@ std::expected<void, std::string> resolve_local_dependency(const YAML::Node &dep,
     return {};
 }
 
-void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags,
-                                   [[maybe_unused]] std::string &ldflags, std::string &ldlibs) {
+void resolve_pkg_config_dependency(const YAML::Node &dep,
+                                   std::string &cxxflags,
+                                   std::string &ccflags,
+                                   [[maybe_unused]] std::string &ldflags,
+                                   std::string &ldlibs) {
     std::string dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving pkg-config dependency: {}", dep_name);
 
@@ -201,8 +209,8 @@ void resolve_pkg_config_dependency(const YAML::Node &dep, std::string &cxxflags,
     }
 }
 
-void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std::string &ccflags, std::string &ldflags,
-                               std::string &ldlibs) {
+void resolve_system_dependency(
+    const YAML::Node &dep, std::string &cxxflags, std::string &ccflags, std::string &ldflags, std::string &ldlibs) {
     std::string dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving system dependency: {}", dep_name);
     bool used_explicit_paths = false;
@@ -258,7 +266,8 @@ void resolve_system_dependency(const YAML::Node &dep, std::string &cxxflags, std
 }
 
 // used to write to the buildfile.
-void write_variables(const catalyst::YAML_UTILS::Configuration &config, std::ofstream &buildfile,
+void write_variables(const catalyst::YAML_UTILS::Configuration &config,
+                     std::ofstream &buildfile,
                      const std::vector<std::string> &enabled_features) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
@@ -299,8 +308,8 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config, std::ofs
     for (const auto &feature : features) {
         bool is_enabled =
             std::find(enabled_features.begin(), enabled_features.end(), feature) != enabled_features.end();
-        std::string flag = std::format(" -DFF_{}__{}={}", config.get_string("manifest.name").value_or("name"), feature, 
-                                       is_enabled ? "1" : "0");
+        std::string flag = std::format(
+            " -DFF_{}__{}={}", config.get_string("manifest.name").value_or("name"), feature, is_enabled ? "1" : "0");
         cxxflags += flag;
         ccflags += flag;
     }

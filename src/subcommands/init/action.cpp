@@ -1,7 +1,6 @@
 #include "catalyst/GLOBALS.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/init.hpp"
-
 #include "catalyst/yaml-utils/profile_write_back.hpp"
 
 #include <expected>
@@ -21,18 +20,18 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     node["meta"]["min_ver"] = catalyst::CATALYST_VERSION;
     node["manifest"]["name"] = parse_args.name;
     switch (parse_args.type) {
-    case parse_t::type_t::BINARY:
-        node["manifest"]["type"] = "BINARY";
-        break;
-    case parse_t::type_t::STATICLIB:
-        node["manifest"]["type"] = "STATICLIB";
-        break;
-    case parse_t::type_t::SHAREDLIB:
-        node["manifest"]["type"] = "SHAREDLIB";
-        break;
-    case parse_t::type_t::INTERFACE:
-        node["manifest"]["type"] = "INTERFACE";
-        break;
+        case parse_t::type_t::BINARY:
+            node["manifest"]["type"] = "BINARY";
+            break;
+        case parse_t::type_t::STATICLIB:
+            node["manifest"]["type"] = "STATICLIB";
+            break;
+        case parse_t::type_t::SHAREDLIB:
+            node["manifest"]["type"] = "SHAREDLIB";
+            break;
+        case parse_t::type_t::INTERFACE:
+            node["manifest"]["type"] = "INTERFACE";
+            break;
     }
     node["manifest"]["version"] = parse_args.version;
     node["manifest"]["description"] = parse_args.description;
@@ -65,8 +64,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     if (!fs::exists(parse_args.path / parse_args.dirs.build)) {
-        catalyst::logger.log(LogLevel::INFO, "Creating build directory: {}",
-                             (parse_args.path / parse_args.dirs.build).string());
+        catalyst::logger.log(
+            LogLevel::INFO, "Creating build directory: {}", (parse_args.path / parse_args.dirs.build).string());
         fs::create_directories(parse_args.path / parse_args.dirs.build);
     }
 

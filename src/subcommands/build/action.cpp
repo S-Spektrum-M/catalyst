@@ -1,4 +1,11 @@
+#include "catalyst/hooks.hpp"
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
+#include "catalyst/subcommands/build.hpp"
+#include "catalyst/subcommands/fetch.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/yaml-utils/Configuration.hpp"
+
 #include <algorithm>
 #include <expected>
 #include <filesystem>
@@ -7,13 +14,6 @@
 #include <string>
 #include <vector>
 #include <yaml-cpp/node/node.h>
-
-#include "catalyst/hooks.hpp"
-#include "catalyst/process_exec.h"
-#include "catalyst/subcommands/build.hpp"
-#include "catalyst/subcommands/fetch.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
 
 namespace catalyst::build {
 namespace fs = std::filesystem;

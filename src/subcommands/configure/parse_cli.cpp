@@ -1,4 +1,5 @@
 #include "catalyst/subcommands/configure.hpp"
+
 #include <CLI/CLI.hpp>
 
 namespace catalyst::configure {

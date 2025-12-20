@@ -2,6 +2,7 @@
 #include "catalyst/process_exec.h"
 #include "catalyst/yaml-utils/Configuration.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <catalyst/hooks.hpp>
 #include <cstdlib>
 #include <expected>
@@ -26,7 +27,7 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
         for (const auto &item : hook_node) {
             if (item["command"]) {
                 std::string command = item["command"].as<std::string>();
-    catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
+                catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
                 if (catalyst::process_exec(command).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
                     return std::unexpected("Hook '" + hook_name + "' command failed: " + command);

@@ -1,4 +1,5 @@
 #include "catalyst/subcommands/build.hpp"
+
 #include <CLI/App.hpp>
 
 namespace catalyst::build {

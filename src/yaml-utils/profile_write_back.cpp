@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+
 #include <catalyst/yaml-utils/profile_write_back.hpp>
 #include <expected>
 #include <filesystem>

@@ -1,5 +1,6 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
+
 #include <expected>
 #include <string>
 

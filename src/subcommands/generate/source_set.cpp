@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+
 #include <expected>
 #include <filesystem>
 #include <ranges>
@@ -58,7 +59,8 @@ std::expected<std::unordered_set<fs::path>, std::string> build_source_set(std::v
                 if (!ignored) {
                     const auto &path = entry.path();
                     const std::string extension = path.extension().string();
-                    if (extension == ".cpp" || extension == ".cxx" || extension == ".cc" || extension == ".c" || extension == ".cu" || extension == ".cupp") {
+                    if (extension == ".cpp" || extension == ".cxx" || extension == ".cc" || extension == ".c" ||
+                        extension == ".cu" || extension == ".cupp") {
                         catalyst::logger.log(LogLevel::DEBUG, "Adding file to source set: {}", path.string());
                         source_set.insert(path);
                     }

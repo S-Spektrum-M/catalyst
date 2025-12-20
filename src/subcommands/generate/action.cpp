@@ -3,6 +3,7 @@
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <expected>
 #include <filesystem>
 #include <fstream>
@@ -16,7 +17,8 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
-void write_variables(const catalyst::YAML_UTILS::Configuration &config, std::ofstream &buildfile,
+void write_variables(const catalyst::YAML_UTILS::Configuration &config,
+                     std::ofstream &buildfile,
                      const std::vector<std::string> &enabled_features);
 void write_rules(std::ofstream &buildfile);
 std::vector<std::string> intermediate_targets(std::ofstream &buildfile, const std::unordered_set<fs::path> &source_set);
@@ -84,8 +86,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::vector<std::string> object_files = intermediate_targets(buildfile, source_set);
     final_target(config, object_files, buildfile);
 
-    catalyst::logger.log(LogLevel::DEBUG, "Writing profile composition to: {}",
-                         (build_dir / "profile_composition.yaml").string());
+    catalyst::logger.log(
+        LogLevel::DEBUG, "Writing profile composition to: {}", (build_dir / "profile_composition.yaml").string());
     std::ofstream profile_comp_file{build_dir / "profile_composition.yaml"};
     if (!profile_comp_file) {
         return std::unexpected("Failed to open profile_composition.yaml for writing in " + build_dir.string());

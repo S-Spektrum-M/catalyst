@@ -1,5 +1,6 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/process_exec.h"
+
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -51,8 +52,8 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
     return {};
 }
 
-std::expected<void, std::string> fetch_git(std::string build_dir, std::string name, std::string source,
-                                           std::string version) {
+std::expected<void, std::string>
+fetch_git(std::string build_dir, std::string name, std::string source, std::string version) {
     catalyst::logger.log(LogLevel::DEBUG, "Fetching git dependency: {}@{} from {}", name, version, source);
     fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
     std::println(std::cout, "Fetching: {}@{} from {}", name, version, source);
@@ -76,5 +77,7 @@ std::expected<void, std::string> fetch_system(const std::string &name) {
     return {};
 }
 
-std::expected<void, std::string> fetch_local() { return {}; }
+std::expected<void, std::string> fetch_local() {
+    return {};
+}
 } // namespace catalyst::fetch

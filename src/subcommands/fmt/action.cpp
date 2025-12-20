@@ -2,6 +2,7 @@
 #include "catalyst/process_exec.h"
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
+
 #include <algorithm>
 #include <atomic>
 #include <cstdlib>

@@ -2,6 +2,7 @@
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <exception>
 #include <expected>
 #include <filesystem>

@@ -1,4 +1,5 @@
 #include "catalyst/subcommands/fetch.hpp"
+
 #include <CLI/App.hpp>
 
 namespace catalyst::fetch {

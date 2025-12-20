@@ -3,6 +3,7 @@
 #include "catalyst/process_exec.h"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/run.hpp"
+
 #include <cctype>
 #include <cstdlib>
 #include <expected>

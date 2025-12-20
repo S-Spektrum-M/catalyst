@@ -2,6 +2,7 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
+
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -16,10 +17,10 @@ namespace fs = std::filesystem;
 
 std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name);
 std::expected<void, std::string> fetch_vcpkg(const std::string &name);
-std::expected<void, std::string> fetch_local(std::string build_dir, std::string name, std::string source,
-                                             std::string version);
-std::expected<void, std::string> fetch_git(std::string build_dir, std::string name, std::string source,
-                                           std::string version);
+std::expected<void, std::string>
+fetch_local(std::string build_dir, std::string name, std::string source, std::string version);
+std::expected<void, std::string>
+fetch_git(std::string build_dir, std::string name, std::string source, std::string version);
 std::expected<void, std::string> fetch_system(const std::string &name);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {

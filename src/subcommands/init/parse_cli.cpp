@@ -1,4 +1,5 @@
 #include "catalyst/subcommands/init.hpp"
+
 #include <CLI/App.hpp>
 #include <map>
 

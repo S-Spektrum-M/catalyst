@@ -1,7 +1,9 @@
 #include "catalyst/yaml-utils/Configuration.hpp"
+
 #include "catalyst/log-utils/log.hpp"
 #include "yaml-cpp/node/node.h"
 #include "yaml-cpp/node/parse.h"
+
 #include <algorithm>
 #include <cstring>
 #include <filesystem>
