@@ -1,7 +1,9 @@
 #pragma once
 #include <CLI/App.hpp>
 #include <expected>
+#include <ostream>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -40,4 +42,49 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
 
 std::expected<std::unordered_set<std::filesystem::path>, std::string>
 build_source_set(std::vector<std::string> source_dirs, const std::vector<std::string> &profiles);
+
+namespace BuildWriters {
+class BaseWriter {
+protected:
+    std::ostream &stream;
+    explicit BaseWriter(std::ostream &stream);
+
+public:
+    using rule_t = std::string;
+    using target_t = std::string;
+
+    virtual ~BaseWriter() = default;
+
+    virtual std::expected<void, std::string> add_variable(std::string_view name, std::string_view value) = 0;
+    virtual std::expected<void, std::string>
+    add_rule(std::string_view name, std::string_view command, std::string_view description) = 0;
+    virtual std::expected<void, std::string> add_build(const std::vector<target_t> &outputs,
+                                                       std::string_view rule,
+                                                       const std::vector<target_t> &inputs,
+                                                       const std::vector<target_t> &implicit_deps = {}
+                                                       // e.g., headers for validation
+                                                       ) = 0;
+
+    virtual void add_comment(std::string_view comment) = 0;
+};
+
+class NinjaWriter : public BaseWriter {
+    std::string escape(std::string_view str);
+
+public:
+    explicit NinjaWriter(std::ostream &stream);
+    std::expected<void, std::string> add_variable(std::string_view name, std::string_view value) override;
+
+    std::expected<void, std::string>
+    add_rule(std::string_view name, std::string_view command, std::string_view description) override;
+
+    std::expected<void, std::string> add_build(const std::vector<target_t> &outputs,
+                                               std::string_view rule,
+                                               const std::vector<target_t> &inputs,
+                                               const std::vector<target_t> &implicit_deps = {}) override;
+
+    void add_comment(std::string_view comment) override;
+};
+
+} // namespace BuildWriters
 } // namespace catalyst::generate
