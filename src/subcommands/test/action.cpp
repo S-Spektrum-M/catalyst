@@ -1,5 +1,6 @@
 #include "catalyst/hooks.hpp"
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/test.hpp"
 #include <cctype>
@@ -73,7 +74,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = command_str(exe_path, args.params);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-    if (int res = std::system(command.c_str()); res) {
+    if (int res = catalyst::process_exec(command.c_str()).value().get(); res) {
         catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
         return std::unexpected(std::format("exitied with code: {}", res));
     }

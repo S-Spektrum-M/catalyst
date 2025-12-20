@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -43,7 +44,7 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
     std::string command = std::format("\"{}\" install {}", vcpkg_exe.string(), name);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
     catalyst::logger.log(LogLevel::DEBUG, "Fetching: {} from vcpkg", name);
-    if (std::system(command.c_str()) != 0) {
+    if (catalyst::process_exec(command).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
@@ -62,7 +63,7 @@ std::expected<void, std::string> fetch_git(std::string build_dir, std::string na
         command = std::format("git clone --depth 1 --branch {} {} {}", version, source, dep_path.string());
     }
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-    if (std::system(command.c_str()) != 0) {
+    if (catalyst::process_exec(command).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }

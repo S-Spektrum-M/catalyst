@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/tidy.hpp"
 #include "yaml-cpp/node/node.h"
@@ -73,7 +74,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 }
 
                 std::string command = LINTER + " " + file_to_process.string();
-                if (int res = std::system(command.c_str()); res != 0) {
+                if (int res = catalyst::process_exec(command).value().get(); res != 0) {
                     err_log_mt.lock();
                     catalyst::logger.log(LogLevel::ERROR, "Linter failed for {}: exit code {}",
                                          file_to_process.string(), res);

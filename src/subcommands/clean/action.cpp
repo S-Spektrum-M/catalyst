@@ -1,8 +1,10 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/generate.hpp"
 
 #include <catalyst/hooks.hpp>
 #include <catalyst/subcommands/clean.hpp>
+#include <format>
 #include <yaml-cpp/node/node.h>
 
 namespace catalyst::clean {
@@ -30,7 +32,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (std::system(std::format("ninja -C {} -t clean", build_dir).c_str()) != 0) {
+    if (catalyst::process_exec(std::format("ninja -C {} -t clean", build_dir)).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
         return std::unexpected("error in cleaning.");
     }
@@ -57,7 +59,7 @@ std::expected<void, std::string> action2(const parse_t &parse_args) {
 
     std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (std::system(std::format("ninja -C {} -t clean", build_dir).c_str()) != 0) {
+    if (catalyst::process_exec(std::format("ninja -C {} -t clean", build_dir)).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
         return std::unexpected("error in cleaning.");
     }
