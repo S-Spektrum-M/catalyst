@@ -151,26 +151,5 @@ public:
         throw std::logic_error("Unimplemented base template method");
     }
 };
-
-class NinjaWriter : public BaseWriter {
-public:
-    explicit NinjaWriter(std::ostream &stream);
-    std::expected<void, std::string> add_variable(std::string_view name, std::string_view value) override;
-
-    std::expected<void, std::string> add_rule(std::string_view name,
-                                              std::string_view command,
-                                              std::string_view description,
-                                              std::string_view depfile = "",
-                                              std::string_view deps = "") override;
-
-    std::expected<void, std::string> add_build(const std::vector<target_t> &outputs,
-                                               std::string_view rule,
-                                               const std::vector<target_t> &inputs,
-                                               const std::vector<target_t> &implicit_deps = {}) override;
-
-    void add_comment(std::string_view comment) override;
-    void add_default(std::string_view target) override;
-};
-
 } // namespace BuildWriters
 } // namespace catalyst::generate
