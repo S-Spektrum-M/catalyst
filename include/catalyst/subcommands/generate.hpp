@@ -2,6 +2,7 @@
 #include <CLI/App.hpp>
 #include <expected>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -56,9 +57,11 @@ public:
     virtual ~BaseWriter() = default;
 
     virtual std::expected<void, std::string> add_variable(std::string_view name, std::string_view value) = 0;
-    virtual std::expected<void, std::string>
-    add_rule(std::string_view name, std::string_view command, std::string_view description, std::string_view depfile = "",
-             std::string_view deps = "") = 0;
+    virtual std::expected<void, std::string> add_rule(std::string_view name,
+                                                      std::string_view command,
+                                                      std::string_view description,
+                                                      std::string_view depfile = "",
+                                                      std::string_view deps = "") = 0;
     virtual std::expected<void, std::string> add_build(const std::vector<target_t> &outputs,
                                                        std::string_view rule,
                                                        const std::vector<target_t> &inputs,
@@ -70,16 +73,95 @@ public:
     virtual void add_default(std::string_view target) = 0;
 };
 
-class NinjaWriter : public BaseWriter {
-    std::string escape(std::string_view str);
+enum class TargetType {
+    Ninja,
+    Make,
+    VisualStudio,
+    XCode,
+};
 
+template <TargetType T> class DerivedWriter : public BaseWriter {
+private:
+    static consteval bool is_implemented(TargetType __t) {
+        return __t == TargetType::Ninja;
+    }
+
+#if __cplusplus >= 202602L
+    static consteval std::string warning_msg(TargetType __t) {
+        switch (__t) {
+            case TargetType::Ninja:
+                return "Unimplemented specialization for DerivedWriter<Ninja>. "
+                       "Add explicit template specialization.";
+            case TargetType::Make:
+                return "Unimplemented specialization for DerivedWriter<Make>. "
+                       "Add explicit template specialization.";
+            case TargetType::VisualStudio:
+                return "Unimplemented specialization for DerivedWriter<VisualStudio>. "
+                       "Add explicit template specialization.";
+            case TargetType::XCode:
+                return "Unimplemented specialization for DerivedWriter<XCode>. "
+                       "Add explicit template specialization.";
+        }
+        return "Unknown TargetType";
+    }
+    static_assert(is_implemented(T), warning_msg(T));
+#else
+    static_assert(is_implemented(T),
+                  "Unimplemented specialization for DerivedWriter. Add wxplicit template specialization.");
+#endif
+
+public:
+    explicit DerivedWriter(std::ostream &stream) : BaseWriter(stream) {
+    }
+
+    ~DerivedWriter() override = default;
+
+    // Delete copy/move to prevent slicing
+    DerivedWriter(const DerivedWriter &) = delete;
+    DerivedWriter &operator=(const DerivedWriter &) = delete;
+    DerivedWriter(DerivedWriter &&) = delete;
+    DerivedWriter &operator=(DerivedWriter &&) = delete;
+
+    std::expected<void, std::string> add_variable([[maybe_unused]] std::string_view name,
+                                                  [[maybe_unused]] std::string_view value) override {
+        throw std::logic_error("Unimplemented base template method");
+    }
+
+    std::expected<void, std::string> add_rule([[maybe_unused]] std::string_view name,
+                                              [[maybe_unused]] std::string_view command,
+                                              [[maybe_unused]] std::string_view description,
+                                              [[maybe_unused]] std::string_view depfile = "",
+                                              [[maybe_unused]] std::string_view deps = "") override {
+        throw std::logic_error("Unimplemented base template method");
+    }
+
+    std::expected<void, std::string>
+    add_build([[maybe_unused]] const std::vector<target_t> &outputs,
+              [[maybe_unused]] std::string_view rule,
+              [[maybe_unused]] const std::vector<target_t> &inputs,
+              [[maybe_unused]] const std::vector<target_t> &implicit_deps = {}) override {
+        throw std::logic_error("Unimplemented base template method");
+    }
+
+    void add_comment([[maybe_unused]] std::string_view comment) override {
+        throw std::logic_error("Unimplemented base template method");
+    }
+
+    void add_default([[maybe_unused]] std::string_view target) override {
+        throw std::logic_error("Unimplemented base template method");
+    }
+};
+
+class NinjaWriter : public BaseWriter {
 public:
     explicit NinjaWriter(std::ostream &stream);
     std::expected<void, std::string> add_variable(std::string_view name, std::string_view value) override;
 
-    std::expected<void, std::string>
-    add_rule(std::string_view name, std::string_view command, std::string_view description, std::string_view depfile = "",
-             std::string_view deps = "") override;
+    std::expected<void, std::string> add_rule(std::string_view name,
+                                              std::string_view command,
+                                              std::string_view description,
+                                              std::string_view depfile = "",
+                                              std::string_view deps = "") override;
 
     std::expected<void, std::string> add_build(const std::vector<target_t> &outputs,
                                                std::string_view rule,
