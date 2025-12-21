@@ -267,7 +267,7 @@ void resolve_system_dependency(
 
 // used to write to the buildfile.
 void write_variables(const catalyst::YAML_UTILS::Configuration &config,
-                     std::ofstream &buildfile,
+                     catalyst::generate::BuildWriters::NinjaWriter &writer,
                      const std::vector<std::string> &enabled_features) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
@@ -334,41 +334,24 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config,
         }
     }
 
-    buildfile << "# Variables\n"
-              << "cc = " << config.get_string("manifest.tooling.CC").value_or("clang") << "\n"
-              << "cxx = " << config.get_string("manifest.tooling.CXX").value_or("clang++") << "\n"
-              << "cxxflags = " << cxxflags << "\n"
-              << "cflags = " << ccflags << "\n"
-              << "ldflags = " << ldflags << " \n"
-              << "ldlibs = " << ldlibs << "\n\n"; // place compiled libraries here
+    writer.add_comment("Variables");
+    writer.add_variable("cc", config.get_string("manifest.tooling.CC").value_or("clang"));
+    writer.add_variable("cxx", config.get_string("manifest.tooling.CXX").value_or("clang++"));
+    writer.add_variable("cxxflags", cxxflags);
+    writer.add_variable("cflags", ccflags);
+    writer.add_variable("ldflags", ldflags);
+    writer.add_variable("ldlibs", ldlibs); // place compiled libraries here
 }
 
-void write_rules(std::ofstream &buildfile) {
+void write_rules(catalyst::generate::BuildWriters::NinjaWriter &writer) {
     catalyst::logger.log(LogLevel::DEBUG, "Writing rules to build file.");
-    buildfile << "# Rules for compiling\n";
-    buildfile << "rule cxx_compile\n";
-    buildfile << "  command = $cxx $cxxflags -MD -MF $out.d -c $in -o $out\n";
-    buildfile << "  description = CXX $out\n";
-    buildfile << "  depfile = $out.d\n";
-    buildfile << "  deps = gcc\n\n";
+    writer.add_comment("Rules for compiling");
+    writer.add_rule("cxx_compile", "$cxx $cxxflags -MD -MF $out.d -c $in -o $out", "CXX $out", "$out.d", "gcc");
+    writer.add_rule("cc_compile", "$cc $cflags -MD -MF $out.d -c $in -o $out", "CC $out", "$out.d", "gcc");
 
-    buildfile << "rule cc_compile\n";
-    buildfile << "  command = $cc $cflags -MD -MF $out.d -c $in -o $out\n";
-    buildfile << "  description = CC $out\n";
-    buildfile << "  depfile = $out.d\n";
-    buildfile << "  deps = gcc\n\n";
-
-    buildfile << "# Rules for linking\n";
-    buildfile << "rule binary_link\n";
-    buildfile << "  command = $cxx $in -o $out $ldflags $ldlibs\n";
-    buildfile << "  description = LINK $out\n\n";
-
-    buildfile << "rule static_link\n";
-    buildfile << "  command = ar rcs $out $in\n";
-    buildfile << "  description = LINK $out\n\n";
-
-    buildfile << "rule shared_link\n";
-    buildfile << "  command = $cxx -shared $in -o $out\n";
-    buildfile << "  description = LINK $out\n\n";
+    writer.add_comment("Rules for linking");
+    writer.add_rule("binary_link", "$cxx $in -o $out $ldflags $ldlibs", "LINK $out");
+    writer.add_rule("static_link", "ar rcs $out $in", "LINK $out");
+    writer.add_rule("shared_link", "$cxx -shared $in -o $out", "LINK $out");
 }
 } // namespace catalyst::generate
