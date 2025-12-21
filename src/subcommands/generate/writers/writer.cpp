@@ -47,15 +47,15 @@ std::expected<void, std::string> NinjaWriter::add_rule(std::string_view name,
                                                          std::string_view description,
                                                          std::string_view depfile,
                                                          std::string_view deps) {
-    std::println(stream, "rule {}\n\tcommand = {} ", name, command);
+    std::println(stream, "rule {}\n  command = {} ", name, command);
     if (!description.empty()) {
-        std::println(stream, "\tdescription = {}", description);
+        std::println(stream, "  description = {}", description);
     }
     if (!depfile.empty()) {
-        std::println(stream, "\tdepfile = {}", depfile);
+        std::println(stream, "  depfile = {}", depfile);
     }
     if (!deps.empty()) {
-        std::println(stream, "\tdeps = {}", deps);
+        std::println(stream, "  deps = {}", deps);
     }
     std::println(stream);
     return {};
