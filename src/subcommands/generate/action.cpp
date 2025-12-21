@@ -18,14 +18,14 @@ namespace catalyst::generate {
 namespace fs = std::filesystem;
 
 void write_variables(const catalyst::YAML_UTILS::Configuration &config,
-                     catalyst::generate::BuildWriters::NinjaWriter &writer,
+                     catalyst::generate::BuildWriters::BaseWriter &writer,
                      const std::vector<std::string> &enabled_features);
-void write_rules(catalyst::generate::BuildWriters::NinjaWriter &writer);
-std::vector<std::string> intermediate_targets(catalyst::generate::BuildWriters::NinjaWriter &writer,
+void write_rules(catalyst::generate::BuildWriters::BaseWriter &writer);
+std::vector<std::string> intermediate_targets(catalyst::generate::BuildWriters::BaseWriter &writer,
                                               const std::unordered_set<fs::path> &source_set);
 void final_target(const YAML_UTILS::Configuration &config,
                   const auto &object_files,
-                  catalyst::generate::BuildWriters::NinjaWriter &writer);
+                  catalyst::generate::BuildWriters::BaseWriter &writer);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
@@ -107,7 +107,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     return {};
 }
 
-std::vector<std::string> intermediate_targets(catalyst::generate::BuildWriters::NinjaWriter &writer,
+std::vector<std::string> intermediate_targets(catalyst::generate::BuildWriters::BaseWriter &writer,
                                               const std::unordered_set<std::filesystem::path> &source_set) {
     catalyst::logger.log(LogLevel::DEBUG, "Generating intermediate targets.");
     fs::path current_dir = fs::current_path();
@@ -129,7 +129,7 @@ std::vector<std::string> intermediate_targets(catalyst::generate::BuildWriters::
 
 void final_target(const YAML_UTILS::Configuration &config,
                   const auto &object_files,
-                  catalyst::generate::BuildWriters::NinjaWriter &writer) {
+                  catalyst::generate::BuildWriters::BaseWriter &writer) {
     catalyst::logger.log(LogLevel::DEBUG, "Generating final target.");
     // Build edge for the final target
     std::string type = config.get_string("manifest.type").value_or("BINARY");

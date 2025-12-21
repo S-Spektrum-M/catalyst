@@ -267,7 +267,7 @@ void resolve_system_dependency(
 
 // used to write to the buildfile.
 void write_variables(const catalyst::YAML_UTILS::Configuration &config,
-                     catalyst::generate::BuildWriters::NinjaWriter &writer,
+                     catalyst::generate::BuildWriters::BaseWriter &writer,
                      const std::vector<std::string> &enabled_features) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
@@ -343,7 +343,7 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config,
     writer.add_variable("ldlibs", ldlibs); // place compiled libraries here
 }
 
-void write_rules(catalyst::generate::BuildWriters::NinjaWriter &writer) {
+void write_rules(catalyst::generate::BuildWriters::BaseWriter &writer) {
     catalyst::logger.log(LogLevel::DEBUG, "Writing rules to build file.");
     writer.add_comment("Rules for compiling");
     writer.add_rule("cxx_compile", "$cxx $cxxflags -MD -MF $out.d -c $in -o $out", "CXX $out", "$out.d", "gcc");
