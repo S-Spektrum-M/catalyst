@@ -74,12 +74,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected("Failed to create object directory: " + obj_dir.string());
     }
 
-    catalyst::logger.log(LogLevel::DEBUG, "Writing build file to: {}", (build_dir / "build.ninja").string());
-    std::ofstream buildfile{build_dir / "build.ninja"};
+    // NOTE: This is basically ALL ninja specific and we should let users define their own generator preference.
+    const fs::path buildfile_path = build_dir / "build.ninja";
+    catalyst::logger.log(LogLevel::DEBUG, "Writing build file to: {}", buildfile_path.string());
+    std::ofstream buildfile{buildfile_path};
 
     if (!buildfile) {
         return std::unexpected(
-            std::format("Failed to open {} for writing", fs::path{build_dir / "build.ninja"}.string()));
+            std::format("Failed to open {} for writing", buildfile_path.string()));
     }
 
     catalyst::generate::BuildWriters::NinjaWriter writer(buildfile);
