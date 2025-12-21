@@ -67,6 +67,7 @@ public:
                                                        ) = 0;
 
     virtual void add_comment(std::string_view comment) = 0;
+    virtual void add_default(std::string_view target) = 0;
 };
 
 class NinjaWriter : public BaseWriter {
@@ -86,6 +87,7 @@ public:
                                                const std::vector<target_t> &implicit_deps = {}) override;
 
     void add_comment(std::string_view comment) override;
+    void add_default(std::string_view target) override;
 };
 
 } // namespace BuildWriters

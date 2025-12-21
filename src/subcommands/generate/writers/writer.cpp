@@ -87,4 +87,8 @@ std::expected<void, std::string> NinjaWriter::add_build(const std::vector<target
 void NinjaWriter::add_comment(std::string_view comment) {
     std::println(stream, "# {}", comment);
 }
+
+void NinjaWriter::add_default(std::string_view target) {
+    std::println(stream, "default {}", escape(target));
+}
 } // namespace catalyst::generate::BuildWriters
