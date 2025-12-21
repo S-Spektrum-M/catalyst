@@ -1,4 +1,5 @@
 #include "catalyst/subcommands/generate.hpp"
+#include <print>
 
 namespace catalyst::generate::BuildWriters {
 
@@ -73,5 +74,9 @@ std::expected<void, std::string> NinjaWriter::add_build(const std::vector<target
 
     std::println(stream);
     return {};
+}
+
+void NinjaWriter::add_comment(std::string_view comment) {
+    std::println(stream, "# {}", comment);
 }
 } // namespace catalyst::generate::BuildWriters
