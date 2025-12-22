@@ -36,10 +36,16 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
     if (auto deps = config.get_root()["dependencies"]; deps && deps.IsSequence()) {
-        for (auto dep : deps) {
-            if (!dep["name"] || !dep["source"]) {
-                catalyst::logger.log(LogLevel::ERROR, "Improperly configured dependency.");
-                return std::unexpected("Improperly configured dependency.");
+        for (int ii = 0; auto dep : deps) {
+            if (!dep["name"]) {
+                catalyst::logger.log(LogLevel::ERROR, "Dependency: {} does not define field: name", ii);
+                return std::unexpected(std::format("Dependency: {} does not define field: name", ii));
+            }
+            if (!dep["source"]) {
+                catalyst::logger.log(
+                    LogLevel::ERROR, "Dependency: {} does not define field: source", dep["name"].as<std::string>());
+                return std::unexpected(
+                    std::format("Dependency: {} does not define field: source", dep["name"].as<std::string>()));
             }
             std::string name = dep["name"].as<std::string>();
             std::string source = dep["source"].as<std::string>();
@@ -47,6 +53,9 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             if (source == "vcpkg") {
                 if (!dep["version"]) {
                     return std::unexpected(std::format("vcpkg dependency '{}' is missing version.", name));
+                }
+                if (!dep["triplet"]) {
+                    return std::unexpected(std::format("vcpkg dependency '{}' is missing triplet.", name));
                 }
                 if (auto res = fetch_vcpkg(name); !res)
                     return std::unexpected(res.error());
@@ -68,6 +77,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                         return std::unexpected(res.error());
                 }
             }
+            ++ii;
         }
     }
 

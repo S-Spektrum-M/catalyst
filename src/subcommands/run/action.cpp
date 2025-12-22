@@ -92,8 +92,8 @@ std::expected<void, std::string> action(const parse_t &args) {
     exec_args.insert(exec_args.end(), args.params.begin(), args.params.end());
 
     if (int res = catalyst::process_exec(std::move(exec_args)).value().get(); res) {
-        catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
-        return std::unexpected(std::format("exitied with code: {}", res));
+        catalyst::logger.log(LogLevel::ERROR, "Target exited with code: {}", res);
+        return std::unexpected(std::format("Target executable: {} exited with failure code: {}", exe_path.string(), res));
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-run hooks.");
