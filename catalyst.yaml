@@ -27,3 +27,7 @@ dependencies:
   - name: cli11
     source: system
     linkage: interface
+  - name: reproc
+    source: vcpkg
+    triplet: x64-linux
+    version: latest
