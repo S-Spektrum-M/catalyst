@@ -46,7 +46,14 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
     std::string compdb_command =
         std::format("ninja -C {} -t compdb cc_compile cxx_compile > {}", build_dir.string(), real_compdb_path.string());
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", compdb_command);
-    if (catalyst::process_exec(compdb_command).value().get() != 0) {
+    auto shell_cmd = [](const std::string &cmd) -> std::vector<std::string> {
+#if defined(_WIN32)
+        return {"cmd", "/c", cmd};
+#else
+        return {"/bin/sh", "-c", cmd};
+#endif
+    };
+    if (catalyst::R_process_exec(shell_cmd(compdb_command)).value().get() != 0) {
         return std::unexpected("failed to generate compile commands");
     }
     return {};
@@ -120,7 +127,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Building project.");
-    if (catalyst::process_exec(std::format("ninja -C {}", build_dir.string())).value().get() != 0) {
+    if (catalyst::R_process_exec({"ninja", "-C", build_dir.string()}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());

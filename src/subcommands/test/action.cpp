@@ -75,7 +75,12 @@ std::expected<void, std::string> action(const parse_t &args) {
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = command_str(exe_path, args.params);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-    if (int res = catalyst::process_exec(command.c_str()).value().get(); res) {
+
+    std::vector<std::string> exec_args;
+    exec_args.push_back(exe_path.string());
+    exec_args.insert(exec_args.end(), args.params.begin(), args.params.end());
+
+    if (int res = catalyst::R_process_exec(std::move(exec_args)).value().get(); res) {
         catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
         return std::unexpected(std::format("exitied with code: {}", res));
     }

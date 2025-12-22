@@ -22,20 +22,28 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
         return {}; // No hook defined, so we do nothing.
     }
 
+    auto shell_cmd = [](const std::string &cmd) -> std::vector<std::string> {
+#if defined(_WIN32)
+        return {"cmd", "/c", cmd};
+#else
+        return {"/bin/sh", "-c", cmd};
+#endif
+    };
+
     const auto &hook_node = profile_comp["hooks"][hook_name];
     if (hook_node.IsSequence()) {
         for (const auto &item : hook_node) {
             if (item["command"]) {
                 std::string command = item["command"].as<std::string>();
                 catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
-                if (catalyst::process_exec(command).value().get() != 0) {
+                if (catalyst::R_process_exec(shell_cmd(command)).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
                     return std::unexpected("Hook '" + hook_name + "' command failed: " + command);
                 }
             } else if (item["script"]) {
                 std::string script = item["script"].as<std::string>();
                 catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running script: {}", hook_name, script);
-                if (catalyst::process_exec(script.c_str()).value().get() != 0) {
+                if (catalyst::R_process_exec(shell_cmd(script)).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' script failed: {}", hook_name, script);
                     return std::unexpected("Hook '" + hook_name + "' script failed: " + script);
                 }
@@ -44,7 +52,7 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
     } else if (hook_node.IsScalar()) {
         std::string command = hook_node.as<std::string>();
         catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
-        if (catalyst::process_exec(command.c_str()).value().get() != 0) {
+        if (catalyst::R_process_exec(shell_cmd(command)).value().get() != 0) {
             catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
             return std::unexpected("Hook '" + hook_name + "' command failed: " + command);
         }
