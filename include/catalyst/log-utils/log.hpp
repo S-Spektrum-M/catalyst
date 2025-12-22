@@ -48,7 +48,7 @@ public:
     log_t &operator=(const log_t &) = delete;
 
     template <typename... Args> void log(LogLevel level, std::format_string<Args...> fmt, Args &&...args) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(log_file_mutex_);
         if (!log_file_.is_open()) {
             return;
         }
@@ -76,9 +76,11 @@ public:
             }
 
             if (level == LogLevel::ERROR) {
+                std::lock_guard<std::mutex> lock{stdio_mutex};
                 std::cerr << std::format("[{:%Y-%m-%d %H:%M:%S}] ", now) << color
                           << std::format("[{}] {}", to_string(level), message) << RESET << "\n";
             } else {
+                std::lock_guard<std::mutex> lock{stdio_mutex};
                 std::cout << std::format("[{:%Y-%m-%d %H:%M:%S}] ", now) << color
                           << std::format("[{}] {}", to_string(level), message) << RESET << "\n";
             }
@@ -86,17 +88,17 @@ public:
     }
 
     bool is_open() const {
-        std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(mutex_));
+        std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(log_file_mutex_));
         return log_file_.is_open();
     }
 
     void flush() {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(log_file_mutex_);
         log_file_.flush();
     }
 
     void close() {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(log_file_mutex_);
         if (log_file_.is_open()) {
             log_file_.close();
         }
@@ -161,7 +163,8 @@ private:
     }
 
     std::ofstream log_file_;
-    std::mutex mutex_;
+    std::mutex log_file_mutex_;
+    std::mutex stdio_mutex; // it's safe to reuse this since writes to stderr and stdout in this class happen seperately
 
 public:
     bool verbose_logging = false;
