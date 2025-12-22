@@ -45,7 +45,7 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
     std::string command = std::format("\"{}\" install {}", vcpkg_exe.string(), name);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
     catalyst::logger.log(LogLevel::DEBUG, "Fetching: {} from vcpkg", name);
-    if (catalyst::process_exec(command).value().get() != 0) {
+    if (catalyst::process_exec({vcpkg_exe.string(), "install", name}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
@@ -58,13 +58,20 @@ fetch_git(std::string build_dir, std::string name, std::string source, std::stri
     fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
     std::println(std::cout, "Fetching: {}@{} from {}", name, version, source);
     std::string command;
+    std::vector<std::string> args = {"git", "clone", "--depth", "1"};
     if (version == "latest") {
         command = std::format("git clone --depth 1 {} {}", source, dep_path.string());
+        args.push_back(source);
+        args.push_back(dep_path.string());
     } else {
         command = std::format("git clone --depth 1 --branch {} {} {}", version, source, dep_path.string());
+        args.push_back("--branch");
+        args.push_back(version);
+        args.push_back(source);
+        args.push_back(dep_path.string());
     }
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-    if (catalyst::process_exec(command).value().get() != 0) {
+    if (catalyst::process_exec(std::move(args)).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }

@@ -107,7 +107,7 @@ private:
     static_assert(is_implemented(T), warning_msg(T));
 #else
     static_assert(is_implemented(T),
-                  "Unimplemented specialization for DerivedWriter. Add wxplicit template specialization.");
+                  "Unimplemented specialization for DerivedWriter. Add explicit template specialization.");
 #endif
 
 public:
