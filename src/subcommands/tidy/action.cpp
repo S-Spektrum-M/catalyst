@@ -82,7 +82,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                     return {"/bin/sh", "-c", cmd};
 #endif
                 };
-                if (int res = catalyst::R_process_exec(shell_cmd(command)).value().get(); res != 0) {
+                if (int res = catalyst::process_exec(shell_cmd(command)).value().get(); res != 0) {
                     err_log_mt.lock();
                     catalyst::logger.log(
                         LogLevel::ERROR, "Linter failed for {}: exit code {}", file_to_process.string(), res);

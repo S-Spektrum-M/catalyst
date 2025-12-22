@@ -75,7 +75,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             return;
         }
         catalyst::logger.log(LogLevel::DEBUG, "Formatting {}", file.string());
-        if (int res = catalyst::R_process_exec({formatter, "-i", file.string()}).value().get(); res) {
+        if (int res = catalyst::process_exec({formatter, "-i", file.string()}).value().get(); res) {
             std::lock_guard<std::mutex> lock(error_mutex);
             if (!formatting_error) {
                 error_message = "Error running clang-format on " + file.string();

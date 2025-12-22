@@ -45,7 +45,7 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
     std::string command = std::format("\"{}\" install {}", vcpkg_exe.string(), name);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
     catalyst::logger.log(LogLevel::DEBUG, "Fetching: {} from vcpkg", name);
-    if (catalyst::R_process_exec({vcpkg_exe.string(), "install", name}).value().get() != 0) {
+    if (catalyst::process_exec({vcpkg_exe.string(), "install", name}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
@@ -71,7 +71,7 @@ fetch_git(std::string build_dir, std::string name, std::string source, std::stri
         args.push_back(dep_path.string());
     }
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-    if (catalyst::R_process_exec(std::move(args)).value().get() != 0) {
+    if (catalyst::process_exec(std::move(args)).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }

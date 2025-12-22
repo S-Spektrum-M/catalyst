@@ -32,7 +32,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (catalyst::R_process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
+    if (catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
         return std::unexpected("error in cleaning.");
     }
@@ -59,7 +59,7 @@ std::expected<void, std::string> action2(const parse_t &parse_args) {
 
     std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (catalyst::R_process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
+    if (catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
         return std::unexpected("error in cleaning.");
     }

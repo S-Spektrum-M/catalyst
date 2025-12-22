@@ -36,14 +36,14 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
             if (item["command"]) {
                 std::string command = item["command"].as<std::string>();
                 catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
-                if (catalyst::R_process_exec(shell_cmd(command)).value().get() != 0) {
+                if (catalyst::process_exec(shell_cmd(command)).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
                     return std::unexpected("Hook '" + hook_name + "' command failed: " + command);
                 }
             } else if (item["script"]) {
                 std::string script = item["script"].as<std::string>();
                 catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running script: {}", hook_name, script);
-                if (catalyst::R_process_exec(shell_cmd(script)).value().get() != 0) {
+                if (catalyst::process_exec(shell_cmd(script)).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' script failed: {}", hook_name, script);
                     return std::unexpected("Hook '" + hook_name + "' script failed: " + script);
                 }
@@ -52,7 +52,7 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
     } else if (hook_node.IsScalar()) {
         std::string command = hook_node.as<std::string>();
         catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
-        if (catalyst::R_process_exec(shell_cmd(command)).value().get() != 0) {
+        if (catalyst::process_exec(shell_cmd(command)).value().get() != 0) {
             catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
             return std::unexpected("Hook '" + hook_name + "' command failed: " + command);
         }

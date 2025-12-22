@@ -53,7 +53,7 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
         return {"/bin/sh", "-c", cmd};
 #endif
     };
-    if (catalyst::R_process_exec(shell_cmd(compdb_command)).value().get() != 0) {
+    if (catalyst::process_exec(shell_cmd(compdb_command)).value().get() != 0) {
         return std::unexpected("failed to generate compile commands");
     }
     return {};
@@ -127,7 +127,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Building project.");
-    if (catalyst::R_process_exec({"ninja", "-C", build_dir.string()}).value().get() != 0) {
+    if (catalyst::process_exec({"ninja", "-C", build_dir.string()}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());

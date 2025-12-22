@@ -10,7 +10,7 @@
 /// async wrapper around std::system()
 /// TODO: migrate to safe exec functions like in reprco
 namespace catalyst {
-std::expected<std::future<int>, std::string> R_process_exec(std::vector<std::string> &&args) {
+std::expected<std::future<int>, std::string> process_exec(std::vector<std::string> &&args) {
     if (args.empty()) {
         return std::unexpected("Cannot execute empty command");
     }
