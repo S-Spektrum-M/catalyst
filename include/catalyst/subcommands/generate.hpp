@@ -48,7 +48,7 @@ namespace BuildWriters {
 class BaseWriter {
 protected:
     std::ostream &stream;
-    explicit BaseWriter(std::ostream &stream);
+    explicit BaseWriter(std::ostream &stream) : stream(stream) {}
 
 public:
     using rule_t = std::string;
