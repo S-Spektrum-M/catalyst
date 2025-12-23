@@ -32,9 +32,9 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
+    if (int rtn = catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get(); rtn != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
-        return std::unexpected("error in cleaning.");
+        return std::unexpected(std::format("Command: ninja -C {} -t clean failed with exit code: {}", build_dir, rtn));
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-clean hooks.");

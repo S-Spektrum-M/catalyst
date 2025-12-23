@@ -58,10 +58,10 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
                 }
             } else if (source == "vcpkg") {
                 if (!dep["triplet"] || !dep["triplet"].IsScalar()) {
-                    catalyst::logger.log(LogLevel::ERROR,
-                                         "vcpkg dependency: {} does not define field: triplet",
-                                         dep["name"].as<std::string>());
-                    return std::unexpected("unable to calculate ld_lib_path");
+                    std::string error_msg = std::format("vcpkg dependency '{}' is missing required field: 'triplet'",
+                                                        dep["name"].as<std::string>());
+                    catalyst::logger.log(LogLevel::ERROR, "{}", error_msg);
+                    return std::unexpected(error_msg);
                 }
                 auto triplet = dep["triplet"].as<std::string>();
                 resolve_vcpkg_dependency(dep, triplet, ldflags, ldlibs);

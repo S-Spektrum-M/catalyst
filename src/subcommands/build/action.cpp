@@ -53,8 +53,11 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
         return {"/bin/sh", "-c", cmd};
 #endif
     };
-    if (catalyst::process_exec(shell_cmd(compdb_command)).value().get() != 0) {
-        return std::unexpected("failed to generate compile commands");
+    if (int rtn = catalyst::process_exec(shell_cmd(compdb_command)).value().get(); rtn != 0) {
+        return std::unexpected(std::format("Failed to generate compile_commands.json.\n"
+                                           "Command: {} exited with error code: {}",
+                                           compdb_command,
+                                           rtn));
     }
     return {};
 }
@@ -127,7 +130,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Building project.");
-    if (catalyst::process_exec({"ninja", "-C", build_dir.string()}).value().get() != 0) {
+    if (int res = catalyst::process_exec({"ninja", "-C", build_dir.string()}).value().get(); res != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
@@ -135,7 +138,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 "Failed to build project.\nAdditionally, the on_build_failure hook failed with error: " +
                 hook_res.error());
         }
-        return std::unexpected("Failed to build project");
+        return std::unexpected(std::format("Build process failed. Ninja exited with code: {}", res));
     }
 
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands.");

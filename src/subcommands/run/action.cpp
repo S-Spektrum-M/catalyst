@@ -9,6 +9,7 @@
 #include <expected>
 #include <filesystem>
 #include <format>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -51,13 +52,25 @@ std::expected<void, std::string> action(const parse_t &args) {
     str_to_lower(target_type);
 
     if (!profile_comp["manifest"]["type"].IsDefined() || target_type != "binary") {
-        catalyst::logger.log(LogLevel::ERROR, "Profile does not build a binary target.");
-        return std::unexpected("profile does not build a binary target");
+        if (!profile_comp["manifest"]["type"].IsDefined()) {
+            catalyst::logger.log(LogLevel::ERROR, "Profile: {} does not define field: 'manifest.type'.", args.profile);
+            return std::unexpected(std::format("Profile: {} does not define field: 'manifest.type'.", args.profile));
+        } else {
+            catalyst::logger.log(LogLevel::ERROR,
+                                 "Profile: {} defines 'manifest.type' = {}. Expected 'manifest.type' = BINARY",
+                                 args.profile,
+                                 target_type);
+            return std::unexpected(
+                std::format("Profile: {} defines 'manifest.type' = {}. Expected 'manifest.type' = BINARY",
+                            args.profile,
+                            target_type));
+        }
+        return std::unexpected(std::format("Profile: {} does not build a binary target.", args.profile));
     }
 
     if (!profile_comp["manifest"]["dirs"]["build"]) {
-        catalyst::logger.log(LogLevel::ERROR, "Build directory is not defined.");
-        return std::unexpected("build directory is not defined");
+        catalyst::logger.log(LogLevel::ERROR, "Build directory is not defined in profile: {}.", args.profile);
+        return std::unexpected(std::format("Build directory is not defined in profile: {}.", args.profile));
     } else {
         build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
     }
@@ -68,14 +81,14 @@ std::expected<void, std::string> action(const parse_t &args) {
         exe = profile_comp["manifest"]["name"].as<std::string>();
     } else {
         catalyst::logger.log(LogLevel::ERROR, "Unable to determine executable name.");
-        return std::unexpected("unable to figure out executable name. "
+        return std::unexpected("Unable to figure out executable name."
                                "manifest.name and manifest.provides are undefined");
     }
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = command_str(exe_path, args.params);
     if (auto res = catalyst::generate::lib_path(profile_comp); !res) {
-        return std::unexpected("failed to generate LD_LIBRARY_PATH");
+        return std::unexpected("Failed to generate LD_LIBRARY_PATH");
     } else {
 #if defined(_WIN32)
         _putenv_s("PATH", res.value().c_str());
@@ -92,8 +105,9 @@ std::expected<void, std::string> action(const parse_t &args) {
     exec_args.insert(exec_args.end(), args.params.begin(), args.params.end());
 
     if (int res = catalyst::process_exec(std::move(exec_args)).value().get(); res) {
-        catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
-        return std::unexpected(std::format("exitied with code: {}", res));
+        catalyst::logger.log(LogLevel::ERROR, "Target exited with code: {}", res);
+        return std::unexpected(
+            std::format("Target executable: {} exited with failure code: {}", exe_path.string(), res));
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-run hooks.");
