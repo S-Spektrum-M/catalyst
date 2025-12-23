@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -179,6 +180,17 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
 
     root = getDefaultConfiguration();
 
+    // This is possibly better than creating a temporary std::unordered_set
+    for (size_t ii = 0; ii < profiles.size(); ++ii) {
+        for (size_t jj = 0; jj < ii; ++jj) {
+            if (profiles[jj] == profiles[ii]) {
+                throw std::runtime_error(std::format(
+                    "Duplicate profiles: {0} at index {1} and {0} at index {2}", profiles[ii], ii, jj
+                ));
+            }
+        }
+    }
+
     for (const auto &profile_name : profile_names) {
         fs::path profile_path{};
         if (profile_name == "common")
@@ -186,7 +198,7 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
         else
             profile_path = std::format("catalyst_{}.yaml", profile_name);
         if (!fs::exists(profile_path)) {
-            catalyst::logger.log(LogLevel::DEBUG, "Profile not found: {}", profile_path.string());
+            catalyst::logger.log(LogLevel::ERROR, "Profile not found: {}", profile_path.string());
             throw std::runtime_error(std::format("Profile: {} not found", profile_path.string()));
         }
         auto new_profile = YAML::LoadFile(profile_path);
