@@ -76,6 +76,32 @@ std::string ver_max(std::string s1, std::string s2) {
 
 void merge(YAML::Node &composite, const fs::path &profile_path) {
     YAML::Node new_profile = YAML::LoadFile(profile_path);
+    YAML::Node defaults = getDefaultConfiguration();
+
+    auto check_conflict = [&](const std::string &section, const std::string &key, const std::string &subkey,
+                              const std::string &incoming_val) {
+        try {
+            std::string current_val;
+            std::string default_val;
+
+            if (subkey.empty()) {
+                current_val = composite[section][key].as<std::string>();
+                default_val = defaults[section][key].as<std::string>();
+            } else {
+                current_val = composite[section][key][subkey].as<std::string>();
+                default_val = defaults[section][key][subkey].as<std::string>();
+            }
+
+            if (current_val != incoming_val && current_val != default_val) {
+                std::string full_key = section + "." + key + (subkey.empty() ? "" : "." + subkey);
+                catalyst::logger.log(LogLevel::WARN, "Profile '{}' overrides '{}': '{}' -> '{}'",
+                                     profile_path.string(), full_key, current_val, incoming_val);
+            }
+        } catch (...) {
+            // Ignore errors
+        }
+    };
+
     if (new_profile["meta"]["min_ver"].IsDefined()) {
         composite["meta"]["min_ver"] =
             ver_max(composite["meta"]["min_ver"].as<std::string>(), new_profile["meta"]["min_ver"].as<std::string>());
@@ -83,34 +109,47 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
 
     if (YAML::Node new_profile_manifest = new_profile["manifest"]; new_profile_manifest.IsDefined()) {
         if (new_profile_manifest["name"]) {
+            check_conflict("manifest", "name", "", new_profile_manifest["name"].as<std::string>());
             composite["manifest"]["name"] = new_profile_manifest["name"];
         }
         if (new_profile_manifest["type"]) {
+            check_conflict("manifest", "type", "", new_profile_manifest["type"].as<std::string>());
             composite["manifest"]["type"] = new_profile_manifest["type"];
         }
         if (new_profile_manifest["version"]) {
+            check_conflict("manifest", "version", "", new_profile_manifest["version"].as<std::string>());
             composite["manifest"]["version"] = new_profile_manifest["version"];
         }
         if (new_profile_manifest["provides"]) {
+            check_conflict("manifest", "provides", "", new_profile_manifest["provides"].as<std::string>());
             composite["manifest"]["provides"] = new_profile_manifest["provides"];
         }
         if (YAML::Node new_profile_manifest_tooling = new_profile_manifest["tooling"]; new_profile_manifest_tooling) {
             if (new_profile_manifest_tooling["CC"]) {
+                check_conflict("manifest", "tooling", "CC", new_profile_manifest_tooling["CC"].as<std::string>());
                 composite["manifest"]["tooling"]["CC"] = new_profile_manifest_tooling["CC"];
             }
             if (new_profile_manifest_tooling["CXX"]) {
+                check_conflict("manifest", "tooling", "CXX", new_profile_manifest_tooling["CXX"].as<std::string>());
                 composite["manifest"]["tooling"]["CXX"] = new_profile_manifest_tooling["CXX"];
             }
             if (new_profile_manifest_tooling["FMT"]) {
+                check_conflict("manifest", "tooling", "FMT", new_profile_manifest_tooling["FMT"].as<std::string>());
                 composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
             }
             if (new_profile_manifest_tooling["LINTER"]) {
+                check_conflict("manifest", "tooling", "LINTER",
+                               new_profile_manifest_tooling["LINTER"].as<std::string>());
                 composite["manifest"]["tooling"]["LINTER"] = new_profile_manifest_tooling["LINTER"];
             }
             if (new_profile_manifest_tooling["CCFLAGS"]) {
+                check_conflict("manifest", "tooling", "CCFLAGS",
+                               new_profile_manifest_tooling["CCFLAGS"].as<std::string>());
                 composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
             }
             if (new_profile_manifest_tooling["CXXFLAGS"]) {
+                check_conflict("manifest", "tooling", "CXXFLAGS",
+                               new_profile_manifest_tooling["CXXFLAGS"].as<std::string>());
                 composite["manifest"]["tooling"]["CXXFLAGS"] = new_profile_manifest_tooling["CXXFLAGS"];
             }
         }
@@ -121,8 +160,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
             if (new_profile_manifest_dirs["source"] && new_profile_manifest_dirs["source"].IsSequence())
                 for (auto src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
                     composite["manifest"]["dirs"]["source"].push_back(src);
-            if (new_profile_manifest_dirs["build"])
+            if (new_profile_manifest_dirs["build"]) {
+                check_conflict("manifest", "dirs", "build", new_profile_manifest_dirs["build"].as<std::string>());
                 composite["manifest"]["dirs"]["build"] = new_profile_manifest_dirs["build"];
+            }
         }
     }
     if (new_profile["features"] && new_profile["features"].IsSequence()) {
