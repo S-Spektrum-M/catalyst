@@ -5,7 +5,9 @@
 #include "yaml-cpp/node/parse.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
+#include <exception>
 #include <filesystem>
 #include <format>
 #include <optional>
@@ -97,8 +99,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
                 catalyst::logger.log(LogLevel::WARN, "Profile '{}' overrides '{}': '{}' -> '{}'",
                                      profile_path.string(), full_key, current_val, incoming_val);
             }
+        } catch (std::exception &err) {
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "{}", err.what()); // NOTE: these aren't super important; let's just leave it at DEBUG level
         } catch (...) {
-            // Ignore errors
+            catalyst::logger.log(catalyst::LogLevel::DEBUG, "unknown failure while checking profile overrides");
         }
     };
 
