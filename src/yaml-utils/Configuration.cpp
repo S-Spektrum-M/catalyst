@@ -316,13 +316,12 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
 
     root = getDefaultConfiguration();
 
-    // This is possibly better than creating a temporary std::unordered_set
+    // NOTE:PERF: This is possibly more performant than creating a temporary std::unordered_set
     for (size_t ii = 0; ii < profiles.size(); ++ii) {
         for (size_t jj = 0; jj < ii; ++jj) {
             if (profiles[jj] == profiles[ii]) {
-                throw std::runtime_error(std::format(
-                    "Duplicate profiles: {0} at index {1} and {0} at index {2}", profiles[ii], ii, jj
-                ));
+                throw std::runtime_error(
+                    std::format("Duplicate profiles: {0} at index {1} and {0} at index {2}", profiles[ii], jj, ii));
             }
         }
     }
