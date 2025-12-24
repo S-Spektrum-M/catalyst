@@ -102,89 +102,180 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
         }
     };
 
-    if (new_profile["meta"]["min_ver"].IsDefined()) {
-        composite["meta"]["min_ver"] =
-            ver_max(composite["meta"]["min_ver"].as<std::string>(), new_profile["meta"]["min_ver"].as<std::string>());
+    if (new_profile["meta"].IsDefined()) {
+        if (new_profile["meta"].IsNull()) {
+            composite.remove("meta");
+        } else if (new_profile["meta"]["min_ver"].IsDefined()) {
+            composite["meta"]["min_ver"] = ver_max(composite["meta"]["min_ver"].as<std::string>(),
+                                                   new_profile["meta"]["min_ver"].as<std::string>());
+        }
     }
 
-    if (YAML::Node new_profile_manifest = new_profile["manifest"]; new_profile_manifest.IsDefined()) {
-        if (new_profile_manifest["name"]) {
-            check_conflict("manifest", "name", "", new_profile_manifest["name"].as<std::string>());
-            composite["manifest"]["name"] = new_profile_manifest["name"];
-        }
-        if (new_profile_manifest["type"]) {
-            check_conflict("manifest", "type", "", new_profile_manifest["type"].as<std::string>());
-            composite["manifest"]["type"] = new_profile_manifest["type"];
-        }
-        if (new_profile_manifest["version"]) {
-            check_conflict("manifest", "version", "", new_profile_manifest["version"].as<std::string>());
-            composite["manifest"]["version"] = new_profile_manifest["version"];
-        }
-        if (new_profile_manifest["provides"]) {
-            check_conflict("manifest", "provides", "", new_profile_manifest["provides"].as<std::string>());
-            composite["manifest"]["provides"] = new_profile_manifest["provides"];
-        }
-        if (YAML::Node new_profile_manifest_tooling = new_profile_manifest["tooling"]; new_profile_manifest_tooling) {
-            if (new_profile_manifest_tooling["CC"]) {
-                check_conflict("manifest", "tooling", "CC", new_profile_manifest_tooling["CC"].as<std::string>());
-                composite["manifest"]["tooling"]["CC"] = new_profile_manifest_tooling["CC"];
-            }
-            if (new_profile_manifest_tooling["CXX"]) {
-                check_conflict("manifest", "tooling", "CXX", new_profile_manifest_tooling["CXX"].as<std::string>());
-                composite["manifest"]["tooling"]["CXX"] = new_profile_manifest_tooling["CXX"];
-            }
-            if (new_profile_manifest_tooling["FMT"]) {
-                check_conflict("manifest", "tooling", "FMT", new_profile_manifest_tooling["FMT"].as<std::string>());
-                composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
-            }
-            if (new_profile_manifest_tooling["LINTER"]) {
-                check_conflict("manifest", "tooling", "LINTER",
-                               new_profile_manifest_tooling["LINTER"].as<std::string>());
-                composite["manifest"]["tooling"]["LINTER"] = new_profile_manifest_tooling["LINTER"];
-            }
-            if (new_profile_manifest_tooling["CCFLAGS"]) {
-                check_conflict("manifest", "tooling", "CCFLAGS",
-                               new_profile_manifest_tooling["CCFLAGS"].as<std::string>());
-                composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
-            }
-            if (new_profile_manifest_tooling["CXXFLAGS"]) {
-                check_conflict("manifest", "tooling", "CXXFLAGS",
-                               new_profile_manifest_tooling["CXXFLAGS"].as<std::string>());
-                composite["manifest"]["tooling"]["CXXFLAGS"] = new_profile_manifest_tooling["CXXFLAGS"];
-            }
-        }
-        if (YAML::Node new_profile_manifest_dirs = new_profile_manifest["dirs"]; new_profile_manifest_dirs) {
-            if (new_profile_manifest_dirs["include"] && new_profile_manifest_dirs["include"].IsSequence())
-                for (auto inc : new_profile_manifest_dirs["include"].as<std::vector<std::string>>())
-                    composite["manifest"]["dirs"]["include"].push_back(inc);
-            if (new_profile_manifest_dirs["source"] && new_profile_manifest_dirs["source"].IsSequence())
-                for (auto src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
-                    composite["manifest"]["dirs"]["source"].push_back(src);
-            if (new_profile_manifest_dirs["build"]) {
-                check_conflict("manifest", "dirs", "build", new_profile_manifest_dirs["build"].as<std::string>());
-                composite["manifest"]["dirs"]["build"] = new_profile_manifest_dirs["build"];
-            }
-        }
-    }
-    if (new_profile["features"] && new_profile["features"].IsSequence()) {
-        for (const auto &feature : new_profile["features"]) {
-            composite["features"].push_back(feature.as<std::string>());
-        }
-    }
-    if (new_profile["dependencies"] && new_profile["dependencies"].IsSequence()) {
-        for (const YAML::Node &dep : new_profile["dependencies"]) {
-            composite["dependencies"].push_back(dep);
-        }
-    }
-    if (new_profile["hooks"] && new_profile["hooks"].IsDefined()) {
-        for (const auto &hook : new_profile["hooks"]) {
-            std::string hook_name = hook.first.as<std::string>();
-            if (hook.second.IsSequence()) {
-                for (const auto &item : hook.second) {
-                    composite["hooks"][hook_name].push_back(item);
+    if (new_profile["manifest"].IsDefined()) {
+        if (new_profile["manifest"].IsNull()) {
+            composite.remove("manifest");
+        } else {
+            YAML::Node new_profile_manifest = new_profile["manifest"];
+            if (new_profile_manifest["name"].IsDefined()) {
+                if (new_profile_manifest["name"].IsNull()) {
+                    composite["manifest"].remove("name");
+                } else {
+                    check_conflict("manifest", "name", "", new_profile_manifest["name"].as<std::string>());
+                    composite["manifest"]["name"] = new_profile_manifest["name"];
                 }
-            } else if (hook.second.IsScalar()) {
-                composite["hooks"][hook_name].push_back(hook.second);
+            }
+            if (new_profile_manifest["type"].IsDefined()) {
+                if (new_profile_manifest["type"].IsNull()) {
+                    composite["manifest"].remove("type");
+                } else {
+                    check_conflict("manifest", "type", "", new_profile_manifest["type"].as<std::string>());
+                    composite["manifest"]["type"] = new_profile_manifest["type"];
+                }
+            }
+            if (new_profile_manifest["version"].IsDefined()) {
+                if (new_profile_manifest["version"].IsNull()) {
+                    composite["manifest"].remove("version");
+                } else {
+                    check_conflict("manifest", "version", "", new_profile_manifest["version"].as<std::string>());
+                    composite["manifest"]["version"] = new_profile_manifest["version"];
+                }
+            }
+            if (new_profile_manifest["provides"].IsDefined()) {
+                if (new_profile_manifest["provides"].IsNull()) {
+                    composite["manifest"].remove("provides");
+                } else {
+                    check_conflict("manifest", "provides", "", new_profile_manifest["provides"].as<std::string>());
+                    composite["manifest"]["provides"] = new_profile_manifest["provides"];
+                }
+            }
+            if (new_profile_manifest["tooling"].IsDefined()) {
+                if (new_profile_manifest["tooling"].IsNull()) {
+                    composite["manifest"].remove("tooling");
+                } else {
+                    YAML::Node new_profile_manifest_tooling = new_profile_manifest["tooling"];
+                    if (new_profile_manifest_tooling["CC"].IsDefined()) {
+                        if (new_profile_manifest_tooling["CC"].IsNull()) {
+                            composite["manifest"]["tooling"].remove("CC");
+                        } else {
+                            check_conflict("manifest", "tooling", "CC",
+                                           new_profile_manifest_tooling["CC"].as<std::string>());
+                            composite["manifest"]["tooling"]["CC"] = new_profile_manifest_tooling["CC"];
+                        }
+                    }
+                    if (new_profile_manifest_tooling["CXX"].IsDefined()) {
+                        if (new_profile_manifest_tooling["CXX"].IsNull()) {
+                            composite["manifest"]["tooling"].remove("CXX");
+                        } else {
+                            check_conflict("manifest", "tooling", "CXX",
+                                           new_profile_manifest_tooling["CXX"].as<std::string>());
+                            composite["manifest"]["tooling"]["CXX"] = new_profile_manifest_tooling["CXX"];
+                        }
+                    }
+                    if (new_profile_manifest_tooling["FMT"].IsDefined()) {
+                        if (new_profile_manifest_tooling["FMT"].IsNull()) {
+                            composite["manifest"]["tooling"].remove("FMT");
+                        } else {
+                            check_conflict("manifest", "tooling", "FMT",
+                                           new_profile_manifest_tooling["FMT"].as<std::string>());
+                            composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
+                        }
+                    }
+                    if (new_profile_manifest_tooling["LINTER"].IsDefined()) {
+                        if (new_profile_manifest_tooling["LINTER"].IsNull()) {
+                            composite["manifest"]["tooling"].remove("LINTER");
+                        } else {
+                            check_conflict("manifest", "tooling", "LINTER",
+                                           new_profile_manifest_tooling["LINTER"].as<std::string>());
+                            composite["manifest"]["tooling"]["LINTER"] = new_profile_manifest_tooling["LINTER"];
+                        }
+                    }
+                    if (new_profile_manifest_tooling["CCFLAGS"].IsDefined()) {
+                        if (new_profile_manifest_tooling["CCFLAGS"].IsNull()) {
+                            composite["manifest"]["tooling"].remove("CCFLAGS");
+                        } else {
+                            check_conflict("manifest", "tooling", "CCFLAGS",
+                                           new_profile_manifest_tooling["CCFLAGS"].as<std::string>());
+                            composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
+                        }
+                    }
+                    if (new_profile_manifest_tooling["CXXFLAGS"].IsDefined()) {
+                        if (new_profile_manifest_tooling["CXXFLAGS"].IsNull()) {
+                            composite["manifest"]["tooling"].remove("CXXFLAGS");
+                        } else {
+                            check_conflict("manifest", "tooling", "CXXFLAGS",
+                                           new_profile_manifest_tooling["CXXFLAGS"].as<std::string>());
+                            composite["manifest"]["tooling"]["CXXFLAGS"] = new_profile_manifest_tooling["CXXFLAGS"];
+                        }
+                    }
+                }
+            }
+            if (new_profile_manifest["dirs"].IsDefined()) {
+                if (new_profile_manifest["dirs"].IsNull()) {
+                    composite["manifest"].remove("dirs");
+                } else {
+                    YAML::Node new_profile_manifest_dirs = new_profile_manifest["dirs"];
+                    if (new_profile_manifest_dirs["include"].IsDefined()) {
+                        if (new_profile_manifest_dirs["include"].IsNull()) {
+                            composite["manifest"]["dirs"].remove("include");
+                        } else if (new_profile_manifest_dirs["include"].IsSequence()) {
+                            for (auto inc : new_profile_manifest_dirs["include"].as<std::vector<std::string>>())
+                                composite["manifest"]["dirs"]["include"].push_back(inc);
+                        }
+                    }
+                    if (new_profile_manifest_dirs["source"].IsDefined()) {
+                        if (new_profile_manifest_dirs["source"].IsNull()) {
+                            composite["manifest"]["dirs"].remove("source");
+                        } else if (new_profile_manifest_dirs["source"].IsSequence()) {
+                            for (auto src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
+                                composite["manifest"]["dirs"]["source"].push_back(src);
+                        }
+                    }
+                    if (new_profile_manifest_dirs["build"].IsDefined()) {
+                        if (new_profile_manifest_dirs["build"].IsNull()) {
+                            composite["manifest"]["dirs"].remove("build");
+                        } else {
+                            check_conflict("manifest", "dirs", "build",
+                                           new_profile_manifest_dirs["build"].as<std::string>());
+                            composite["manifest"]["dirs"]["build"] = new_profile_manifest_dirs["build"];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (new_profile["features"].IsDefined()) {
+        if (new_profile["features"].IsNull()) {
+            composite.remove("features");
+        } else if (new_profile["features"].IsSequence()) {
+            for (const auto &feature : new_profile["features"]) {
+                composite["features"].push_back(feature.as<std::string>());
+            }
+        }
+    }
+    if (new_profile["dependencies"].IsDefined()) {
+        if (new_profile["dependencies"].IsNull()) {
+            composite.remove("dependencies");
+        } else if (new_profile["dependencies"].IsSequence()) {
+            for (const YAML::Node &dep : new_profile["dependencies"]) {
+                composite["dependencies"].push_back(dep);
+            }
+        }
+    }
+    if (new_profile["hooks"].IsDefined()) {
+        if (new_profile["hooks"].IsNull()) {
+            composite.remove("hooks");
+        } else {
+            for (const auto &hook : new_profile["hooks"]) {
+                std::string hook_name = hook.first.as<std::string>();
+                if (hook.second.IsNull()) {
+                    composite["hooks"].remove(hook_name);
+                } else if (hook.second.IsSequence()) {
+                    for (const auto &item : hook.second) {
+                        composite["hooks"][hook_name].push_back(item);
+                    }
+                } else if (hook.second.IsScalar()) {
+                    composite["hooks"][hook_name].push_back(hook.second);
+                }
             }
         }
     }
