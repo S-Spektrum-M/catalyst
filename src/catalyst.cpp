@@ -56,13 +56,25 @@ int main(int argc, char **argv) {
         std::cout << app.help() << std::endl;
         helped = true;
     });
-    if (helped) return 0; // avoid catalyst <subcommand> help from triggering the subcommand
+    if (helped)
+        return 0; // avoid catalyst <subcommand> help from triggering the subcommand
 
     try {
         (app).parse(argc, argv);
     } catch (const CLI ::ParseError &e) {
-        catalyst::logger.log(catalyst::LogLevel::ERROR, "Failed to pass provided arguments: {}", concat_argv());
-        return (app).exit(e);
+        auto help_command = [](int argc, const char *const *argv) -> bool {
+            for (int ii = 0; ii < argc; ++ii) {
+                if (strcmp(argv[ii], "--help") == 0 || strcmp(argv[ii], "-h") == 0)
+                    return true;
+            }
+            return false;
+        };
+        if (!help_command(argc, argv)) {
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "Failed to parse provided arguments: {}", concat_argv());
+            return (app).exit(e);
+        } else {
+            return (app).exit(e);
+        }
     };
 
     if (show_version) {
