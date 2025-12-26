@@ -2,7 +2,7 @@
 #include "catalyst/subcommands/add.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/clean.hpp"
-#include "catalyst/subcommands/configure.hpp"
+#include "catalyst/subcommands/configure.hpp" // deprecated
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
@@ -73,25 +73,25 @@ int main(int argc, char **argv) {
     if (*add_subc) {
         if (*add_git_subc) {
             catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add git");
-            if (auto res = catalyst::add::git::action(*add_git_res); !res) {
+            if (std::expected<void, std::string> res = catalyst::add::git::action(*add_git_res); !res) {
                 catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return 1;
             }
         } else if (*add_system_subc) {
             catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add system");
-            if (auto res = catalyst::add::system::action(*add_system_res); !res) {
+            if (std::expected<void, std::string> res = catalyst::add::system::action(*add_system_res); !res) {
                 catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return 1;
             }
         } else if (*add_local_subc) {
             catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add local");
-            if (auto res = catalyst::add::local::action(*add_local_res); !res) {
+            if (std::expected<void, std::string> res = catalyst::add::local::action(*add_local_res); !res) {
                 catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return 1;
             }
         } else if (*add_vcpkg_subc) {
             catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "add vcpkg");
-            if (auto res = catalyst::add::vcpkg::action(*add_vcpkg_res); !res) {
+            if (std::expected<void, std::string> res = catalyst::add::vcpkg::action(*add_vcpkg_res); !res) {
                 catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
                 return 1;
             }
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 
     if (*build_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "build");
-        if (auto res = catalyst::build::action(*build_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::build::action(*build_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 
     if (*clean_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "clean");
-        if (auto res = catalyst::clean::action(*clean_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::clean::action(*clean_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
     if (*fetch_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "fetch");
-        if (auto res = catalyst::fetch::action(*fetch_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::fetch::action(*fetch_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
 
     if (*fmt_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "fmt");
-        if (auto res = catalyst::fmt::action(*fmt_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::fmt::action(*fmt_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 
     if (*generate_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "generate");
-        if (auto res = catalyst::generate::action(*generate_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::generate::action(*generate_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 
     if (*init_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "init");
-        if (auto res = catalyst::init::action(*init_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::init::action(*init_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
 
     if (*run_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "run");
-        if (auto res = catalyst::run::action(*run_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::run::action(*run_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
 
     if (*test_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "test");
-        if (auto res = catalyst::test::action(*test_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::test::action(*test_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 
     if (*tidy_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "tidy");
-        if (auto res = catalyst::tidy::action(*tidy_res); !res) {
+        if (std::expected<void, std::string> res = catalyst::tidy::action(*tidy_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }

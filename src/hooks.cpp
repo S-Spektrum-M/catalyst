@@ -30,7 +30,7 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
 #endif
     };
 
-    const auto &hook_node = profile_comp["hooks"][hook_name];
+    const YAML::Node &hook_node = profile_comp["hooks"][hook_name];
     if (hook_node.IsSequence()) {
         for (const auto &item : hook_node) {
             if (item["command"]) {

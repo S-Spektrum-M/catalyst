@@ -26,7 +26,7 @@ std::expected<YAML::Node, std::string> load_profile_file(const std::string &prof
     }
 
     try {
-        auto ret = YAML::LoadFile(profile_path);
+        YAML::Node ret = YAML::LoadFile(profile_path);
         catalyst::logger.log(LogLevel::DEBUG, "Profile file loaded successfully.");
         return ret;
     } catch (YAML::Exception &err) {

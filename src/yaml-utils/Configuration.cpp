@@ -59,8 +59,8 @@ std::string ver_max(std::string s1, std::string s2) {
         return parts;
     };
 
-    auto v1 = split_ver(s1);
-    auto v2 = split_ver(s2);
+    std::vector<int> v1 = split_ver(s1);
+    std::vector<int> v2 = split_ver(s2);
 
     for (size_t i = 0, lim = std::min(v1.size(), v2.size()); i < lim; ++i)
         if (v1[i] > v2[i]) {
@@ -307,8 +307,9 @@ std::vector<std::string> split_path(const std::string &key) {
     }
     return segments;
 }
+
 std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
-    auto segments = split_path(key);
+    std::vector<std::string> segments = split_path(key);
     YAML::Node current = YAML::Node(root);
 
     for (const auto &s : segments) {
@@ -350,7 +351,7 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
             catalyst::logger.log(LogLevel::ERROR, "Profile not found: {}", profile_path.string());
             throw std::runtime_error(std::format("Profile: {} not found", profile_path.string()));
         }
-        auto new_profile = YAML::LoadFile(profile_path);
+        const YAML::Node &new_profile = YAML::LoadFile(profile_path);
         merge(root, profile_path);
     }
 
@@ -358,7 +359,7 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
 }
 
 bool Configuration::has(const std::string &key) const {
-    auto segments = split_path(key);
+    std::vector<std::string> segments = split_path(key);
     YAML::Node current = YAML::Clone(root);
 
     for (const auto &segment : segments) {
@@ -372,7 +373,7 @@ bool Configuration::has(const std::string &key) const {
 
 std::optional<std::string> Configuration::get_string(const std::string &key) const {
     YAML::Node final;
-    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
         return std::nullopt;
     } else {
         final = res.value();
@@ -387,7 +388,7 @@ std::optional<std::string> Configuration::get_string(const std::string &key) con
 
 std::optional<int> Configuration::get_int(const std::string &key) const {
     YAML::Node final;
-    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
         return std::nullopt;
     } else {
         final = res.value();
@@ -402,7 +403,7 @@ std::optional<int> Configuration::get_int(const std::string &key) const {
 
 std::optional<bool> Configuration::get_bool(const std::string &key) const {
     YAML::Node final;
-    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
         return std::nullopt;
     } else {
         final = res.value();
@@ -417,7 +418,7 @@ std::optional<bool> Configuration::get_bool(const std::string &key) const {
 
 std::optional<std::vector<std::string>> Configuration::get_string_vector(const std::string &key) const {
     YAML::Node final;
-    if (auto res = traverse(key, YAML::Clone(root)); !res) {
+    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
         return std::nullopt;
     } else {
         final = res.value();

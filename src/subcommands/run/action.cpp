@@ -29,7 +29,7 @@ std::expected<void, std::string> action(const parse_t &args) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    if (auto res = generate::profile_composition(profiles); !res) {
+    if (std::expected<YAML::Node, std::string> res = generate::profile_composition(profiles); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
     } else {
@@ -37,7 +37,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-run hooks.");
-    if (auto res = hooks::pre_run(profile_comp); !res) {
+    if (std::expected<void, std::string> res = hooks::pre_run(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-run hook failed: {}", res.error());
         return res;
     }
@@ -87,7 +87,7 @@ std::expected<void, std::string> action(const parse_t &args) {
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = command_str(exe_path, args.params);
-    if (auto res = catalyst::generate::lib_path(profile_comp); !res) {
+    if (std::expected<std::string, std::string> res = catalyst::generate::lib_path(profile_comp); !res) {
         return std::unexpected("Failed to generate LD_LIBRARY_PATH");
     } else {
 #if defined(_WIN32)
@@ -111,7 +111,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-run hooks.");
-    if (auto res = hooks::post_run(profile_comp); !res) {
+    if (std::expected<void, std::string> res = hooks::post_run(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-run hook failed: {}", res.error());
         return res;
     }
