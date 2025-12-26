@@ -52,9 +52,12 @@ int main(int argc, char **argv) {
     app.add_flag("-v,--version", show_version, "current version");
     app.add_flag("-V,--verbose", catalyst::logger.verbose_logging, "verbose stdout logging output");
 
+    bool helped = false;
     app.add_subcommand("help", "Display help information for a subcommand.")->callback([&]() {
         std::cout << app.help() << std::endl;
+        helped = true;
     });
+    if (helped) return 0; // avoid catalyst <subcommand> help from triggering the subcommand
 
     try {
         (app).parse(argc, argv);
