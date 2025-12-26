@@ -34,7 +34,6 @@ int main(int argc, char **argv) {
     const auto [add_subc, add_res] = catalyst::add::parse(app);
     const auto [build_subc, build_res] = catalyst::build::parse(app);
     const auto [clean_subc, clean_res] = catalyst::clean::parse(app);
-    const auto [configure_subc, configure_res] = catalyst::configure::parse(app);
     const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
     const auto [fmt_subc, fmt_res] = catalyst::fmt::parse(app);
     const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
@@ -110,13 +109,6 @@ int main(int argc, char **argv) {
     if (*clean_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "clean");
         if (auto res = catalyst::clean::action(*clean_res); !res) {
-            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
-            return 1;
-        }
-    }
-    if (*configure_subc) {
-        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "configure");
-        if (auto res = catalyst::configure::action(*configure_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
