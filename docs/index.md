@@ -1,10 +1,7 @@
 # Catalyst: **A Modern, Declartive C++ Build System**
 
-> [!WARNING]
-> Catalyst is currently in early development. APIs and features are subject to change.
-
-> [!NOTE]
-> This documentation refers to binaries built from the 1.1.0 tag.
+> WARNING: Catalyst is currently in early development. APIs and features are subject to change.
+> NOTE: This documentation refers to binaries built from the 1.1.0 tag.
 
 Catalyst is a next-generation build system for C++ that aims to bring the ease of use of declarative configuration to
 the C++ ecosystem. It prioritizes declarative configuration, reproducibility, and developer experience.
