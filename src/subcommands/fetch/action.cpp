@@ -17,8 +17,8 @@ namespace fs = std::filesystem;
 
 std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name);
 std::expected<void, std::string> fetch_vcpkg(const std::string &name);
-std::expected<void, std::string>
-fetch_local(std::string build_dir, std::string name, std::string source, std::string version);
+std::expected<void, std::string> fetch_local(const std::string &name, const std::string &path,
+                                             const std::vector<std::string> &profiles);
 std::expected<void, std::string>
 fetch_git(std::string build_dir, std::string name, std::string source, std::string version);
 std::expected<void, std::string> fetch_system(const std::string &name);
@@ -63,7 +63,16 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 if (auto res = fetch_system(name); !res)
                     return std::unexpected(res.error());
             } else if (source == "local") {
-                std::println(std::cout, "Skipping fetch for local dependency: {}", name);
+                if (!dep["path"]) {
+                    return std::unexpected(std::format("Local dependency '{}' is missing path.", name));
+                }
+                std::string path = dep["path"].as<std::string>();
+                std::vector<std::string> profiles_vec;
+                if (dep["profiles"] && dep["profiles"].IsSequence()) {
+                    profiles_vec = dep["profiles"].as<std::vector<std::string>>();
+                }
+                if (auto res = fetch_local(name, path, profiles_vec); !res)
+                    return std::unexpected(res.error());
             } else {
                 fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
                 if (fs::exists(dep_path)) {

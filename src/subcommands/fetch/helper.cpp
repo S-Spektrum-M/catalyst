@@ -7,7 +7,9 @@
 #include <format>
 #include <iostream>
 #include <print>
+#include <sstream>
 #include <string>
+#include <unordered_map>
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::fetch {
@@ -84,7 +86,43 @@ std::expected<void, std::string> fetch_system(const std::string &name) {
     return {};
 }
 
-std::expected<void, std::string> fetch_local() {
+std::expected<void, std::string> fetch_local(const std::string &name, const std::string &path,
+                                             const std::vector<std::string> &profiles) {
+    fs::path local_path = fs::absolute(path);
+    std::string visited_env = std::getenv("CATALYST_VISITED") ? std::getenv("CATALYST_VISITED") : "";
+
+    // Cycle detection
+    std::stringstream ss(visited_env);
+    std::string segment;
+    while (std::getline(ss, segment, ':')) {
+        if (!segment.empty() && fs::equivalent(fs::path(segment), local_path)) {
+            return std::unexpected(std::format("Dependency cycle detected involving {}", local_path.string()));
+        }
+    }
+
+    std::string new_visited = visited_env.empty() ? local_path.string() : visited_env + ":" + local_path.string();
+
+    catalyst::logger.log(LogLevel::DEBUG, "Recursively building local dependency: {} at {}", name, local_path.string());
+    std::println(std::cout, "Building local dependency: {} at {}", name, local_path.string());
+
+    std::vector<std::string> args = {"catalyst", "build"};
+    for (const auto &p : profiles) {
+        args.push_back("--profile");
+        args.push_back(p);
+    }
+
+    std::unordered_map<std::string, std::string> env_map;
+    env_map["CATALYST_VISITED"] = new_visited;
+
+    auto res = catalyst::process_exec(std::move(args), local_path.string(), env_map);
+    if (!res) {
+        return std::unexpected(res.error());
+    }
+
+    if (res.value().get() != 0) {
+        return std::unexpected(std::format("Failed to build local dependency: {}", name));
+    }
+
     return {};
 }
 } // namespace catalyst::fetch
