@@ -4,7 +4,7 @@
 
 namespace catalyst::build {
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
-    CLI::App *build = app.add_subcommand("build", "build the project");
+    CLI::App *build = app.add_subcommand("build", "Build the project.");
     auto ret = std::make_unique<parse_t>();
     build->add_flag("-r,--no-regen", ret->regen, "regenerate the build file");
     build->add_flag("--force-rebuild", ret->force_rebuild, "recompile dependencies");
