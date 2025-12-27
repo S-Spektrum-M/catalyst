@@ -5,6 +5,7 @@
 
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 #include <yaml-cpp/node/node.h>
@@ -63,6 +64,22 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
+    if (parse_args.type == parse_t::type_t::BINARY) {
+        fs::path entry_cpp_path = fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
+        std::ofstream entry_cpp{entry_cpp_path};
+
+        if (!entry_cpp) {
+            return std::unexpected(std::format("Failed to create entry point while {} initialzing BINARY project.",
+                                               entry_cpp_path.string()));
+        }
+        entry_cpp <<
+            R"(#include <iostream>
+
+int main(int argc, char **argv) {
+    std::cout << "Hello, Catalyst!" << std::endl;
+}
+)";
+    }
     if (!fs::exists(parse_args.path / parse_args.dirs.build)) {
         catalyst::logger.log(
             LogLevel::INFO, "Creating build directory: {}", (parse_args.path / parse_args.dirs.build).string());
