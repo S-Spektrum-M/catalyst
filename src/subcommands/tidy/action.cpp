@@ -74,15 +74,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                     work_queue.pop();
                 }
 
-                std::string command = LINTER + " " + file_to_process.string();
-                auto shell_cmd = [](const std::string &cmd) -> std::vector<std::string> {
-#if defined(_WIN32)
-                    return {"cmd", "/c", cmd};
-#else
-                    return {"/bin/sh", "-c", cmd};
-#endif
-                };
-                if (int res = catalyst::process_exec(shell_cmd(command)).value().get(); res != 0) {
+                if (int res = catalyst::process_exec({LINTER, file_to_process.string()}).value().get(); res != 0) {
                     err_log_mt.lock();
                     catalyst::logger.log(
                         LogLevel::ERROR, "Linter failed for {}: exit code {}", file_to_process.string(), res);
