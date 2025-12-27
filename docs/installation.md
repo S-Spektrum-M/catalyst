@@ -42,3 +42,7 @@ catalyst --version
 ```
 
 > NOTE: The following additional dependencies are required and must be installed sperately: ninja, vcpkg, clang-format, clang-tidy.
+
+## Next Steps
+
+- [**Get Started**](getting_started.md).
