@@ -1,0 +1,24 @@
+# CLI Command Reference
+
+Catalyst provides a suite of subcommands to manage the entire project lifecycle.
+
+| Command | Description |
+|---|---|
+| [`init`](init.md) | Initialize a new project or profile. |
+| [`add`](add.md) | Add a dependency to the project. |
+| [`build`](build.md) | Build the project. |
+| [`run`](run.md) | Run the built executable. |
+| [`test`](test.md) | Run project tests. |
+| [`fetch`](fetch.md) | Fetch remote dependencies. |
+| [`generate`](generate.md) | Generate build scripts (Ninja). |
+| [`clean`](clean.md) | Remove build artifacts. |
+| [`fmt`](fmt.md) | Format source code. |
+| [`tidy`](tidy.md) | Run static analysis. |
+
+## Global Options
+
+These options apply to all commands:
+
+- `-v, --version`: Print version information.
+- `-V, --verbose`: Enable verbose logging (debug output).
+- `-h, --help`: Print help message.
