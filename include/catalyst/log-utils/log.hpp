@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <mutex>
-#include <print>
+#include <nlohmann/json.hpp>
 #include <string>
 
 // ANSI color codes
@@ -107,12 +107,18 @@ public:
 private:
     log_t() : log_file_{".catalyst.log", std::ios_base::app} {
         auto now = std::chrono::system_clock::now();
-        std::println(log_file_, R"({{"event":"begin_session","timestamp":"{:%Y-%m-%d %H:%M:%S}"}})", now);
+        nlohmann::json j;
+        j["event"] = "begin_session";
+        j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
+        log_file_ << j.dump() << "\n";
     }
     ~log_t() {
         auto now = std::chrono::system_clock::now();
         // Destructor assumes single thread or end of life
-        std::println(log_file_, R"({{"event":"end_session","timestamp":"{:%Y-%m-%d %H:%M:%S}"}})", now);
+        nlohmann::json j;
+        j["event"] = "end_session";
+        j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
+        log_file_ << j.dump() << "\n";
         if (log_file_.is_open()) {
             log_file_.close();
         }
@@ -121,45 +127,11 @@ private:
     std::string generate_json_log_event(const std::chrono::system_clock::time_point &now,
                                         LogLevel level,
                                         const std::string &message) {
-        std::string escaped_message = escape_json(message);
-        return std::format(R"({{"timestamp":"{:%Y-%m-%d %H:%M:%S}","level":"{}","message":"{}"}})",
-                           now,
-                           to_string(level),
-                           escaped_message);
-    }
-
-    static std::string escape_json(const std::string &s) {
-        std::string out;
-        out.reserve(s.size());
-        for (char c : s) {
-            switch (c) {
-                case '"':
-                    out.append("\"");
-                    break;
-                case '\\':
-                    out.append("\\");
-                    break;
-                case '\b':
-                    out.append("\b");
-                    break;
-                case '\f':
-                    out.append("\f");
-                    break;
-                case '\n':
-                    out.append("\n");
-                    break;
-                case '\r':
-                    out.append("\r");
-                    break;
-                case '\t':
-                    out.append("\t");
-                    break;
-                default:
-                    out.push_back(c);
-                    break;
-            }
-        }
-        return out;
+        nlohmann::json j;
+        j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
+        j["level"] = to_string(level);
+        j["message"] = message;
+        return j.dump();
     }
 
     std::ofstream log_file_;
