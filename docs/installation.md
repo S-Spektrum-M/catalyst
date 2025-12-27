@@ -41,4 +41,4 @@ Run the following command to verify that Catalyst is installed correctly:
 catalyst --version
 ```
 
-<!--NOTE: ninja is required-->
+> NOTE: The following additional dependencies are required and must be installed sperately: ninja, vcpkg, clang-format, clang-tidy.
