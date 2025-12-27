@@ -5,7 +5,7 @@
 
 namespace catalyst::init {
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
-    CLI::App *init = app.add_subcommand("init", "initialize a profile.");
+    CLI::App *init = app.add_subcommand("init", "Initialize a new catalyst profile.");
     auto ret = std::make_unique<parse_t>();
     init->add_option("-n,--name", ret->name, "the name of the project");
     init->add_option("--path", ret->path, "the default path for the project");
