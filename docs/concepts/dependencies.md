@@ -75,7 +75,7 @@ Uses `pkg-config` to find a system-installed library.
 ## Adding Dependencies via CLI
 
 
-You can use the [`catalyst add`](cli/add.md) command to append dependencies to your configuration without editing YAML manually.
+You can use the [`catalyst add`](../cli/add.md) command to append dependencies to your configuration without editing YAML manually.
 
 ```bash
 catalyst add git https://github.com/fmtlib/fmt.git -v 10.0.0

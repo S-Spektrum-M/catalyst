@@ -15,7 +15,7 @@ These macros are automatically defined by Catalyst during compilation.
 ## Feature Flags
 
 > [!NOTE]
-> Read [build subcommand](cli/build.md) docs for info on how to dynamically enable or disable features.
+> Read [build subcommand](../cli/build.md) docs for info on how to dynamically enable or disable features.
 
 Features defined in `catalyst.yaml` map directly to preprocessor macros.
 
