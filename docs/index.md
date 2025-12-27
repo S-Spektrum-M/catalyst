@@ -29,6 +29,7 @@ the C++ ecosystem. It prioritizes declarative configuration, reproducibility, an
 - [Dependencies](concepts/dependencies.md)
 - [Hooks](concepts/hooks.md)
 - [Preprocessor & Features](concepts/preprocessor.md)
+- [catalystignore](concepts/catalystignore.md)
 
 ### CLI Reference
 - [Command Overview](cli/index.md)
