@@ -13,25 +13,25 @@ Currently, Catalyst must be built from source.
 
 1.  **Clone the repository:**
 
-    ```bash
-    git clone https://github.com/S-Spektrum-M/catalyst.git
-    cd catalyst
-    ```
+```bash
+git clone https://github.com/S-Spektrum-M/catalyst.git
+cd catalyst
+```
 
 2.  **Build with CMake:**
 
-    ```bash
-    cmake -B build
-    cmake --build build
-    ```
+```bash
+cmake -B build
+cmake --build build
+```
 
 3.  **Install:**
 
-    ```bash
-    sudo cmake --install build
-    ```
+```bash
+sudo cmake --install build
+```
 
-    Or add the `build/catalyst` binary to your PATH manually.
+Or add the `build/catalyst` binary to your PATH manually.
 
 ## Verifying Installation
 
