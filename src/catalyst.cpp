@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     };
 
     if (show_version) {
-        std::print(std::cout, "{}", catalyst::CATALYST_VERSION);
+        std::println("{}", catalyst::CATALYST_VERSION);
         return 0;
     }
 
