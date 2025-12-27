@@ -182,5 +182,6 @@ int main(int argc, char **argv) {
         }
     }
 
+    catalyst::logger.log(catalyst::LogLevel::ERROR, "run catalyst --help for info on available commands.", concat_argv());
     return 0;
 }
