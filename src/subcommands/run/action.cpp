@@ -65,7 +65,6 @@ std::expected<void, std::string> action(const parse_t &args) {
                             args.profile,
                             target_type));
         }
-        return std::unexpected(std::format("Profile: {} does not build a binary target.", args.profile));
     }
 
     if (!profile_comp["manifest"]["dirs"]["build"]) {
