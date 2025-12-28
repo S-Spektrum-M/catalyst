@@ -1,3 +1,5 @@
-Goals:
-1. toml support (drop yaml?)
-1. configurable toolchain setting
+- Goals:
+    - ``catalyst pack`` -- package a artifact and dependencies if required
+    - ``catalyst install`` -- install a dependency to path, directly from source code.
+    - ``catalyst install git`` -- install a dependency to path, directly from repo.
+        - basically git clone "path" + catalyst install.
