@@ -1,4 +1,4 @@
-# Catalyst: **A Modern, Declartive C++ Build System**
+# Catalyst: **A Modern, Declarative C++ Build System**
 
 > WARNING: Catalyst is currently in early development. APIs and features are subject to change.
 > NOTE: This documentation refers to binaries built from the 1.1.0 tag.

@@ -69,7 +69,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         std::ofstream entry_cpp{entry_cpp_path};
 
         if (!entry_cpp) {
-            return std::unexpected(std::format("Failed to create entry point while {} initialzing BINARY project.",
+            return std::unexpected(std::format("Failed to create entry point while {} initializing BINARY project.",
                                                entry_cpp_path.string()));
         }
         entry_cpp <<

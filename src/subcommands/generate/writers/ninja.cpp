@@ -12,7 +12,7 @@ std::string escape(std::string_view str) {
     std::string result;
     result.reserve(static_cast<size_t>(str.size() * ESCAPE_TUNING_FACTOR)); // NOTE: allow some extra space for escape
                                                                             // sequences
-                                                                            // PERF: subject to tunining
+                                                                            // PERF: subject to tuning
     for (char c : str) {
         switch (c) {
             case '$':
