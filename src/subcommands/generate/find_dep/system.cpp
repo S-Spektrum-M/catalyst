@@ -1,12 +1,13 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
+
 #include <expected>
 #include <string>
 
 namespace catalyst::generate {
 std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
     std::string dep_name = dep["name"].as<std::string>();
-    catalyst::logger.log(LogLevel::INFO, "Resolving system dependency: {}", dep_name);
+    catalyst::logger.log(LogLevel::DEBUG, "Resolving system dependency: {}", dep_name);
 
     std::string linkage; // assume shared
     if (dep["linkage"] && dep["linkage"].IsScalar()) {

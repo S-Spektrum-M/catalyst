@@ -3,7 +3,7 @@
 namespace catalyst::tidy {
 
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
-    CLI::App *tidy = app.add_subcommand("tidy", "run linting");
+    CLI::App *tidy = app.add_subcommand("tidy", "Run linting on source code.");
     auto ret = std::make_unique<parse_t>();
     tidy->add_option("-p,--profiles", ret->profiles);
     return {tidy, std::move(ret)};

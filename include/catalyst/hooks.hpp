@@ -1,6 +1,7 @@
 #pragma once
 #include "catalyst/yaml-utils/Configuration.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <expected>
 #include <filesystem>
 #include <string>

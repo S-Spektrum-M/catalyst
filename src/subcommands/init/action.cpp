@@ -1,11 +1,11 @@
 #include "catalyst/GLOBALS.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/init.hpp"
-
 #include "catalyst/yaml-utils/profile_write_back.hpp"
 
 #include <expected>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 #include <yaml-cpp/node/node.h>
@@ -15,24 +15,24 @@ namespace catalyst::init {
 namespace fs = std::filesystem;
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
-    catalyst::logger.log(LogLevel::INFO, "Init subcommand invoked.");
+    catalyst::logger.log(LogLevel::DEBUG, "Init subcommand invoked.");
     // TODO: change directory to parse_args->path;
     YAML::Node node;
     node["meta"]["min_ver"] = catalyst::CATALYST_VERSION;
     node["manifest"]["name"] = parse_args.name;
     switch (parse_args.type) {
-    case parse_t::type_t::BINARY:
-        node["manifest"]["type"] = "BINARY";
-        break;
-    case parse_t::type_t::STATICLIB:
-        node["manifest"]["type"] = "STATICLIB";
-        break;
-    case parse_t::type_t::SHAREDLIB:
-        node["manifest"]["type"] = "SHAREDLIB";
-        break;
-    case parse_t::type_t::INTERFACE:
-        node["manifest"]["type"] = "INTERFACE";
-        break;
+        case parse_t::type_t::BINARY:
+            node["manifest"]["type"] = "BINARY";
+            break;
+        case parse_t::type_t::STATICLIB:
+            node["manifest"]["type"] = "STATICLIB";
+            break;
+        case parse_t::type_t::SHAREDLIB:
+            node["manifest"]["type"] = "SHAREDLIB";
+            break;
+        case parse_t::type_t::INTERFACE:
+            node["manifest"]["type"] = "INTERFACE";
+            break;
     }
     node["manifest"]["version"] = parse_args.version;
     node["manifest"]["description"] = parse_args.description;
@@ -64,9 +64,25 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
+    if (parse_args.type == parse_t::type_t::BINARY) {
+        fs::path entry_cpp_path = fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
+        std::ofstream entry_cpp{entry_cpp_path};
+
+        if (!entry_cpp) {
+            return std::unexpected(std::format("Failed to create entry point while {} initializing BINARY project.",
+                                               entry_cpp_path.string()));
+        }
+        entry_cpp <<
+            R"(#include <iostream>
+
+int main(int argc, char **argv) {
+    std::cout << "Hello, Catalyst!" << std::endl;
+}
+)";
+    }
     if (!fs::exists(parse_args.path / parse_args.dirs.build)) {
-        catalyst::logger.log(LogLevel::INFO, "Creating build directory: {}",
-                             (parse_args.path / parse_args.dirs.build).string());
+        catalyst::logger.log(
+            LogLevel::INFO, "Creating build directory: {}", (parse_args.path / parse_args.dirs.build).string());
         fs::create_directories(parse_args.path / parse_args.dirs.build);
     }
 
@@ -77,14 +93,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         profile_path = std::format("{}/catalyst_{}.yaml", parse_args.path.string(), parse_args.profile);
 
     if (!fs::exists(profile_path)) {
-        catalyst::logger.log(LogLevel::INFO, "Creating new profile file: {}", profile_path.string());
+        catalyst::logger.log(LogLevel::DEBUG, "Creating new profile file: {}", profile_path.string());
     }
 
     std::ofstream profile_file = std::ofstream(profile_path);
     YAML::Emitter emmiter;
     emmiter << node;
     profile_file << emmiter.c_str() << std::endl;
-    catalyst::logger.log(LogLevel::INFO, "Init subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Init subcommand finished successfully.");
     return {};
 }
 

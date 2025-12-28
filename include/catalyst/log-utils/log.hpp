@@ -2,32 +2,29 @@
 #include <chrono>
 #include <format>
 #include <fstream>
-#include <iostream>
-#include <print>
+#include <mutex>
 #include <string>
 
 // ANSI color codes
 inline const char *RED = "\033[31m";
+inline const char *ORANGE = "\033[33m";
+inline const char *BLUE = "\033[34m";
+inline const char *PURPLE = "\033[35m";
 inline const char *RESET = "\033[0m";
 
 namespace catalyst {
-enum class LogLevel { INFO, WARN, ERROR };
+enum class LogLevel {
+    DEBUG, // hidden info (unless asked for opt in with -V)
+    INFO,  // user facing milestones
+    WARN,  // warnings
+    ERROR  // errors
+};
 
 // Helper function to convert LogLevel to string
-inline const char *to_string(LogLevel level) {
-    switch (level) {
-    case LogLevel::INFO:
-        return "INFO";
-    case LogLevel::WARN:
-        return "WARN";
-    case LogLevel::ERROR:
-        return "ERROR";
-    }
-    return "UNKNOWN";
-}
+const char *to_string(LogLevel level);
 
 class log_t {
-  public:
+public:
     static log_t &instance() {
         static log_t logger_instance;
         return logger_instance;
@@ -37,44 +34,28 @@ class log_t {
     log_t &operator=(const log_t &) = delete;
 
     template <typename... Args> void log(LogLevel level, std::format_string<Args...> fmt, Args &&...args) {
-        if (!log_file_.is_open()) {
-            return;
-        }
-
-        auto now = std::chrono::system_clock::now();
         std::string message = std::format(fmt, std::forward<Args>(args)...);
-
-        log_file_ << std::format("[{:%Y-%m-%d %H:%M:%S}] [{}] {}\n", now, to_string(level), message);
-
-        if (level == LogLevel::ERROR) {
-            std::cerr << std::format("[{:%Y-%m-%d %H:%M:%S}] ", now) << RED         // Start color
-                      << std::format("[{}] {}", to_string(level), message) << RESET // Reset to default color
-                      << "\n";
-        }
-        log_file_.flush(); // Ensure logs are written immediately
+        log_impl(level, message);
     }
 
-    bool is_open() const { return log_file_.is_open(); }
+    bool is_open() const;
+    void flush();
+    void close();
 
-    void close() {
-        if (log_file_.is_open()) {
-            log_file_.close();
-        }
-    }
+    bool verbose_logging = false;
 
-  private:
-    log_t() : log_file_{".catalyst.log", std::ios_base::app} {
-        auto now = std::chrono::system_clock::now();
-        std::println(log_file_, "[beginblock {:%Y-%m-%d %H:%M:%S}]", now);
-    }
-    ~log_t() {
-        std::println(log_file_, "[endblock]");
-        if (log_file_.is_open()) {
-            log_file_.close();
-        }
-    }
+private:
+    log_t();
+    ~log_t();
+
+    void log_impl(LogLevel level, const std::string &message);
+    std::string generate_json_log_event(const std::chrono::system_clock::time_point &now,
+                                        LogLevel level,
+                                        const std::string &message);
 
     std::ofstream log_file_;
+    std::mutex log_file_mutex_;
+    std::mutex stdio_mutex;
 };
 
 // Global logger instance

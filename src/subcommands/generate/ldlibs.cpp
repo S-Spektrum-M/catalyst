@@ -2,6 +2,7 @@
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/yaml.h"
+
 #include <filesystem>
 #include <sstream>
 #include <string>
@@ -14,7 +15,7 @@ std::string ld_filter(std::string &ldflags);
 
 // NOTE: used for run::action. Needs to be updated to use find_*.
 std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
-    catalyst::logger.log(LogLevel::INFO, "Writing variables to build file.");
+    catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
     fs::path current_dir = fs::current_path();
     fs::path build_dir{profile["manifest"]["dirs"]["build"].as<std::string>()};
     fs::path obj_dir = "obj";
@@ -35,7 +36,7 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
         ccflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
         ldflags += std::format(" -L{}", (fs::path(vcpkg_root) / "installed" / triplet / "lib").string());
     } else {
-        logger.log(LogLevel::INFO, "VCPKG_ROOT environment variable is not defined.");
+        logger.log(LogLevel::WARN, "VCPKG_ROOT environment variable is not defined.");
     }
 
     std::string ldlibs;
@@ -50,14 +51,17 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
                 resolve_system_dependency(dep, cxxflags, ccflags, ldflags, ldlibs);
             } else if (source == "local") {
                 if (auto res = resolve_local_dependency(dep, cxxflags, ccflags, ldflags, ldlibs); !res) {
-                    logger.log(LogLevel::ERROR, "Failed to resolve local dependency {}: {}",
-                               dep["name"].as<std::string>(), res.error());
+                    logger.log(LogLevel::ERROR,
+                               "Failed to resolve local dependency {}: {}",
+                               dep["name"].as<std::string>(),
+                               res.error());
                 }
             } else if (source == "vcpkg") {
                 if (!dep["triplet"] || !dep["triplet"].IsScalar()) {
-                    catalyst::logger.log(LogLevel::ERROR, "vcpkg dependency: {} does not define field: triplet",
-                                         dep["name"].as<std::string>());
-                    return std::unexpected("unable to calculate ld_lib_path");
+                    std::string error_msg = std::format("vcpkg dependency '{}' is missing required field: 'triplet'",
+                                                        dep["name"].as<std::string>());
+                    catalyst::logger.log(LogLevel::ERROR, "{}", error_msg);
+                    return std::unexpected(error_msg);
                 }
                 auto triplet = dep["triplet"].as<std::string>();
                 resolve_vcpkg_dependency(dep, triplet, ldflags, ldlibs);
@@ -74,8 +78,10 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
                 if (dep["using"] && dep["using"].IsSequence())
                     node["using"] = dep["using"];
                 if (auto res = resolve_local_dependency(node, cxxflags, ccflags, ldflags, ldlibs); !res) {
-                    logger.log(LogLevel::ERROR, "Failed to resolve git dependency {}: {}",
-                               node["name"].as<std::string>(), res.error());
+                    logger.log(LogLevel::ERROR,
+                               "Failed to resolve git dependency {}: {}",
+                               node["name"].as<std::string>(),
+                               res.error());
                 }
             }
         }

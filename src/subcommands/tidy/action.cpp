@@ -1,7 +1,9 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/tidy.hpp"
 #include "yaml-cpp/node/node.h"
+
 #include <atomic>
 #include <cstdlib>
 #include <deque>
@@ -30,7 +32,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     std::string LINTER = profile_comp["manifest"]["tooling"]["LINTER"].as<std::string>();
     // call the linter on the source_set (we can expect clang-tidy like arg syntax) and go on about our day
 
-    catalyst::logger.log(LogLevel::INFO, "Building source set.");
+    catalyst::logger.log(LogLevel::DEBUG, "Building source set.");
 
     namespace fs = std::filesystem;
 
@@ -50,8 +52,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     unsigned int num_threads = std::thread::hardware_concurrency();
-    catalyst::logger.log(LogLevel::INFO, "Running linter on {} files using {} threads.", source_set.size(),
-                         num_threads);
+    catalyst::logger.log(
+        LogLevel::DEBUG, "Running linter on {} files using {} threads.", source_set.size(), num_threads);
 
     std::queue<fs::path, std::deque<fs::path>> work_queue(std::deque<fs::path>(source_set.begin(), source_set.end()));
     std::atomic<bool> has_errors = false;
@@ -72,11 +74,10 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                     work_queue.pop();
                 }
 
-                std::string command = LINTER + " " + file_to_process.string();
-                if (int res = std::system(command.c_str()); res != 0) {
+                if (int res = catalyst::process_exec({LINTER, file_to_process.string()}).value().get(); res != 0) {
                     err_log_mt.lock();
-                    catalyst::logger.log(LogLevel::ERROR, "Linter failed for {}: exit code {}",
-                                         file_to_process.string(), res);
+                    catalyst::logger.log(
+                        LogLevel::ERROR, "Linter failed for {}: exit code {}", file_to_process.string(), res);
                     has_errors = true;
                     err_log_mt.unlock();
                 }
@@ -92,7 +93,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return std::unexpected("Linter finished with errors.");
     }
 
-    catalyst::logger.log(LogLevel::INFO, "Tidy subcommand finished successfully.");
+    catalyst::logger.log(LogLevel::DEBUG, "Tidy subcommand finished successfully.");
     return {};
 }
 } // namespace catalyst::tidy
