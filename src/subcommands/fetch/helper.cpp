@@ -86,8 +86,8 @@ std::expected<void, std::string> fetch_system(const std::string &name) {
     return {};
 }
 
-std::expected<void, std::string> fetch_local(const std::string &name, const std::string &path,
-                                             const std::vector<std::string> &profiles) {
+std::expected<void, std::string>
+fetch_local(const std::string &name, const std::string &path, const std::vector<std::string> &profiles) {
     fs::path local_path = fs::absolute(path);
     std::string visited_env = std::getenv("CATALYST_VISITED") ? std::getenv("CATALYST_VISITED") : "";
 
@@ -106,9 +106,11 @@ std::expected<void, std::string> fetch_local(const std::string &name, const std:
     std::println(std::cout, "Building local dependency: {} at {}", name, local_path.string());
 
     std::vector<std::string> args = {"catalyst", "build"};
-    for (const auto &p : profiles) {
-        args.push_back("--profile");
-        args.push_back(p);
+    if (profiles.size() != 0) {
+        args.push_back("--profiles");
+        for (const auto &p : profiles) {
+            args.push_back(p);
+        }
     }
 
     std::unordered_map<std::string, std::string> env_map;
