@@ -18,30 +18,29 @@ git clone https://github.com/S-Spektrum-M/catalyst.git
 cd catalyst
 ```
 
-2.  **Build with CMake:**
+2.  **Build the Bootstrap version using CMake:**
 
 ```bash
-cmake -B build
-cmake --build build
+git checkout tags/1.0.0
+cmake -B build-bootstrap -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build-bootstrap --config Release
 ```
 
-3.  **Install:**
+3.  **Build Catalyst:**
 
 ```bash
-sudo cmake --install build
+git checkout dev-1.1.0
+mkdir build
+./build-bootstrap/catalyst build
 ```
-
-Or add the `build/catalyst` binary to your PATH manually.
 
 ## Verifying Installation
 
 Run the following command to verify that Catalyst is installed correctly:
 
 ```bash
-catalyst --version
+build/catalyst -v # should be 1.1.0
 ```
-
-> NOTE: The following additional dependencies are required and must be installed sperately: ninja, vcpkg, clang-format, clang-tidy.
 
 ## Next Steps
 
