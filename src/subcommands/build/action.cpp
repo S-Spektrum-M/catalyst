@@ -64,13 +64,8 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Build subcommand invoked.");
-    std::vector<std::string> profiles = parse_args.profiles;
-    if (std::find(profiles.begin(), profiles.end(), "common") == profiles.end()) {
-        profiles.insert(profiles.begin(), "common");
-    }
-
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    YAML_UTILS::Configuration config{profiles};
+    YAML_UTILS::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::INFO, "Running pre-build hooks.");
     if (auto res = hooks::pre_build(config); !res) {
