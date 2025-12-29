@@ -326,12 +326,10 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
 
     std::vector profile_names = profiles;
-    if (std::find(profile_names.begin(), profile_names.end(), "common") == profile_names.end())
-        profile_names.insert(profile_names.cbegin(), std::string{"common"});
 
     root = getDefaultConfiguration();
 
-    // NOTE:PERF: This is possibly more performant than creating a temporary std::unordered_set
+    // NOTE: PERF: This is possibly more performant than creating a temporary std::unordered_set
     for (size_t ii = 0; ii < profiles.size(); ++ii) {
         for (size_t jj = 0; jj < ii; ++jj) {
             if (profiles[jj] == profiles[ii]) {
