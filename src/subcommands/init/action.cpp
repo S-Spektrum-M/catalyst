@@ -88,9 +88,9 @@ int main(int argc, char **argv) {
 
     fs::path profile_path;
     if (parse_args.profile == "common")
-        profile_path = std::format("{}/catalyst.yaml", parse_args.path.string());
+        profile_path = parse_args.path / std::format("catalyst.yaml");
     else
-        profile_path = std::format("{}/catalyst_{}.yaml", parse_args.path.string(), parse_args.profile);
+        profile_path = parse_args.path / std::format("catalyst_{}.yaml", parse_args.profile);
 
     if (!fs::exists(profile_path)) {
         catalyst::logger.log(LogLevel::DEBUG, "Creating new profile file: {}", profile_path.string());
