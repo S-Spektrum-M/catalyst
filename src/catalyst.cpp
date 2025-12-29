@@ -7,6 +7,7 @@
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/init.hpp"
+#include "catalyst/subcommands/install.hpp"
 #include "catalyst/subcommands/run.hpp"
 #include "catalyst/subcommands/test.hpp"
 #include "catalyst/subcommands/tidy.hpp"
@@ -38,6 +39,7 @@ int main(int argc, char **argv) {
     const auto [fmt_subc, fmt_res] = catalyst::fmt::parse(app);
     const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
     const auto [init_subc, init_res] = catalyst::init::parse(app);
+    const auto [install_subc, install_res] = catalyst::install::parse(app);
     const auto [run_subc, run_res] = catalyst::run::parse(app);
     const auto [test_subc, test_res] = catalyst::test::parse(app);
     const auto [tidy_subc, tidy_res] = catalyst::tidy::parse(app);
@@ -141,6 +143,12 @@ int main(int argc, char **argv) {
     } else if (*init_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "init");
         if (std::expected<void, std::string> res = catalyst::init::action(*init_res); !res) {
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+            return 1;
+        }
+    } else if (*install_subc) {
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "install");
+        if (std::expected<void, std::string> res = catalyst::install::action(*install_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }
