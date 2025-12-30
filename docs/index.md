@@ -34,6 +34,7 @@ the C++ ecosystem. It prioritizes declarative configuration, reproducibility, an
 - [add](cli/add.md)
 - [build](cli/build.md)
 - [run](cli/run.md)
+- [install](cli/install.md)
 - [test](cli/test.md)
 - [fetch](cli/fetch.md)
 - [generate](cli/generate.md)
