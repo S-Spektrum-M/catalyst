@@ -3,6 +3,7 @@
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/clean.hpp"
 #include "catalyst/subcommands/configure.hpp" // deprecated
+#include "catalyst/subcommands/download.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
@@ -35,6 +36,7 @@ int main(int argc, char **argv) {
     const auto [add_subc, add_res] = catalyst::add::parse(app);
     const auto [build_subc, build_res] = catalyst::build::parse(app);
     const auto [clean_subc, clean_res] = catalyst::clean::parse(app);
+    const auto [download_subc, download_res] = catalyst::download::parse(app);
     const auto [fetch_subc, fetch_res] = catalyst::fetch::parse(app);
     const auto [fmt_subc, fmt_res] = catalyst::fmt::parse(app);
     const auto [generate_subc, generate_res] = catalyst::generate::parse(app);
@@ -119,6 +121,12 @@ int main(int argc, char **argv) {
     } else if (*clean_subc) {
         catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "clean");
         if (std::expected<void, std::string> res = catalyst::clean::action(*clean_res); !res) {
+            catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+            return 1;
+        }
+    } else if (*download_subc) {
+        catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", "download");
+        if (std::expected<void, std::string> res = catalyst::download::action(*download_res); !res) {
             catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
             return 1;
         }

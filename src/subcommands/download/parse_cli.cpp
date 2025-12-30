@@ -1,0 +1,17 @@
+#include "catalyst/subcommands/download.hpp"
+
+#include <memory>
+
+namespace catalyst::download {
+std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
+    auto download = app.add_subcommand("download", "Install a catalyst configured package from git.");
+    auto ret = std::make_unique<parse_t>();
+    download->add_option("remote", ret->git_remote, "the remote to clone")->required();
+    download->add_option("branch", ret->git_branch, "the branch to clone");
+    download->add_option("-p,--profiles", ret->profiles, "the profiles to compose in the build artifact")
+        ->default_val(std::vector<std::string>{"common"});
+    download->add_option("-f,--features", ret->enabled_features, "the features to enable in the build");
+    download->add_option("-t,--target", ret->target_path, "the path to install to")->required();
+    return {download, std::move(ret)};
+}
+} // namespace catalyst::download
