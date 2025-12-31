@@ -1,5 +1,4 @@
 - Goals:
     - [ ] ``catalyst pack`` -- package a artifact and dependencies if required
     - [x] ``catalyst install`` -- install a dependency to path, directly from source code.
-    - [ ] ``catalyst git-install`` -- install a dependency to path, directly from repo.
-        - basically git clone "remote" + catalyst install.
+    - [x] ``catalyst download`` -- install a dependency to path, directly from repo.
