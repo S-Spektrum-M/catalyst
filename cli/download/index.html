@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../fetch/">
+        <link rel="prev" href="../clean/">
       
       
-        <link rel="next" href="../generate/">
+        <link rel="next" href="../fetch/">
       
       
         
@@ -23,7 +23,7 @@
     
     
       
-        <title>catalyst fmt - Catalyst Build System Documentation</title>
+        <title>catalyst download - Catalyst Build System Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#catalyst-fmt" class="md-skip">
+        <a href="#catalyst-download" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              catalyst fmt
+              catalyst download
             
           </span>
         </div>
@@ -435,10 +435,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../download/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    catalyst download
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -454,6 +481,48 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Details
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -491,37 +560,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    catalyst fmt
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../fmt/" class="md-nav__link">
         
   
   
@@ -537,37 +579,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#details" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Details
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1007,6 +1018,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1024,15 +1046,36 @@
 
 
 
-<h1 id="catalyst-fmt">catalyst fmt</h1>
-<pre><code>format the project files.
-Usage: catalyst fmt [OPTIONS]
+<h1 id="catalyst-download">catalyst download</h1>
+<pre><code>Install a catalyst configured package from git.
+Usage: catalyst download [OPTIONS] remote [branch]
 
 Options:
   -h,--help                   Print this help message and exit
+  remote TEXT REQUIRED        the remote to clone
+  branch TEXT                 the branch to clone
+  -p,--profiles TEXT ...      the profiles to compose in the build artifact (default: common)
+  -f,--features TEXT ...      the features to enable in the build
+  -t,--target TEXT REQUIRED   the path to install to
 </code></pre>
 <h2 id="details">Details</h2>
-<p>Expects a <code>.clang-format</code> file in the project root. It will recursively format all C/C++ files in the source directories.</p>
+<p>The <code>download</code> command automates the process of fetching a Catalyst-based project from a Git repository, building it, and installing it to a specified location. It essentially performs the following steps:</p>
+<ol>
+<li><strong>Clone</strong>: Clones the specified git repository to a temporary directory.</li>
+<li><strong>Build</strong>: Runs <code>catalyst build</code> on the cloned project with the specified profiles and features.</li>
+<li><strong>Install</strong>: Installs the build artifacts to the target directory.</li>
+<li><strong>Cleanup</strong>: Removes the temporary directory.</li>
+</ol>
+<h2 id="examples">Examples</h2>
+<p>Download and install a project to a local <code>bin</code> directory:</p>
+<pre><code class="language-bash">catalyst download https://github.com/user/repo.git --target ./bin
+</code></pre>
+<p>Download a specific branch with specific features enabled:</p>
+<pre><code class="language-bash">catalyst download https://github.com/user/repo.git develop --target /usr/local --features extra_feature
+</code></pre>
+<p>Download with custom profiles:</p>
+<pre><code class="language-bash">catalyst download https://github.com/user/repo.git --target ./dist --profiles release optimization
+</code></pre>
 
 
 
