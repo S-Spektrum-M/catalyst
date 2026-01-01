@@ -79,20 +79,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
-    bool regenerate = true;
-    // NOTE: this is just overall a BAD check for whether it changed
-    // TODO: Update to actually check values
-    //
-    // if (fs::exists(build_dir / "profile_composition.yaml")) {
-    //     YAML::Node existing_pc = YAML::LoadFile((build_dir / "profile_composition.yaml").string());
-    //     if (existing_pc.size() != profile_comp.size()) {
-    //         catalyst::logger.log(LogLevel::INFO, "Profile composition changed, regenerating build files.");
-    //         regenerate = true;
-    //     }
-    // }
 
-    // DONE: generate the build file if requested or needed
-    if (!fs::exists(build_dir / "build.ninja") || parse_args.regen || regenerate) {
+    if (!fs::exists(build_dir / "build.ninja") || parse_args.regen) {
         catalyst::logger.log(LogLevel::INFO, "Generating build files.");
         auto res = catalyst::generate::action({parse_args.profiles, parse_args.enabled_features});
         if (!res) {

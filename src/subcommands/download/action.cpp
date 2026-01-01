@@ -82,7 +82,13 @@ std::expected<void, std::string> action(const parse_t &args) {
                          "Building downloaded project with profiles: {} and features: {}",
                          std::format("{}", args.profiles),
                          std::format("{}", args.enabled_features));
-    catalyst::build::parse_t build_args{.profiles = args.profiles, .enabled_features = args.enabled_features};
+    catalyst::build::parse_t build_args{
+        .regen = false,
+        .force_rebuild = false,
+        .force_refetch = false,
+        .profiles = args.profiles,
+        .enabled_features = args.enabled_features,
+    };
 
     if (auto res = catalyst::build::action(build_args); !res) {
         return std::unexpected(std::format("Build failed: {}", res.error()));
