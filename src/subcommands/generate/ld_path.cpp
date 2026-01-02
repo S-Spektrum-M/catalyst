@@ -346,8 +346,8 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config,
 void write_rules(catalyst::generate::BuildWriters::BaseWriter &writer) {
     catalyst::logger.log(LogLevel::DEBUG, "Writing rules to build file.");
     writer.add_comment("Rules for compiling");
-    writer.add_rule("cxx_compile", "$cxx $cxxflags -MD -MF $out.d -c $in -o $out", "CXX $out", "$out.d", "gcc");
-    writer.add_rule("cc_compile", "$cc $cflags -MD -MF $out.d -c $in -o $out", "CC $out", "$out.d", "gcc");
+    writer.add_rule("cxx_compile", "$cxx $cxxflags -MMD -MF $out.d -c $in -o $out", "CXX $out", "$out.d", "gcc");
+    writer.add_rule("cc_compile", "$cc $cflags -MMD -MF $out.d -c $in -o $out", "CC $out", "$out.d", "gcc");
 
     writer.add_comment("Rules for linking");
     writer.add_rule("binary_link", "$cxx $in -o $out $ldflags $ldlibs", "LINK $out");
