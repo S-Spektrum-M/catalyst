@@ -78,12 +78,13 @@ enum class TargetType {
     Make,
     VisualStudio,
     XCode,
+    CBE,
 };
 
 template <TargetType T> class DerivedWriter : public BaseWriter {
 private:
     static consteval bool is_implemented(TargetType __t) {
-        return __t == TargetType::Ninja;
+        return __t == TargetType::Ninja || __t == TargetType::CBE;
     }
 
 #if __cplusplus >= 202602L
@@ -100,6 +101,9 @@ private:
                        "Add explicit template specialization.";
             case TargetType::XCode:
                 return "Unimplemented specialization for DerivedWriter<XCode>. "
+                       "Add explicit template specialization.";
+            case TargetType::CBE:
+                return "Unimplemented specialization for DerivedWriter<CBE>. "
                        "Add explicit template specialization.";
         }
         return "Unknown TargetType";
