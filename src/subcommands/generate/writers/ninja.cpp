@@ -7,7 +7,7 @@
 
 namespace catalyst::generate::BuildWriters {
 
-std::string escape(std::string_view str) {
+static std::string escape(std::string_view str) {
     constexpr double ESCAPE_TUNING_FACTOR = 1.25;
     std::string result;
     result.reserve(static_cast<size_t>(str.size() * ESCAPE_TUNING_FACTOR)); // NOTE: allow some extra space for escape
