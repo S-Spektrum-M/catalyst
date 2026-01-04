@@ -9,25 +9,25 @@
       
       
       
-        <link rel="prev" href="../add/">
+        <link rel="prev" href="..">
       
       
-        <link rel="next" href="../clean/">
+        <link rel="next" href="../getting_started/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>catalyst build - Catalyst Build System Documentation</title>
+        <title>CBE (Catalyst Build Executor) - Catalyst Build System Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
       
 
@@ -46,7 +46,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#catalyst-build" class="md-skip">
+        <a href="#cbe-catalyst-build-executor" class="md-skip">
           Skip to content
         </a>
       
@@ -80,7 +80,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Catalyst Build System Documentation" class="md-header__button md-logo" aria-label="Catalyst Build System Documentation" data-md-component="logo">
+    <a href=".." title="Catalyst Build System Documentation" class="md-header__button md-logo" aria-label="Catalyst Build System Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              catalyst build
+              CBE (Catalyst Build Executor)
             
           </span>
         </div>
@@ -178,7 +178,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Catalyst Build System Documentation" class="md-nav__button md-logo" aria-label="Catalyst Build System Documentation" data-md-component="logo">
+    <a href=".." title="Catalyst Build System Documentation" class="md-nav__button md-logo" aria-label="Catalyst Build System Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -196,7 +196,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -220,10 +220,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../cbe/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CBE (Catalyst Build Executor)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -239,6 +266,87 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-catalystbuild-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The catalyst.build Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The catalyst.build Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toolchain-mapping-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toolchain Mapping &amp; Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-catalystbuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example catalyst.build
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -250,7 +358,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/" class="md-nav__link">
+      <a href="../getting_started/" class="md-nav__link">
         
   
   
@@ -277,7 +385,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -301,20 +409,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -335,7 +441,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -353,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../cli/" class="md-nav__link">
         
   
   
@@ -381,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../add/" class="md-nav__link">
+      <a href="../cli/add/" class="md-nav__link">
         
   
   
@@ -406,37 +512,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    catalyst build
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../cli/build/" class="md-nav__link">
         
   
   
@@ -452,37 +531,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -495,7 +543,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clean/" class="md-nav__link">
+      <a href="../cli/clean/" class="md-nav__link">
         
   
   
@@ -523,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../download/" class="md-nav__link">
+      <a href="../cli/download/" class="md-nav__link">
         
   
   
@@ -551,7 +599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fetch/" class="md-nav__link">
+      <a href="../cli/fetch/" class="md-nav__link">
         
   
   
@@ -579,7 +627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../fmt/" class="md-nav__link">
+      <a href="../cli/fmt/" class="md-nav__link">
         
   
   
@@ -607,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../generate/" class="md-nav__link">
+      <a href="../cli/generate/" class="md-nav__link">
         
   
   
@@ -635,7 +683,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../init/" class="md-nav__link">
+      <a href="../cli/init/" class="md-nav__link">
         
   
   
@@ -663,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../install/" class="md-nav__link">
+      <a href="../cli/install/" class="md-nav__link">
         
   
   
@@ -691,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../run/" class="md-nav__link">
+      <a href="../cli/run/" class="md-nav__link">
         
   
   
@@ -719,7 +767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../test/" class="md-nav__link">
+      <a href="../cli/test/" class="md-nav__link">
         
   
   
@@ -747,7 +795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tidy/" class="md-nav__link">
+      <a href="../cli/tidy/" class="md-nav__link">
         
   
   
@@ -829,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/catalystignore/" class="md-nav__link">
+      <a href="../concepts/catalystignore/" class="md-nav__link">
         
   
   
@@ -857,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/configuration/" class="md-nav__link">
+      <a href="../concepts/configuration/" class="md-nav__link">
         
   
   
@@ -885,7 +933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/dependencies/" class="md-nav__link">
+      <a href="../concepts/dependencies/" class="md-nav__link">
         
   
   
@@ -913,7 +961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/hooks/" class="md-nav__link">
+      <a href="../concepts/hooks/" class="md-nav__link">
         
   
   
@@ -941,7 +989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/preprocessor/" class="md-nav__link">
+      <a href="../concepts/preprocessor/" class="md-nav__link">
         
   
   
@@ -969,7 +1017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../concepts/profiles/" class="md-nav__link">
+      <a href="../concepts/profiles/" class="md-nav__link">
         
   
   
@@ -1024,10 +1072,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#the-catalystbuild-schema" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
+        The catalyst.build Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The catalyst.build Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toolchain-mapping-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toolchain Mapping &amp; Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-catalystbuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example catalyst.build
       
     </span>
   </a>
@@ -1051,27 +1149,105 @@
 
 
 
-<h1 id="catalyst-build">catalyst build</h1>
-<pre><code>build the project
-Usage: catalyst build [OPTIONS]
-
-Options:
-  -h,--help                   Print this help message and exit
-  -r,--no-regen               regenerate the build file
-  --force-rebuild             recompile dependencies
-  --force-refetch             refetch dependencies
-  -p,--profiles TEXT ...      
-  -f,--features TEXT ...      
-</code></pre>
-<h2 id="examples">Examples</h2>
-<p><strong>Standard build:</strong></p>
-<pre><code class="language-bash">catalyst build
-</code></pre>
-<p><strong>Debug build:</strong></p>
-<pre><code class="language-bash">catalyst build --profiles debug
-</code></pre>
-<p><strong>Force clean build:</strong></p>
-<pre><code class="language-bash">catalyst build --force-rebuild
+<h1 id="cbe-catalyst-build-executor">CBE (Catalyst Build Executor)</h1>
+<p><a href="https://github.com/S-Spektrum-M/catalyst-build-executor">CBE</a> is a high-speed, low-level build orchestrator
+designed as a machine-generated target for higher-level meta-build systems, focusing on performance and
+dependency tracking.</p>
+<h2 id="the-catalystbuild-schema">The <code>catalyst.build</code> Schema</h2>
+<p>The manifest uses a strict pipe-delimited, 3-column format.</p>
+<h3 id="definitions">Definitions</h3>
+<p>Definitions configure the toolchain and must appear at the top of the file. Empty definitions use <code>DEF|&lt;var&gt;|</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEF\|cc\|&lt;val&gt;</code></td>
+<td>The C compiler (e.g., <code>/usr/bin/clang</code>).</td>
+</tr>
+<tr>
+<td><code>DEF\|cxx\|&lt;val&gt;</code></td>
+<td>The C++ compiler (e.g., <code>/usr/bin/clang++</code>).</td>
+</tr>
+<tr>
+<td><code>DEF\|cflags\|&lt;val&gt;</code></td>
+<td>Flags for <code>cc</code> steps.</td>
+</tr>
+<tr>
+<td><code>DEF\|cxxflags\|&lt;val&gt;</code></td>
+<td>Flags for <code>cxx</code> steps.</td>
+</tr>
+<tr>
+<td><code>DEF\|ldflags\|&lt;val&gt;</code></td>
+<td>Linker search paths and general flags.</td>
+</tr>
+<tr>
+<td><code>DEF\|ldlibs\|&lt;val&gt;</code></td>
+<td>Libraries to link against (e.g., <code>-lpthread</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="build-steps">Build Steps</h3>
+<p>Format: <code>&lt;step_type&gt;|&lt;input_list&gt;|&lt;output_file&gt;</code></p>
+<ul>
+<li><code>step_type</code>: Tool mnemonic (see Toolchain Mapping).</li>
+<li><code>input_list</code>: Comma-separated files (e.g., <code>src/main.cpp,src/util.cpp</code>).</li>
+<li><code>output_file</code>: The generated file.</li>
+</ul>
+<p>Note: Future support for <code>.rsp</code> (response files) is planned for handling long input lists.</p>
+<h3 id="toolchain-mapping-dependencies">Toolchain Mapping &amp; Dependencies</h3>
+<p>CBE manages dependency tracking (<code>.d</code> files) automatically.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Command Template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cc</code></td>
+<td>C Compile</td>
+<td><code>$cc $cflags -MMD -MF $out.d -c $in -o $out</code></td>
+</tr>
+<tr>
+<td><code>cxx</code></td>
+<td>C++ Compile</td>
+<td><code>$cxx $cxxflags -MMD -MF $out.d -c $in -o $out</code></td>
+</tr>
+<tr>
+<td><code>ld</code></td>
+<td>Binary Link</td>
+<td><code>$cxx $in -o $out $ldflags $ldlibs</code></td>
+</tr>
+<tr>
+<td><code>ar</code></td>
+<td>Static Link</td>
+<td><code>ar rcs $out $in</code></td>
+</tr>
+<tr>
+<td><code>sld</code></td>
+<td>Shared Link</td>
+<td><code>$cxx -shared $in -o $out</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>cc</code> and <code>cxx</code> steps are expected to produce a sidecar <code>.d</code> file at <code>&lt;output_file&gt;.d</code> for dependency graph population.</p>
+<h2 id="example-catalystbuild">Example <code>catalyst.build</code></h2>
+<pre><code class="language-text">DEF|cc|clang
+DEF|cxx|clang++
+DEF|cflags|
+DEF|cxxflags|-std=c++20 -O3
+DEF|ldflags|
+DEF|ldlibs|
+cxx|src/main.cpp|build/main.o
+cxx|src/net.cpp|build/net.o
+ld|build/main.o,build/net.o|build/app
 </code></pre>
 
 
@@ -1122,10 +1298,10 @@ Options:
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
