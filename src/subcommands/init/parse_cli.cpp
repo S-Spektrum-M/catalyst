@@ -34,7 +34,7 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     init->add_option("--cxxflags", ret->tooling.CXXFLAGS, "cxx compiler flags")->default_str("");
 
     init->add_option("--include-dirs", ret->dirs.include, "include directories")->default_val(std::vector<std::string>{"include"});
-    init->add_option("--source-dirs", ret->dirs.source, "source directories")->default_val(std::vector<std::string>{"source"});
+    init->add_option("--source-dirs", ret->dirs.source, "source directories")->default_val(std::vector<std::string>{"src"});
     init->add_option("--build-dir", ret->dirs.build, "build directory")->default_str("build");
 
     init->add_option("-p,--profile", ret->profile, "the profile to initialize")->default_val("common");
