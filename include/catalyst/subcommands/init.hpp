@@ -9,21 +9,21 @@ namespace catalyst::init {
 struct parse_t {
     enum class type_t { BINARY, STATICLIB, SHAREDLIB, INTERFACE };
 
-    std::string name;
-    std::filesystem::path path;
-    type_t type;
-    std::string version;
-    std::string description;
-    std::string provides;
+    std::string name{std::filesystem::current_path().filename().string()};
+    std::filesystem::path path{std::filesystem::current_path()};
+    type_t type{parse_t::type_t::BINARY};
+    std::string version{"0.0.1"};
+    std::string description{"Your description goes here."};
+    std::string provides{""};
     struct {
-        std::string CC;
-        std::string CXX;
-        std::string CCFLAGS;
-        std::string CXXFLAGS;
+        std::string CC{"clang"};
+        std::string CXX{"clang++"};
+        std::string CCFLAGS{""};
+        std::string CXXFLAGS{""};
     } tooling;
     struct {
-        std::vector<std::string> include;
-        std::vector<std::string> source;
+        std::vector<std::string> include{{"include"}};
+        std::vector<std::string> source{{"src"}};
         std::string build{"build"};
     } dirs;
     std::string profile{"common"}; // only allow initializing one profile at a time.
