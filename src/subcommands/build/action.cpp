@@ -40,7 +40,11 @@ bool dep_missing(const YAML_UTILS::Configuration &config) {
 }
 
 // FIXME: use better redirection scheme
-std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir) {
+std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir, const std::string &generator) {
+    if (generator != "ninja") { // TODO: wait for CBE to support compile_commands generation in 1.0
+        catalyst::logger.log(LogLevel::DEBUG, "Skipping compile commands generation for generator: {}", generator);
+        return {};
+    }
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
     fs::path real_compdb_path = build_dir / "compile_commands.json";
     std::string compdb_command =
@@ -79,8 +83,10 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
+    std::string generator = config.get_string("meta.generator").value_or("cbe");
+    std::string build_filename = (generator == "ninja") ? "build.ninja" : "catalyst.build";
 
-    if (!fs::exists(build_dir / "build.ninja") || parse_args.regen) {
+    if (!fs::exists(build_dir / build_filename) || parse_args.regen) {
         catalyst::logger.log(LogLevel::INFO, "Generating build files.");
         auto res = catalyst::generate::action({parse_args.profiles, parse_args.enabled_features});
         if (!res) {
@@ -113,7 +119,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Building project.");
-    if (int res = catalyst::process_exec({"ninja", "-C", build_dir.string()}).value().get(); res != 0) {
+    std::vector<std::string> build_command;
+    if (generator == "ninja") {
+        build_command = {"ninja"};
+    } else {
+        build_command = {"cbe"};
+    }
+
+    if (int res = catalyst::process_exec(std::move(build_command), build_dir).value().get(); res != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
@@ -121,12 +134,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 "Failed to build project.\nAdditionally, the on_build_failure hook failed with error: " +
                 hook_res.error());
         }
-        return std::unexpected(std::format("Build process failed. Ninja exited with code: {}", res));
+        return std::unexpected(std::format("Build process failed. {} exited with code: {}", build_command[0], res));
     }
 
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands.");
     // effectively: call "ninja -C build_dir -t compdb > build_dir/compile_commands.json"
-    if (auto res = generate_compile_commands(build_dir); !res) {
+    if (auto res = generate_compile_commands(build_dir, generator); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to generate compile commands: {}", res.error());
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());

@@ -25,6 +25,7 @@ namespace {
 YAML::Node getDefaultConfiguration() {
     YAML::Node root;
     root["meta"]["min_ver"] = "0.0.1";
+    root["meta"]["generator"] = "cbe";
     root["manifest"]["name"] = "name";
     root["manifest"]["type"] = "BINARY";
     root["manifest"]["version"] = "0.0.1";
@@ -117,9 +118,31 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
     if (new_profile["meta"].IsDefined()) {
         if (new_profile["meta"].IsNull()) {
             composite.remove("meta");
-        } else if (new_profile["meta"]["min_ver"].IsDefined()) {
-            composite["meta"]["min_ver"] = ver_max(composite["meta"]["min_ver"].as<std::string>(),
-                                                   new_profile["meta"]["min_ver"].as<std::string>());
+        } else {
+            if (new_profile["meta"]["min_ver"].IsDefined()) {
+                if (new_profile["meta"]["min_ver"].IsNull()) {
+                    composite.remove("meta.min_ver");
+                } else {
+                    composite["meta"]["min_ver"] = ver_max(composite["meta"]["min_ver"].as<std::string>(),
+                                                           new_profile["meta"]["min_ver"].as<std::string>());
+                }
+            }
+            if (new_profile["meta"]["generator"].IsDefined()) {
+                if (new_profile["meta"]["generator"].IsNull()) {
+                    composite["meta"]["generator"] = "cbe"; // this should be set to avoid downsteram effects
+                } else {
+                    std::string gen = new_profile["meta"]["generator"].as<std::string>();
+                    if (gen == "ninja" || gen == "cbe") {
+                        check_conflict("meta", "generator", "", gen);
+                        composite["meta"]["generator"] = gen;
+                    } else {
+                        catalyst::logger.log(LogLevel::WARN,
+                                             "Invalid generator '{}' in profile '{}'. Ignoring.",
+                                             gen,
+                                             profile_path.string());
+                    }
+                }
+            }
         }
     }
 
