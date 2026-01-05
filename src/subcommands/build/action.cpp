@@ -42,8 +42,13 @@ bool dep_missing(const YAML_UTILS::Configuration &config) {
 // FIXME: use better redirection scheme
 std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir, const std::string &generator) {
     if (generator != "ninja") { // TODO: wait for CBE to support compile_commands generation in 1.0
-        catalyst::logger.log(LogLevel::DEBUG, "Skipping compile commands generation for generator: {}", generator);
-        return {};
+        auto cp = fs::current_path();
+        fs::current_path(build_dir);
+        if (auto res = catalyst::process_exec({"cbe", "COMPDB"}); !res) {
+            fs::current_path(cp);
+            return std::unexpected(res.error());
+        }
+        fs::current_path(cp);
     }
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
     fs::path real_compdb_path = build_dir / "compile_commands.json";
