@@ -134,7 +134,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 "Failed to build project.\nAdditionally, the on_build_failure hook failed with error: " +
                 hook_res.error());
         }
-        return std::unexpected(std::format("Build process failed. {} exited with code: {}", build_command[0], res));
+        return std::unexpected(std::format("Build process failed. {} exited with code: {}", generator, res));
     }
 
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands.");
