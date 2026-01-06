@@ -10,7 +10,6 @@
 #include <expected>
 #include <filesystem>
 #include <format>
-#include <fstream>
 #include <string>
 #include <vector>
 #include <yaml-cpp/node/node.h>
@@ -41,7 +40,7 @@ bool dep_missing(const YAML_UTILS::Configuration &config) {
 
 // FIXME: use better redirection scheme
 std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir, const std::string &generator) {
-    if (generator != "ninja") { // TODO: wait for CBE to support compile_commands generation in 1.0
+    if (generator != "ninja") {
         auto cp = fs::current_path();
         fs::current_path(build_dir);
         if (auto res = catalyst::process_exec({"cbe", "COMPDB"}); !res) {
@@ -49,6 +48,7 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
             return std::unexpected(res.error());
         }
         fs::current_path(cp);
+        return {};
     }
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
     fs::path real_compdb_path = build_dir / "compile_commands.json";
