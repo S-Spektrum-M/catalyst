@@ -5,6 +5,7 @@
 #include <catalyst/hooks.hpp>
 #include <catalyst/subcommands/clean.hpp>
 #include <format>
+#include <string>
 #include <yaml-cpp/node/node.h>
 
 namespace catalyst::clean {
@@ -31,10 +32,19 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
+    std::string generator = profile_comp["meta"]["generator"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (int rtn = catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get(); rtn != 0) {
-        catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
-        return std::unexpected(std::format("Command: ninja -C {} -t clean failed with exit code: {}", build_dir, rtn));
+    if (generator == "ninja") {
+        if (int rtn = catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get(); rtn != 0) {
+            catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
+            return std::unexpected(
+                std::format("Command: ninja -C {} -t clean failed with exit code: {}", build_dir, rtn));
+        }
+    } else if (generator == "cbe") {
+        if (int rtn = catalyst::process_exec({"cbe", "-d", build_dir, "--clean"}).value().get(); rtn != 0) {
+            catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
+            return std::unexpected(std::format("Command: cbe -d {} --clean failed with exit code: {}", build_dir, rtn));
+        }
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-clean hooks.");

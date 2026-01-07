@@ -43,7 +43,7 @@ std::expected<void, std::string> generate_compile_commands(const fs::path &build
     if (generator != "ninja") {
         auto cp = fs::current_path();
         fs::current_path(build_dir);
-        if (auto res = catalyst::process_exec({"cbe", "COMPDB"}); !res) {
+        if (auto res = catalyst::process_exec({"cbe", "--compdb"}); !res) {
             fs::current_path(cp);
             return std::unexpected(res.error());
         }
@@ -126,12 +126,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Building project.");
     std::vector<std::string> build_command;
     if (generator == "ninja") {
-        build_command = {"ninja"};
+        build_command = {"ninja", "-C", build_dir};
     } else {
-        build_command = {"cbe"};
+        build_command = {"cbe", "-d", build_dir};
     }
 
-    if (int res = catalyst::process_exec(std::move(build_command), build_dir).value().get(); res != 0) {
+    if (int res = catalyst::process_exec(std::move(build_command)).value().get(); res != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
