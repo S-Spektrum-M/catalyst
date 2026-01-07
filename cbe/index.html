@@ -343,6 +343,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1132,6 +1160,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1198,7 +1254,6 @@ dependency tracking.</p>
 <li><code>input_list</code>: Comma-separated files (e.g., <code>src/main.cpp,src/util.cpp</code>).</li>
 <li><code>output_file</code>: The generated file.</li>
 </ul>
-<p>Note: Future support for <code>.rsp</code> (response files) is planned for handling long input lists.</p>
 <h3 id="toolchain-mapping-dependencies">Toolchain Mapping &amp; Dependencies</h3>
 <p>CBE manages dependency tracking (<code>.d</code> files) automatically.</p>
 <table>
@@ -1249,6 +1304,20 @@ cxx|src/main.cpp|build/main.o
 cxx|src/net.cpp|build/net.o
 ld|build/main.o,build/net.o|build/app
 </code></pre>
+<h2 id="usage">Usage</h2>
+<pre><code class="language-bash">cbe [options]
+</code></pre>
+<h3 id="options">Options</h3>
+<ul>
+<li><code>-h, --help</code>: Show help message.</li>
+<li><code>-v, --version</code>: Show version.</li>
+<li><code>-d &lt;dir&gt;</code>: Change working directory before execution.</li>
+<li><code>-f &lt;file&gt;</code>: Use a custom build manifest (default: <code>catalyst.build</code>).</li>
+<li><code>-j &lt;N&gt;</code>: Set the number of parallel jobs (default: auto-detected based on hardware).</li>
+<li><code>--dry-run</code>: Print commands without executing them.</li>
+<li><code>--clean</code>: Remove all generated build artifacts.</li>
+<li><code>--compdb</code>: Generate a <code>compile_commands.json</code> file for clangd/LSP integration.</li>
+</ul>
 
 
 
