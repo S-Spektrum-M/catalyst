@@ -346,9 +346,8 @@ std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
 } // namespace
 
 Configuration::Configuration(const std::vector<std::string> &profiles) {
-    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-
     std::vector profile_names = profiles;
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles: {}.", profile_names);
 
     root = getDefaultConfiguration();
 
