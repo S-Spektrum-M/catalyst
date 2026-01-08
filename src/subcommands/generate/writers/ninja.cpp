@@ -38,7 +38,24 @@ static std::string escape(std::string_view str) {
 template <>
 std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::add_variable(std::string_view name,
                                                                                 std::string_view value) {
-    std::println(stream, "{} = {}", name, value);
+    static auto escape_quotes = [](std::string_view str) -> std::string {
+        std::string result;
+        constexpr double ESCAPE_TUNING_FACTOR = 1.25;
+        result.reserve(
+            static_cast<size_t>(str.size() * ESCAPE_TUNING_FACTOR)); // NOTE: allow some extra space for escape
+        for (char c : str) {
+            switch (c) {
+                case '"':
+                    result.append("\\\"");
+                    break;
+                default:
+                    result.push_back(c);
+                    break;
+            }
+        }
+        return result;
+    };
+    std::println(stream, "{} = {}", name, escape_quotes(value));
     return {};
 }
 
