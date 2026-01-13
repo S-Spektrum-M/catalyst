@@ -29,3 +29,13 @@ catalyst build --profiles debug
 ```bash
 catalyst build --force-rebuild
 ```
+
+**Enable features:**
+```bash
+catalyst build --features logging
+```
+
+**Disable features:**
+```bash
+catalyst build --features no-logging
+```

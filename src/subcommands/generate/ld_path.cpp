@@ -303,15 +303,35 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config,
         logger.log(LogLevel::WARN, "VCPKG_ROOT environment variable is not defined.");
     }
 
-    // Add feature flags
-    std::vector<std::string> features = config.get_string_vector("features").value_or({});
-    for (const auto &feature : features) {
-        bool is_enabled =
-            std::find(enabled_features.begin(), enabled_features.end(), feature) != enabled_features.end();
-        std::string flag = std::format(
-            " -DFF_{}__{}={}", config.get_string("manifest.name").value_or("name"), feature, is_enabled ? "1" : "0");
-        cxxflags += flag;
-        ccflags += flag;
+    if (const auto &features_node = config.get_root()["features"]; features_node && features_node.IsSequence()) {
+        for (const auto &feature_map : features_node) {
+            if (feature_map.IsMap()) {
+                for (auto it = feature_map.begin(); it != feature_map.end(); ++it) {
+                    std::string feature = it->first.as<std::string>();
+                    bool default_enabled = it->second.as<bool>();
+                    bool explicitly_enabled =
+                        std::find(enabled_features.begin(), enabled_features.end(), feature) != enabled_features.end();
+                    bool explicitly_disabled =
+                        std::find(enabled_features.begin(), enabled_features.end(), "no-" + feature) !=
+                        enabled_features.end();
+
+                    bool is_enabled = default_enabled;
+                    if (explicitly_enabled) {
+                        is_enabled = true;
+                    } else if (explicitly_disabled) {
+                        is_enabled = false;
+                    }
+
+                    std::string flag = std::format(" -DFF_{}__{}={}",
+                                                   config.get_string("manifest.name").value_or("name"),
+                                                   feature,
+                                                   is_enabled ? "1" : "0");
+                    cxxflags += flag;
+                    ccflags += flag;
+                }
+            }
+            // reaching this is technically an error but we allow it
+        }
     }
 
     std::vector<std::string> inc_dirs = config.get_string_vector("manifest.dirs.include").value();

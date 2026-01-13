@@ -289,7 +289,7 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
             composite.remove("features");
         } else if (new_profile["features"].IsSequence()) {
             for (const auto &feature : new_profile["features"]) {
-                composite["features"].push_back(feature.as<std::string>());
+                composite["features"].push_back(feature);
             }
         }
     }
