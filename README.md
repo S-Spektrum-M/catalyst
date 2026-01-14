@@ -28,7 +28,7 @@ Think Cargo for Rust, but for C++.
 
 ```bash
 # Clone the repository
-git clone https://github.com/S-Spektrum-M/catalyst.git
+git clone https://github.com/CatalystCPP/catalyst-build-system.git
 cd catalyst
 
 # Build Catalyst using CMake
@@ -255,7 +255,8 @@ Catalyst is in active development and contributions are welcome! Please see [CON
 
 **Development setup:**
 ```bash
-git clone https://github.com/S-Spektrum-M/catalyst.git
+# Clone the repository
+git clone https://github.com/CatalystCPP/catalyst-build-system.git
 cd catalyst
 catalyst build --profiles debug
 catalyst test

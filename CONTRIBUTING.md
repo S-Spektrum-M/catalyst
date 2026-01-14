@@ -12,7 +12,7 @@ Catalyst is currently in its early stages of development.
 
 ### Bug Reports
 
-- **Search first:** Check the [GitHub Issues](https://github.com/S-Spektrum-M/catalyst/issues) to see if the bug has already been reported.
+- **Search first:** Check the [GitHub Issues](https://github.com/CatalystCPP/catalyst-build-system/issues) to see if the bug has already been reported.
 - **Be specific:** Include your OS, compiler version, and a minimal reproducible example (a small `catalyst.yaml` and source file).
 - **Logs:** Provide the exact error message and any relevant output (the entire ``.catalyst.log`` output not just command line output).
 
