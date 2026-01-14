@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
@@ -186,26 +187,16 @@ void resolve_pkg_config_dependency(const YAML::Node &dep,
             }
         }
     } else {
-        std::string command = std::format("pkg-config --libs {}", dep_name);
-        catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-        std::array<char, 128> buffer;
         std::string result;
-        FILE *pipe = popen(command.c_str(), "r");
-        if (!pipe) {
+        if (auto res = process_exec_stdout({"pkg-config", "--libs", dep_name}); !res) {
             ldlibs += " -l" + dep_name;
             return;
-        }
-        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-            result += buffer.data();
-        }
-        int ret = pclose(pipe);
-        if (WEXITSTATUS(ret) == 0) {
-            result.erase(result.find_last_not_of(" \t\n") + 1);
-            catalyst::logger.log(LogLevel::DEBUG, "Adding libs: {}", result);
-            ldlibs += " " + result;
         } else {
-            ldlibs += " -l" + dep_name;
+            result = *res;
         }
+        result.erase(result.find_last_not_of(" \t\n") + 1);
+        catalyst::logger.log(LogLevel::DEBUG, "Adding libs: {}", result);
+        ldlibs += " " + result;
     }
 }
 
