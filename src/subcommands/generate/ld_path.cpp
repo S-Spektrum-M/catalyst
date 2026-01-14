@@ -15,6 +15,7 @@
 #include <print>
 #include <string>
 #include <sys/wait.h>
+#include <unordered_map>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -51,6 +52,44 @@ void resolve_vcpkg_dependency(const YAML::Node &dep,
         ldlibs += std::format(" -l{}", dep_name);
         return;
     }
+
+    fs::path pkg_config_dir = lib_path / "pkgconfig";
+    fs::path pc_file = pkg_config_dir / std::format("{}.pc", dep_name);
+
+    if (fs::exists(pc_file)) {
+        catalyst::logger.log(LogLevel::DEBUG, "Found pkg-config file for {}: {}", dep_name, pc_file.string());
+
+        std::unordered_map<std::string, std::string> env;
+        if (const char *path_env = std::getenv("PATH")) {
+            env["PATH"] = path_env;
+        }
+        env["PKG_CONFIG_PATH"] = pkg_config_dir.string();
+
+        auto res_L = process_exec_stdout({"pkg-config", "--libs-only-L", dep_name}, std::nullopt, env);
+        auto res_l =
+            process_exec_stdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name}, std::nullopt, env);
+
+        if (res_L && res_l) {
+            std::string L_val = *res_L;
+            std::string l_val = *res_l;
+
+            if (auto last = L_val.find_last_not_of(" \t\n"); last != std::string::npos)
+                L_val.erase(last + 1);
+            if (auto last = l_val.find_last_not_of(" \t\n"); last != std::string::npos)
+                l_val.erase(last + 1);
+
+            if (!L_val.empty())
+                ldflags += " " + L_val;
+            if (!l_val.empty())
+                ldlibs += " " + l_val;
+
+            catalyst::logger.log(LogLevel::DEBUG, "Resolved via pkg-config: L='{}' l='{}'", L_val, l_val);
+            return;
+        } else {
+            catalyst::logger.log(LogLevel::WARN, "pkg-config failed for {}, falling back.", dep_name);
+        }
+    }
+    catalyst::logger.log(LogLevel::DEBUG, "Did not find pkg-config file for {}: {}", dep_name, pc_file.string());
 
     // Add this specific library path to the linker search paths.
     // This is often redundant if the global vcpkg lib path is already added, but it's more explicit.
