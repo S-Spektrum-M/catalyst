@@ -10,6 +10,7 @@
 #include <expected>
 #include <filesystem>
 #include <format>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <yaml-cpp/node/node.h>
@@ -17,7 +18,7 @@
 namespace catalyst::build {
 namespace fs = std::filesystem;
 
-bool dep_missing(const YAML_UTILS::Configuration &config) {
+bool depMissing(const YAML_UTILS::Configuration &config) {
     catalyst::logger.log(LogLevel::DEBUG, "Checking for missing dependencies.");
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
     if (!config.has("dependencies")) {
@@ -25,49 +26,37 @@ bool dep_missing(const YAML_UTILS::Configuration &config) {
         return false;
     }
     // TODO: needs to be updated to respect actual dependency types
-    if (const auto &pc = config.get_root();
-        std::any_of(pc["dependencies"].begin(), pc["dependencies"].end(), [&](const YAML::Node &dep) {
+    const auto &pc = config.get_root();
+    return std::any_of(pc["dependencies"].begin(), pc["dependencies"].end(), [&](const YAML::Node &dep) {
+        if (auto type = dep["source"].as<std::string>(); type == "git") {
             bool missing = !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
             if (missing) {
                 catalyst::logger.log(LogLevel::WARN, "Missing dependency: {}", dep["name"].as<std::string>());
             }
             return missing;
-        }))
-        return true;
-    catalyst::logger.log(LogLevel::DEBUG, "All dependencies are present.");
-    return false;
+        }
+        return false;
+    });
 }
 
-// FIXME: use better redirection scheme
-std::expected<void, std::string> generate_compile_commands(const fs::path &build_dir, const std::string &generator) {
+std::expected<void, std::string> generateCompileCommands(const fs::path &build_dir, const std::string &generator) {
     if (generator != "ninja") {
-        auto cp = fs::current_path();
-        fs::current_path(build_dir);
-        if (auto res = catalyst::process_exec({"cbe", "--compdb"}); !res) {
-            fs::current_path(cp);
+        if (auto res = catalyst::process_exec({"cbe", "-d", build_dir, "--compdb"}); !res)
             return std::unexpected(res.error());
-        }
-        fs::current_path(cp);
         return {};
     }
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
+    auto res =
+        catalyst::process_exec_stdout({"ninja", "-C", build_dir.string(), "-t", "compdb", "cc_compile", "cxx_compile"});
+    if (!res)
+        return std::unexpected(res.error());
+
     fs::path real_compdb_path = build_dir / "compile_commands.json";
-    std::string compdb_command =
-        std::format("ninja -C {} -t compdb cc_compile cxx_compile > {}", build_dir.string(), real_compdb_path.string());
-    catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", compdb_command);
-    auto shell_cmd = [](const std::string &cmd) -> std::vector<std::string> {
-#if defined(_WIN32)
-        return {"cmd", "/c", cmd};
-#else
-        return {"/bin/sh", "-c", cmd};
-#endif
-    };
-    if (int rtn = catalyst::process_exec(shell_cmd(compdb_command)).value().get(); rtn != 0) {
-        return std::unexpected(std::format("Failed to generate compile_commands.json.\n"
-                                           "Command: {} exited with error code: {}",
-                                           compdb_command,
-                                           rtn));
-    }
+    std::ofstream compdb_file{real_compdb_path};
+    if (compdb_file.is_open())
+        compdb_file << *res << std::flush;
+    else
+        return std::unexpected(std::format("Failed to open {} for writing", real_compdb_path.string()));
     return {};
 }
 
@@ -93,7 +82,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     if (!fs::exists(build_dir / build_filename) || parse_args.regen) {
         catalyst::logger.log(LogLevel::INFO, "Generating build files.");
-        auto res = catalyst::generate::action({parse_args.profiles, parse_args.enabled_features});
+        auto res = catalyst::generate::action(
+            {.profiles = parse_args.profiles, .enabled_features = parse_args.enabled_features});
         if (!res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to generate build files: {}", res.error());
             if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
@@ -106,7 +96,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     // TODO: check if all deps exist or we've been asked to refetch them
-    if (!fs::exists(build_dir / "catalyst-libs") || parse_args.force_refetch || dep_missing(config)) {
+    if (!fs::exists(build_dir / "catalyst-libs") || parse_args.force_refetch || depMissing(config)) {
         if (parse_args.force_refetch) {
             catalyst::logger.log(LogLevel::INFO, "Forcefully refetching dependencies.");
             fs::remove_all(fs::path{build_dir / "catalyst-libs"}); // cleanup
@@ -143,8 +133,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands.");
-    // effectively: call "ninja -C build_dir -t compdb > build_dir/compile_commands.json"
-    if (auto res = generate_compile_commands(build_dir, generator); !res) {
+    if (auto res = generateCompileCommands(build_dir, generator); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to generate compile commands: {}", res.error());
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
