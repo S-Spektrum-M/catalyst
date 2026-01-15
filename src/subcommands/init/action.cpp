@@ -65,7 +65,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     if (parse_args.type == parse_t::type_t::BINARY) {
-        fs::path entry_cpp_path = parse_args.path / fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
+        fs::path entry_cpp_path =
+            parse_args.path / fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
         std::ofstream entry_cpp{entry_cpp_path};
 
         if (!entry_cpp) {

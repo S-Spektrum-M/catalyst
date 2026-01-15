@@ -48,24 +48,23 @@ process_exec(std::vector<std::string> &&args,
         return std::unexpected("Cannot execute empty command");
     }
 
-    return std::async(
-        std::launch::async,
-        [args = std::move(args), working_dir = std::move(working_dir), env = std::move(env)]() -> int {
-            reproc::options options;
-            options.redirect.out.type = reproc::redirect::parent;
-            options.redirect.err.type = reproc::redirect::parent;
+    return std::async(std::launch::async,
+                      [args = std::move(args), working_dir = std::move(working_dir), env = std::move(env)]() -> int {
+                          reproc::options options;
+                          options.redirect.out.type = reproc::redirect::parent;
+                          options.redirect.err.type = reproc::redirect::parent;
 
-            std::vector<std::string> env_strings;
-            std::vector<const char *> env_ptrs;
-            configure_opt::working_dir(working_dir, options);
-            configure_opt::env(env, options, env_strings, env_ptrs);
+                          std::vector<std::string> env_strings;
+                          std::vector<const char *> env_ptrs;
+                          configure_opt::working_dir(working_dir, options);
+                          configure_opt::env(env, options, env_strings, env_ptrs);
 
-            auto [status, ec] = reproc::run(args, options);
+                          auto [status, ec] = reproc::run(args, options);
 
-            if (ec)
-                return -1;
-            return status;
-        });
+                          if (ec)
+                              return -1;
+                          return status;
+                      });
 }
 
 std::expected<std::string, std::string>

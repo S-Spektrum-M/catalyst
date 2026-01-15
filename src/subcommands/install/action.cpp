@@ -1,5 +1,5 @@
-#include "catalyst/subcommands/install.hpp"
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/install.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
 
 #include <filesystem>
@@ -22,14 +22,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         catalyst::logger.log(LogLevel::DEBUG, "Changing working directory to: {}", source_path.string());
         fs::current_path(source_path);
     } else {
-         return std::unexpected(std::format("Source directory '{}' does not exist.", source_path.string()));
+        return std::unexpected(std::format("Source directory '{}' does not exist.", source_path.string()));
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML_UTILS::Configuration config;
     try {
         config = YAML_UTILS::Configuration(parse_args.profiles);
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         fs::current_path(original_cwd);
         return std::unexpected(e.what());
     }
@@ -38,7 +38,10 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     if (!fs::exists(build_dir)) {
         fs::current_path(original_cwd);
-        return std::unexpected(std::format("Build directory '{}' does not exist in '{}'. Please run 'catalyst build' first.", build_dir.string(), source_path.string()));
+        return std::unexpected(
+            std::format("Build directory '{}' does not exist in '{}'. Please run 'catalyst build' first.",
+                        build_dir.string(),
+                        source_path.string()));
     }
 
     catalyst::logger.log(LogLevel::INFO, "Installing to: {}", install_path.string());
@@ -85,12 +88,15 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         artifact_subdir = "bin";
     } else {
         fs::current_path(original_cwd);
-        return std::unexpected(std::format("Unexpected value for manifest.type: {}. Expected: STATICLIB, SHAREDLIB, or BINARY.", type));
+        return std::unexpected(
+            std::format("Unexpected value for manifest.type: {}. Expected: STATICLIB, SHAREDLIB, or BINARY.", type));
     }
 
-    auto copy_artifact = [&](const fs::path& source, const fs::path& dest_dir, const std::string& filename) -> std::expected<void, std::string> {
-         fs::path dest = dest_dir / filename;
-         if (fs::exists(source)) {
+    auto copy_artifact = [&](const fs::path &source,
+                             const fs::path &dest_dir,
+                             const std::string &filename) -> std::expected<void, std::string> {
+        fs::path dest = dest_dir / filename;
+        if (fs::exists(source)) {
             catalyst::logger.log(LogLevel::INFO, "Installing artifact: {} -> {}", source.string(), dest.string());
             try {
                 fs::create_directories(dest_dir);
@@ -99,7 +105,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 return std::unexpected(std::format("Failed to install artifact: {}", e.what()));
             }
         } else {
-            catalyst::logger.log(LogLevel::WARN, "Artifact '{}' not found in build directory. Skipping.", source.string());
+            catalyst::logger.log(
+                LogLevel::WARN, "Artifact '{}' not found in build directory. Skipping.", source.string());
         }
         return {};
     };
@@ -119,8 +126,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         // We don't fail hard if import lib is missing, just warn, but it's usually important.
         // Re-using copy_artifact which warns.
         if (auto res = copy_artifact(source_import_lib, dest_import_lib_dir, import_lib_filename); !res) {
-             fs::current_path(original_cwd);
-             return res;
+            fs::current_path(original_cwd);
+            return res;
         }
     }
 
@@ -128,26 +135,29 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     if (auto include_dirs = config.get_string_vector("manifest.dirs.include")) {
         fs::path dest_include_dir = install_path / "include";
         for (const auto &inc_dir : *include_dirs) {
-             fs::path source_inc = fs::path(inc_dir); // Relative to current path (which is source_path)
-             if (fs::exists(source_inc) && fs::is_directory(source_inc)) {
-                 catalyst::logger.log(LogLevel::INFO, "Installing headers from: {} -> {}", source_inc.string(), dest_include_dir.string());
-                 try {
-                     fs::create_directories(dest_include_dir);
-                     for(const auto& entry : fs::recursive_directory_iterator(source_inc)) {
-                         fs::path relative_path = fs::relative(entry.path(), source_inc);
-                         fs::path target_path = dest_include_dir / relative_path;
-                         if (fs::is_directory(entry)) {
-                             fs::create_directories(target_path);
-                         } else {
-                             fs::create_directories(target_path.parent_path());
-                             fs::copy_file(entry.path(), target_path, fs::copy_options::overwrite_existing);
-                         }
-                     }
-                 } catch (const fs::filesystem_error &e) {
-                     fs::current_path(original_cwd);
-                     return std::unexpected(std::format("Failed to install headers: {}", e.what()));
-                 }
-             }
+            fs::path source_inc = fs::path(inc_dir); // Relative to current path (which is source_path)
+            if (fs::exists(source_inc) && fs::is_directory(source_inc)) {
+                catalyst::logger.log(LogLevel::INFO,
+                                     "Installing headers from: {} -> {}",
+                                     source_inc.string(),
+                                     dest_include_dir.string());
+                try {
+                    fs::create_directories(dest_include_dir);
+                    for (const auto &entry : fs::recursive_directory_iterator(source_inc)) {
+                        fs::path relative_path = fs::relative(entry.path(), source_inc);
+                        fs::path target_path = dest_include_dir / relative_path;
+                        if (fs::is_directory(entry)) {
+                            fs::create_directories(target_path);
+                        } else {
+                            fs::create_directories(target_path.parent_path());
+                            fs::copy_file(entry.path(), target_path, fs::copy_options::overwrite_existing);
+                        }
+                    }
+                } catch (const fs::filesystem_error &e) {
+                    fs::current_path(original_cwd);
+                    return std::unexpected(std::format("Failed to install headers: {}", e.what()));
+                }
+            }
         }
     }
 

@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+
 #include <iostream>
 #include <nlohmann/json.hpp>
 
@@ -18,7 +19,7 @@ const char *to_string(LogLevel level) {
     return "UNKNOWN";
 }
 
-log_t::log_t() : log_file_{ ".catalyst.log", std::ios_base::app } {
+log_t::log_t() : log_file_{".catalyst.log", std::ios_base::app} {
     auto now = std::chrono::system_clock::now();
     nlohmann::json j;
     j["event"] = "begin_session";

@@ -17,8 +17,8 @@ namespace fs = std::filesystem;
 
 std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name);
 std::expected<void, std::string> fetch_vcpkg(const std::string &name);
-std::expected<void, std::string> fetch_local(const std::string &name, const std::string &path,
-                                             const std::vector<std::string> &profiles);
+std::expected<void, std::string>
+fetch_local(const std::string &name, const std::string &path, const std::vector<std::string> &profiles);
 std::expected<void, std::string>
 fetch_git(std::string build_dir, std::string name, std::string source, std::string version);
 std::expected<void, std::string> fetch_system(const std::string &name);
