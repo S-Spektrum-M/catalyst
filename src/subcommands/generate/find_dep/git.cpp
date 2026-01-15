@@ -42,7 +42,8 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
     catalyst::logger.log(LogLevel::DEBUG, "Changing directory back to: {}", project_dir.string());
 
     std::string include_path_flags;
-    if (auto dep_includes_node = profile["manifest"]["dirs"]["include"]; dep_includes_node && dep_includes_node.IsSequence()) {
+    if (auto dep_includes_node = profile["manifest"]["dirs"]["include"];
+        dep_includes_node && dep_includes_node.IsSequence()) {
         for (const auto &include_dir : dep_includes_node.as<std::vector<std::string>>()) {
             fs::path abs_include_path = fs::absolute(dep_path / include_dir);
             catalyst::logger.log(LogLevel::DEBUG, "Adding include path: {}", abs_include_path.string());

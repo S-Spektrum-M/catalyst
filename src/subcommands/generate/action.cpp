@@ -120,7 +120,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
 std::vector<std::string> intermediate_targets(catalyst::generate::BuildWriters::BaseWriter &writer,
                                               const std::unordered_set<std::filesystem::path> &source_set) {
-    catalyst::logger.log(LogLevel::DEBUG, "Generating intermediate targets.");
+    catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
     fs::path current_dir = fs::current_path();
     writer.add_comment("Source File Compilation");
     std::vector<std::string> object_files;
@@ -183,5 +183,114 @@ void final_target(const YAML_UTILS::Configuration &config,
     // Default target
     writer.add_comment("Default target to build");
     writer.add_default(target_path.string());
+}
+
+void write_variables(const catalyst::YAML_UTILS::Configuration &config,
+                     catalyst::generate::BuildWriters::BaseWriter &writer,
+                     const std::vector<std::string> &enabled_features) {
+
+    catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
+    fs::path current_dir = fs::current_path();
+    std::string build_dir_str = config.get_string("manifest.dirs.build").value_or("build");
+    fs::path build_dir{build_dir_str};
+    fs::path obj_dir = "obj";
+
+    std::string cxxflags =
+                    std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
+                                config.get_string("manifest.tooling.CXXFLAGS").value_or(""),
+                                config.get_string("manifest.name").value_or("name"),
+                                config.get_string("manifest.version").value_or("0.0.0")),
+                ccflags =
+                    std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
+                                config.get_string("manifest.tooling.CCFLAGS").value_or(""),
+                                config.get_string("manifest.name").value_or("name"),
+                                config.get_string("manifest.version").value_or("0.0.0")),
+                ldflags = "-Lcatalyst-libs";
+
+    if (const char *vcpkg_root = std::getenv("VCPKG_ROOT"); vcpkg_root != nullptr) {
+#if defined(_WIN32)
+        const char *triplet = "x64-windows";
+#elif defined(__APPLE__)
+        const char *triplet = "x64-osx";
+#else
+        const char *triplet = "x64-linux";
+#endif
+        cxxflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
+        ccflags += std::format(" -I{}", (fs::path(vcpkg_root) / "installed" / triplet / "include").string());
+        ldflags += std::format(" -L{}", (fs::path(vcpkg_root) / "installed" / triplet / "lib").string());
+    } else {
+        logger.log(LogLevel::WARN, "VCPKG_ROOT environment variable is not defined.");
+    }
+
+    if (const auto &features_node = config.get_root()["features"]; features_node && features_node.IsSequence()) {
+        for (const auto &feature_map : features_node) {
+            if (feature_map.IsMap()) {
+                for (auto it = feature_map.begin(); it != feature_map.end(); ++it) {
+                    std::string feature = it->first.as<std::string>();
+                    bool default_enabled = it->second.as<bool>();
+                    bool explicitly_enabled =
+                        std::find(enabled_features.begin(), enabled_features.end(), feature) != enabled_features.end();
+                    bool explicitly_disabled =
+                        std::find(enabled_features.begin(), enabled_features.end(), "no-" + feature) !=
+                        enabled_features.end();
+
+                    bool is_enabled = default_enabled;
+                    if (explicitly_enabled) {
+                        is_enabled = true;
+                    } else if (explicitly_disabled) {
+                        is_enabled = false;
+                    }
+
+                    std::string flag = std::format(" -DFF_{}__{}={}",
+                                                   config.get_string("manifest.name").value_or("name"),
+                                                   feature,
+                                                   is_enabled ? "1" : "0");
+                    cxxflags += flag;
+                    ccflags += flag;
+                }
+            }
+            // reaching this is technically an error but we allow it
+        }
+    }
+
+    std::vector<std::string> inc_dirs = config.get_string_vector("manifest.dirs.include").value();
+    for (const auto &inc_dir : inc_dirs) {
+        cxxflags += std::format(" -I{}", fs::absolute(inc_dir).string());
+        ccflags += std::format(" -I{}", fs::absolute(inc_dir).string());
+    }
+
+    std::string ldlibs;
+    for (const auto &dep : config.get_root()["dependencies"]) {
+        if (auto res = find_dep(build_dir_str, dep); !res) {
+            catalyst::logger.log(LogLevel::ERROR, "{}", res.error());
+            continue;
+        } else {
+            auto [lib_path, inc_path, libs] = res.value();
+            ldflags += " " + lib_path;
+            ldlibs += " " + libs;
+            ccflags += " " + inc_path;
+            cxxflags += " " + inc_path;
+        }
+    }
+
+    writer.add_comment("Variables");
+    writer.add_variable("cc", config.get_string("manifest.tooling.CC").value_or("clang"));
+    writer.add_variable("cxx", config.get_string("manifest.tooling.CXX").value_or("clang++"));
+    writer.add_variable("cxxflags", cxxflags);
+    writer.add_variable("cflags", ccflags);
+    writer.add_variable("ldflags", ldflags);
+    writer.add_variable("ldlibs", ldlibs); // place compiled libraries here
+}
+
+void write_rules(catalyst::generate::BuildWriters::BaseWriter &writer) {
+    catalyst::logger.log(LogLevel::DEBUG, "Writing rules to build file.");
+    writer.add_comment("Rules for compiling");
+    writer.add_rule("cxx_compile", "$cxx $cxxflags -MMD -MF $out.d -c $in -o $out", "CXX $out", "$out.d", "gcc");
+    writer.add_rule("cc_compile", "$cc $cflags -MMD -MF $out.d -c $in -o $out", "CC $out", "$out.d", "gcc");
+
+    writer.add_comment("Rules for linking");
+    writer.add_rule("binary_link", "$cxx $in -o $out $ldflags $ldlibs", "LINK $out");
+    writer.add_rule("static_link", "ar rcs $out $in", "LINK $out");
+    writer.add_rule("shared_link", "$cxx -shared $in -o $out", "LINK $out");
 }
 } // namespace catalyst::generate
