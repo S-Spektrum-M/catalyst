@@ -1,3 +1,4 @@
+#include "catalyst/dir_gaurd.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/install.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
@@ -14,30 +15,27 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Install subcommand invoked.");
 
     // Handle source and target paths
-    fs::path original_cwd = fs::current_path();
     fs::path source_path = fs::absolute(parse_args.source_path);
     fs::path install_path = fs::absolute(parse_args.target_path);
 
-    if (fs::exists(source_path) && fs::is_directory(source_path)) {
-        catalyst::logger.log(LogLevel::DEBUG, "Changing working directory to: {}", source_path.string());
-        fs::current_path(source_path);
-    } else {
+    if (!fs::exists(source_path) || !fs::is_directory(source_path)) {
         return std::unexpected(std::format("Source directory '{}' does not exist.", source_path.string()));
     }
+
+    catalyst::logger.log(LogLevel::DEBUG, "Changing working directory to: {}", source_path.string());
+    catalyst::DirectoryChangeGuard dg(source_path);
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML_UTILS::Configuration config;
     try {
         config = YAML_UTILS::Configuration(parse_args.profiles);
     } catch (const std::exception &e) {
-        fs::current_path(original_cwd);
         return std::unexpected(e.what());
     }
 
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
 
     if (!fs::exists(build_dir)) {
-        fs::current_path(original_cwd);
         return std::unexpected(
             std::format("Build directory '{}' does not exist in '{}'. Please run 'catalyst build' first.",
                         build_dir.string(),
@@ -49,7 +47,6 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     try {
         fs::create_directories(install_path);
     } catch (const fs::filesystem_error &e) {
-        fs::current_path(original_cwd);
         return std::unexpected(std::format("Failed to create install directory: {}", e.what()));
     }
 
@@ -87,7 +84,6 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 #endif
         artifact_subdir = "bin";
     } else {
-        fs::current_path(original_cwd);
         return std::unexpected(
             std::format("Unexpected value for manifest.type: {}. Expected: STATICLIB, SHAREDLIB, or BINARY.", type));
     }
@@ -115,7 +111,6 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     fs::path dest_artifact_dir = install_path / artifact_subdir;
 
     if (auto res = copy_artifact(source_artifact, dest_artifact_dir, target_filename); !res) {
-        fs::current_path(original_cwd);
         return res;
     }
 
@@ -126,7 +121,6 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         // We don't fail hard if import lib is missing, just warn, but it's usually important.
         // Re-using copy_artifact which warns.
         if (auto res = copy_artifact(source_import_lib, dest_import_lib_dir, import_lib_filename); !res) {
-            fs::current_path(original_cwd);
             return res;
         }
     }
@@ -154,14 +148,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                         }
                     }
                 } catch (const fs::filesystem_error &e) {
-                    fs::current_path(original_cwd);
                     return std::unexpected(std::format("Failed to install headers: {}", e.what()));
                 }
             }
         }
     }
 
-    fs::current_path(original_cwd);
     catalyst::logger.log(LogLevel::DEBUG, "Install subcommand finished successfully.");
     return {};
 }

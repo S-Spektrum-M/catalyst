@@ -46,7 +46,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     fs::path current_dir = fs::current_path();
-    std::vector<std::string> relative_source_dirs, absolute_source_dirs;
+    std::vector<std::string> relative_source_dirs;
+    std::vector<std::string> absolute_source_dirs;
     if (auto res = config.get_string_vector("manifest.dirs.source"); !res) {
         return std::unexpected("Unable to get value for manifest.dirs.source");
     } else {
@@ -190,22 +191,21 @@ void write_variables(const catalyst::YAML_UTILS::Configuration &config,
                      const std::vector<std::string> &enabled_features) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
-    fs::path current_dir = fs::current_path();
     std::string build_dir_str = config.get_string("manifest.dirs.build").value_or("build");
     fs::path build_dir{build_dir_str};
     fs::path obj_dir = "obj";
 
     std::string cxxflags =
-                    std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
+                    std::format(R"({} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME="{}" -DCATALYST_PROJ_VER="{}")",
                                 config.get_string("manifest.tooling.CXXFLAGS").value_or(""),
                                 config.get_string("manifest.name").value_or("name"),
-                                config.get_string("manifest.version").value_or("0.0.0")),
-                ccflags =
-                    std::format("{} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME=\"{}\" -DCATALYST_PROJ_VER=\"{}\"",
+                                config.get_string("manifest.version").value_or("0.0.0"));
+    std::string ccflags =
+                    std::format(R"({} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME="{}" -DCATALYST_PROJ_VER="{}")",
                                 config.get_string("manifest.tooling.CCFLAGS").value_or(""),
                                 config.get_string("manifest.name").value_or("name"),
-                                config.get_string("manifest.version").value_or("0.0.0")),
-                ldflags = "-Lcatalyst-libs";
+                                config.get_string("manifest.version").value_or("0.0.0"));
+    std::string ldflags = "-Lcatalyst-libs";
 
     if (const char *vcpkg_root = std::getenv("VCPKG_ROOT"); vcpkg_root != nullptr) {
 #if defined(_WIN32)

@@ -1,3 +1,4 @@
+#include "catalyst/dir_gaurd.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/process_exec.h"
 #include "catalyst/subcommands/build.hpp"
@@ -29,24 +30,6 @@ std::string random_string(size_t length) {
     std::generate_n(str.begin(), length, randchar);
     return str;
 }
-
-struct ScopedDir {
-    fs::path original_path;
-    fs::path temp_path;
-    bool keep;
-
-    ScopedDir(fs::path t) : temp_path(std::move(t)), keep(false) {
-        original_path = fs::current_path();
-    }
-
-    ~ScopedDir() {
-        std::error_code ec;
-        fs::current_path(original_path, ec);
-        if (!keep && fs::exists(temp_path)) {
-            fs::remove_all(temp_path, ec);
-        }
-    }
-};
 } // namespace
 
 std::expected<void, std::string> action(const parse_t &args) {
@@ -75,8 +58,7 @@ std::expected<void, std::string> action(const parse_t &args) {
         return std::unexpected("Failed to create temporary directory for clone.");
     }
 
-    ScopedDir scoped_dir(temp_dir);
-    fs::current_path(temp_dir);
+    catalyst::DirectoryChangeGuard scoped_dir(temp_dir);
 
     catalyst::logger.log(LogLevel::INFO,
                          "Building downloaded project with profiles: {} and features: {}",
