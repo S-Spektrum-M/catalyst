@@ -11,10 +11,12 @@
 #include "catalyst/subcommands/run.hpp"
 #include "catalyst/subcommands/test.hpp"
 #include "catalyst/subcommands/tidy.hpp"
+#include "catalyst/workspace.hpp"
 
 namespace catalyst {
 struct CliContext {
     CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
+    std::optional<Workspace> workspace;
     bool show_version{false};
     bool helped{false};
 

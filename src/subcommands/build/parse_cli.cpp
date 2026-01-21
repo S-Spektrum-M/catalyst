@@ -10,6 +10,8 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     build->add_flag("-r,--regen", ret->regen, "Regenerate the build file.")->default_val(false);
     build->add_flag("-b,--force-rebuild", ret->force_rebuild, "Recompile dependencies.")->default_val(false);
     build->add_flag("--force-refetch", ret->force_refetch, "Refetch dependencies.")->default_val(false);
+    build->add_flag("--workspace,--all", ret->workspace_build, "Build all members in the workspace.")->default_val(false);
+    build->add_option("-P,--package", ret->package, "Build a specific package from the root.");
     build->add_option("-p,--profiles", ret->profiles, "Profile composition to build.")
         ->default_val(std::vector{"common"});
     build->add_option("-f,--features", ret->enabled_features, "Features to enable.")

@@ -1,0 +1,109 @@
+#include "catalyst/workspace.hpp"
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/yaml-utils/Configuration.hpp"
+#include <yaml-cpp/yaml.h>
+#include <format>
+#include <fstream>
+
+namespace catalyst {
+
+namespace fs = std::filesystem;
+
+std::optional<Workspace> Workspace::find_root(const fs::path& start_path) {
+    fs::path current = fs::absolute(start_path);
+    fs::path root = current.root_path();
+
+    while (true) {
+        fs::path config_path = current / "WORKSPACE.yaml";
+        if (fs::exists(config_path)) {
+            logger.log(LogLevel::DEBUG, "Found workspace root at: {}", current.string());
+            return load(config_path);
+        }
+
+        if (current == root) {
+            break;
+        }
+        current = current.parent_path();
+    }
+    
+    return std::nullopt;
+}
+
+std::optional<Workspace> Workspace::load(const fs::path& workspace_file) {
+    try {
+        YAML::Node node = YAML::LoadFile(workspace_file.string());
+        Workspace workspace;
+        workspace.root_path = workspace_file.parent_path();
+
+        if (!node.IsMap()) {
+            logger.log(LogLevel::ERROR, "WORKSPACE.yaml must be a map");
+            return std::nullopt;
+        }
+
+        for (const auto& kv : node) {
+            std::string key = kv.first.as<std::string>();
+            YAML::Node value = kv.second;
+
+            WorkspaceMember member;
+            member.name = key;
+            
+            if (value["path"]) {
+                member.path = workspace.root_path / value["path"].as<std::string>();
+            } else {
+                member.path = workspace.root_path / key;
+            }
+
+            if (value["profiles"]) {
+                if (value["profiles"].IsSequence()) {
+                    member.profiles = value["profiles"].as<std::vector<std::string>>();
+                } else {
+                     logger.log(LogLevel::WARN, "Member '{}' profiles is not a sequence, ignoring.", key);
+                }
+            }
+
+            workspace.members[key] = member;
+        }
+
+        return workspace;
+
+    } catch (const YAML::Exception& e) {
+        logger.log(LogLevel::ERROR, "Failed to parse WORKSPACE.yaml: {}", e.what());
+        return std::nullopt;
+    }
+}
+
+bool Workspace::contains(const fs::path& path) const {
+    fs::path abs_path = fs::absolute(path);
+    fs::path rel = abs_path.lexically_relative(root_path);
+    return !rel.empty() && rel.native().front() != '.';
+}
+
+std::optional<WorkspaceMember> Workspace::get_member_by_path(const fs::path& path) const {
+    fs::path abs_path = fs::absolute(path);
+    for (const auto& [name, member] : members) {
+        if (fs::equivalent(member.path, abs_path)) {
+            return member;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<WorkspaceMember> Workspace::find_package(const std::string& package_name) const {
+    for (const auto& [key, member] : members) {
+        try {
+            std::vector<std::string> profiles = member.profiles;
+            if (profiles.empty()) profiles.push_back("common");
+
+            YAML_UTILS::Configuration config(profiles, member.path);
+            auto name_opt = config.get_string("manifest.name");
+            if (name_opt && *name_opt == package_name) {
+                return member;
+            }
+        } catch (...) {
+            // Ignore errors
+        }
+    }
+    return std::nullopt;
+}
+
+} // namespace catalyst

@@ -5,6 +5,7 @@
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
+#include "catalyst/workspace.hpp"
 
 #include <algorithm>
 #include <expected>
@@ -13,10 +14,93 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
+#include <unordered_map>
 #include <yaml-cpp/node/node.h>
 
 namespace catalyst::build {
 namespace fs = std::filesystem;
+
+struct PackageInfo {
+    std::string name;
+    std::string workspace_member_key;
+    std::vector<std::string> dependencies;
+};
+
+/// Perform a topological sort on workspace members based on their dependencies
+/// will look through all the packages in the workspace, read their manifests,
+/// and then perform a topological sort to determine the correct build order.
+std::vector<WorkspaceMember> buildOrderTopSort(const Workspace& ws) {
+    std::unordered_map<std::string, PackageInfo> packages;
+
+    for (const auto& [key, member] : ws.get_members()) {
+        try {
+             std::vector<std::string> profiles = member.profiles;
+             if (profiles.empty()) profiles.emplace_back("common");
+
+             YAML_UTILS::Configuration config(profiles, member.path);
+             auto name_opt = config.get_string("manifest.name");
+             if (!name_opt) {
+                 catalyst::logger.log(LogLevel::WARN, "Member {} has no manifest.name", key);
+                 continue;
+             }
+             const std::string& name = *name_opt;
+
+             PackageInfo info;
+             info.name = name;
+             info.workspace_member_key = key;
+
+             const auto& root = config.get_root();
+             if (root["dependencies"]) {
+                 for (const auto& dep : root["dependencies"]) {
+                     if (dep["name"]) {
+                         info.dependencies.push_back(dep["name"].as<std::string>());
+                     }
+                 }
+             }
+             packages[name] = info;
+
+        } catch (const std::exception& e) {
+             catalyst::logger.log(LogLevel::ERROR, "Failed to load config for member {}: {}", key, e.what());
+        }
+    }
+
+    std::vector<WorkspaceMember> order;
+    std::unordered_set<std::string> visited;
+    std::unordered_set<std::string> visiting;
+
+    std::function<void(const std::string&)> visit = [&](const std::string& pkg_name) {
+        if (visited.count(pkg_name)) return;
+        if (visiting.count(pkg_name)) {
+            catalyst::logger.log(LogLevel::WARN, "Circular dependency detected involving {}", pkg_name);
+            return;
+        }
+        visiting.insert(pkg_name);
+
+        if (packages.count(pkg_name)) {
+            const auto& info = packages[pkg_name];
+            for (const auto& dep : info.dependencies) {
+                if (packages.count(dep)) {
+                    visit(dep);
+                }
+            }
+
+            std::string key = info.workspace_member_key;
+            auto it = ws.get_members().find(key);
+            if (it != ws.get_members().end()) {
+                order.push_back(it->second);
+            }
+        }
+        visited.insert(pkg_name);
+        visiting.erase(pkg_name);
+    };
+
+    for (const auto& [name, info] : packages) {
+        visit(name);
+    }
+
+    return order;
+}
 
 bool depMissing(const YAML_UTILS::Configuration &config) {
     catalyst::logger.log(LogLevel::DEBUG, "Checking for missing dependencies.");
@@ -62,6 +146,67 @@ std::expected<void, std::string> generateCompileCommands(const fs::path &build_d
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Build subcommand invoked.");
+
+    if (parse_args.workspace) {
+        fs::path current = fs::current_path();
+        bool is_root = false;
+        try {
+            is_root = fs::equivalent(parse_args.workspace->get_root(), current);
+        } catch (...) {
+            std::ignore;
+        }
+
+        if (parse_args.workspace_build || is_root || !parse_args.package.empty()) {
+             catalyst::logger.log(LogLevel::INFO, "Resolving workspace build order.");
+             auto order = buildOrderTopSort(*parse_args.workspace);
+
+             std::vector<WorkspaceMember> targets;
+             if (!parse_args.package.empty()) {
+                 // Find specific package
+                 // We need to match manifest name, but order contains WorkspaceMembers which have keys/paths
+                 // get_build_order returns members sorted.
+                 // We need to map package name -> member.
+                 // Re-loading config is inefficient but safe.
+                 // Optimization: get_build_order could return (Member, PackageName) pair.
+                 // For now, let's just loop.
+                 bool found = false;
+                 for (const auto& m : order) {
+                      YAML_UTILS::Configuration c(m.profiles.empty() ? std::vector<std::string>{"common"} : m.profiles, m.path);
+                      if (c.get_string("manifest.name").value_or("") == parse_args.package) {
+                          targets.push_back(m);
+                          found = true;
+                          break;
+                      }
+                 }
+                 if (!found) return std::unexpected("Package " + parse_args.package + " not found in workspace.");
+             } else {
+                 targets = order;
+             }
+
+             for (const auto& member : targets) {
+                 catalyst::logger.log(LogLevel::INFO, "Building workspace member: {}", member.name);
+                 fs::current_path(member.path);
+
+                 parse_t member_args = parse_args;
+                 member_args.workspace_build = false;
+                 member_args.package = ""; // Clear package arg so we don't recurse logic
+
+                 // Profile logic: if default "common", use member profiles
+                 if (member_args.profiles.size() == 1 && member_args.profiles[0] == "common") {
+                     if (!member.profiles.empty()) {
+                         member_args.profiles = member.profiles;
+                     }
+                 }
+
+                 auto res = action(member_args);
+                 fs::current_path(current); // Restore
+
+                 if (!res) return res;
+             }
+             return {};
+        }
+    }
+
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML_UTILS::Configuration config{parse_args.profiles};
 
@@ -102,7 +247,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             fs::remove_all(fs::path{build_dir / "catalyst-libs"}); // cleanup
         }
         catalyst::logger.log(LogLevel::INFO, "Fetching dependencies.");
-        if (auto res = catalyst::fetch::action({parse_args.profiles}); !res) {
+        if (auto res = catalyst::fetch::action({parse_args.profiles, parse_args.workspace}); !res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependencies: {}", res.error());
             if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
                 catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());

@@ -25,6 +25,10 @@ std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
     std::vector<std::string> profiles{}, features{};
     if (dep["profiles"] && dep["profiles"].IsSequence())
         profiles = dep["profiles"].as<std::vector<std::string>>();
+
+    if (profiles.empty())
+        profiles.emplace_back("common");
+
     if (dep["using"] && dep["using"].IsSequence())
         features = dep["using"].as<std::vector<std::string>>();
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles for local dependency.");

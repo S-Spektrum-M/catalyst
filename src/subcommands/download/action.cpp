@@ -68,8 +68,11 @@ std::expected<void, std::string> action(const parse_t &args) {
         .regen = false,
         .force_rebuild = false,
         .force_refetch = false,
+        .workspace_build = false,
+        .package = "",
         .profiles = args.profiles,
         .enabled_features = args.enabled_features,
+        .workspace = std::nullopt,
     };
 
     if (auto res = catalyst::build::action(build_args); !res) {

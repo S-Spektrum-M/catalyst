@@ -22,6 +22,40 @@ namespace catalyst::test {
 std::string command_str(fs::path executable_name, const std::vector<std::string> &params);
 std::expected<void, std::string> action(const parse_t &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Test subcommand invoked.");
+    
+    if (args.workspace) {
+        fs::path current = fs::current_path();
+        bool is_root = false;
+        try {
+            is_root = fs::equivalent(args.workspace->get_root(), current);
+        } catch (...) {}
+
+        if (is_root) {
+            catalyst::logger.log(LogLevel::INFO, "Running tests for all workspace members.");
+            bool any_failed = false;
+            std::string failed_members;
+
+            for (const auto& [name, member] : args.workspace->get_members()) {
+                 catalyst::logger.log(LogLevel::INFO, "Testing member: {}", name);
+                 fs::current_path(member.path);
+                 
+                 parse_t member_args = args;
+                 member_args.workspace = std::nullopt; // Prevent recursion loop
+                 
+                 if (auto res = action(member_args); !res) {
+                     catalyst::logger.log(LogLevel::ERROR, "Test failed for member: {}", name);
+                     any_failed = true;
+                     failed_members += name + " ";
+                 }
+                 fs::current_path(current);
+            }
+            if (any_failed) {
+                return std::unexpected("Tests failed for members: " + failed_members);
+            }
+            return {};
+        }
+    }
+
     std::vector<std::string> profiles;
     profiles.push_back("common");
     profiles.push_back("test");
