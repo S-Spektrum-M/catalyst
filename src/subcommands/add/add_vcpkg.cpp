@@ -19,7 +19,7 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &add) {
     add_vcpkg->add_option("name", ret->name)->required();
     add_vcpkg->add_option("-t,--triplet", ret->triplet)->required();
     add_vcpkg->add_option("-v,--version", ret->version)->default_str("latest");
-    add_vcpkg->add_option("-p,--profiles", ret->profiles)->default_val(std::vector{"common"});
+    add_vcpkg->add_option("-p,--profiles", ret->profiles)->default_val(std::vector<std::string>{"common"});
     add_vcpkg->add_option("-f,--features", ret->enabled_features);
 
     return {add_vcpkg, std::move(ret)};
@@ -33,7 +33,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     return {};
 }
 
-}; // namespace catalyst::add::vcpkg
+} // namespace catalyst::add::vcpkg
 
 static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
                                                               const catalyst::add::vcpkg::parse_t &args) {

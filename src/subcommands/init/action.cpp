@@ -65,7 +65,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     if (parse_args.type == parse_t::type_t::BINARY) {
-        fs::path entry_cpp_path = parse_args.path / fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
+        fs::path entry_cpp_path =
+            parse_args.path / fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
         std::ofstream entry_cpp{entry_cpp_path};
 
         if (!entry_cpp) {
@@ -88,9 +89,9 @@ int main(int argc, char **argv) {
 
     fs::path profile_path;
     if (parse_args.profile == "common")
-        profile_path = std::format("{}/catalyst.yaml", parse_args.path.string());
+        profile_path = parse_args.path / std::format("catalyst.yaml");
     else
-        profile_path = std::format("{}/catalyst_{}.yaml", parse_args.path.string(), parse_args.profile);
+        profile_path = parse_args.path / std::format("catalyst_{}.yaml", parse_args.profile);
 
     if (!fs::exists(profile_path)) {
         catalyst::logger.log(LogLevel::DEBUG, "Creating new profile file: {}", profile_path.string());

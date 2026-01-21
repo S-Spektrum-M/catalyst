@@ -7,11 +7,13 @@
 
 namespace catalyst::init {
 struct parse_t {
+    enum class type_t { BINARY, STATICLIB, SHAREDLIB, INTERFACE };
+
     std::string name{std::filesystem::current_path().filename().string()};
     std::filesystem::path path{std::filesystem::current_path()};
-    enum class type_t { BINARY, STATICLIB, SHAREDLIB, INTERFACE } type{type_t::BINARY};
+    type_t type{parse_t::type_t::BINARY};
     std::string version{"0.0.1"};
-    std::string description{"Your Description Goes Here"};
+    std::string description{"Your description goes here."};
     std::string provides{""};
     struct {
         std::string CC{"clang"};

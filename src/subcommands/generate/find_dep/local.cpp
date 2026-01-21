@@ -1,3 +1,4 @@
+#include "catalyst/dir_gaurd.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/node/node.h"
@@ -11,34 +12,34 @@ namespace fs = std::filesystem;
 
 std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
     catalyst::logger.log(LogLevel::DEBUG, "Resolving local dependency: {}", dep["name"].as<std::string>());
-    auto project_dir = fs::current_path(); // save cwd
-    fs::path dep_path;
-    if (dep["path"]) {
-        dep_path = dep["path"].as<std::string>();
-        catalyst::logger.log(LogLevel::DEBUG, "Changing directory to: {}", dep_path.string());
-        fs::current_path(dep_path); // navigate to the dep_path
-    } else {
+
+    if (!dep["path"]) {
         return std::unexpected(
             std::format("Local Dependency: {} does not define path.", dep["name"].as<std::string>()));
     }
 
+    fs::path dep_path = dep["path"].as<std::string>();
+    catalyst::logger.log(LogLevel::DEBUG, "Changing directory to: {}", dep_path.string());
+    catalyst::DirectoryChangeGuard dg(dep_path);
+
     std::vector<std::string> profiles{}, features{};
     if (dep["profiles"] && dep["profiles"].IsSequence())
         profiles = dep["profiles"].as<std::vector<std::string>>();
+
+    if (profiles.empty())
+        profiles.emplace_back("common");
+
     if (dep["using"] && dep["using"].IsSequence())
         features = dep["using"].as<std::vector<std::string>>();
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles for local dependency.");
     auto pc = catalyst::generate::profile_composition(profiles);
 
-    fs::current_path(project_dir);
     if (!pc) {
         return std::unexpected(pc.error());
     }
     YAML::Node profile = pc.value();
 
     // DO NOT rebuild here. This should have been done in fetch::fetch_local or something.
-
-    catalyst::logger.log(LogLevel::DEBUG, "Changing directory back to: {}", project_dir.string());
 
     // Add include directories
     std::string include_path;

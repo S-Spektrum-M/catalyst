@@ -10,14 +10,14 @@
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::YAML_UTILS {
-std::expected<YAML::Node, std::string> load_profile_file(const std::string &profile) {
-    catalyst::logger.log(LogLevel::DEBUG, "Loading profile file: {}", profile);
+std::expected<YAML::Node, std::string> load_profile_file(const std::string &profile, const std::filesystem::path& root_dir) {
+    catalyst::logger.log(LogLevel::DEBUG, "Loading profile file: {} from {}", profile, root_dir.string());
     namespace fs = std::filesystem;
-    fs::path profile_path;
+    fs::path profile_path = root_dir;
     if (profile == "common")
-        profile_path = "catalyst.yaml";
+        profile_path /= "catalyst.yaml";
     else
-        profile_path = std::format("catalyst_{}.yaml", profile);
+        profile_path /= std::format("catalyst_{}.yaml", profile);
 
     catalyst::logger.log(LogLevel::DEBUG, "Profile path: {}", profile_path.string());
     if (!fs::exists(profile_path)) {

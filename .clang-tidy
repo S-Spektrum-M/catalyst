@@ -1,0 +1,46 @@
+---
+# Enable all checks by default, then disable the noisy/unnecessary ones
+Checks: >
+  -*,
+  bugprone-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  google-readability-casting,
+  misc-definitions-in-headers,
+  misc-unused-parameters,
+  misc-unused-alias-decls,
+  clang-analyzer-*,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-vararg,
+  -modernize-use-trailing-return-type,
+  -readability-braces-around-statements,
+  -readability-implicit-bool-conversion,
+  -readability-identifier-length
+
+# Terminate if errors are found
+WarningsAsErrors: "*"
+
+CheckOptions:
+  # Check that 'override' is added to overridden virtual functions
+  - key:             modernize-use-override.IgnoreDestructors
+    value:           'false'
+
+  # Suggest using 'using' instead of 'typedef'
+  - key:             modernize-use-using.IgnoreMacros
+    value:           'false'
+
+  # Ensure variable names are consistent (Optional: adjust to your preference)
+  - key:             readability-identifier-naming.VariableCase
+    value:           lower_case
+  - key:             readability-identifier-naming.FunctionCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ClassCase
+    value:           CamelCase
+
+# Don't lint third-party headers found in system includes
+HeaderFilterRegex: 'src/.*|include/.*'
+---
+

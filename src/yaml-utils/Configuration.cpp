@@ -25,6 +25,7 @@ namespace {
 YAML::Node getDefaultConfiguration() {
     YAML::Node root;
     root["meta"]["min_ver"] = "0.0.1";
+    root["meta"]["generator"] = "cbe";
     root["manifest"]["name"] = "name";
     root["manifest"]["type"] = "BINARY";
     root["manifest"]["version"] = "0.0.1";
@@ -76,8 +77,8 @@ std::string ver_max(std::string s1, std::string s2) {
     return s1;
 }
 
-void merge(YAML::Node &composite, const fs::path &profile_path) {
-    YAML::Node new_profile = YAML::LoadFile(profile_path);
+void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& root_dir) {
+    YAML::Node new_profile = YAML::LoadFile(root_dir / profile_path);
     YAML::Node defaults = getDefaultConfiguration();
 
     auto check_conflict = [&](const std::string &section,
@@ -117,9 +118,31 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
     if (new_profile["meta"].IsDefined()) {
         if (new_profile["meta"].IsNull()) {
             composite.remove("meta");
-        } else if (new_profile["meta"]["min_ver"].IsDefined()) {
-            composite["meta"]["min_ver"] = ver_max(composite["meta"]["min_ver"].as<std::string>(),
-                                                   new_profile["meta"]["min_ver"].as<std::string>());
+        } else {
+            if (new_profile["meta"]["min_ver"].IsDefined()) {
+                if (new_profile["meta"]["min_ver"].IsNull()) {
+                    composite.remove("meta.min_ver");
+                } else {
+                    composite["meta"]["min_ver"] = ver_max(composite["meta"]["min_ver"].as<std::string>(),
+                                                           new_profile["meta"]["min_ver"].as<std::string>());
+                }
+            }
+            if (new_profile["meta"]["generator"].IsDefined()) {
+                if (new_profile["meta"]["generator"].IsNull()) {
+                    composite["meta"]["generator"] = "cbe"; // this should be set to avoid downsteram effects
+                } else {
+                    std::string gen = new_profile["meta"]["generator"].as<std::string>();
+                    if (gen == "ninja" || gen == "cbe") {
+                        check_conflict("meta", "generator", "", gen);
+                        composite["meta"]["generator"] = gen;
+                    } else {
+                        catalyst::logger.log(LogLevel::WARN,
+                                             "Invalid generator '{}' in profile '{}'. Ignoring.",
+                                             gen,
+                                             profile_path.string());
+                    }
+                }
+            }
         }
     }
 
@@ -266,7 +289,7 @@ void merge(YAML::Node &composite, const fs::path &profile_path) {
             composite.remove("features");
         } else if (new_profile["features"].IsSequence()) {
             for (const auto &feature : new_profile["features"]) {
-                composite["features"].push_back(feature.as<std::string>());
+                composite["features"].push_back(feature);
             }
         }
     }
@@ -322,10 +345,9 @@ std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
 }
 } // namespace
 
-Configuration::Configuration(const std::vector<std::string> &profiles) {
-    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-
+Configuration::Configuration(const std::vector<std::string> &profiles, const std::filesystem::path& root_dir) {
     std::vector profile_names = profiles;
+    catalyst::logger.log(LogLevel::DEBUG, "Composing profiles: {}.", profile_names);
 
     root = getDefaultConfiguration();
 
@@ -340,17 +362,17 @@ Configuration::Configuration(const std::vector<std::string> &profiles) {
     }
 
     for (const auto &profile_name : profile_names) {
-        fs::path profile_path{};
+        fs::path profile_path = root_dir;
         if (profile_name == "common")
-            profile_path = "catalyst.yaml";
+            profile_path /= "catalyst.yaml";
         else
-            profile_path = std::format("catalyst_{}.yaml", profile_name);
+            profile_path /= std::format("catalyst_{}.yaml", profile_name);
+
         if (!fs::exists(profile_path)) {
             catalyst::logger.log(LogLevel::ERROR, "Profile not found: {}", profile_path.string());
             throw std::runtime_error(std::format("Profile: {} not found", profile_path.string()));
         }
-        const YAML::Node &new_profile = YAML::LoadFile(profile_path);
-        merge(root, profile_path);
+        merge(root, profile_path, root_dir);
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Profile composition finished.");

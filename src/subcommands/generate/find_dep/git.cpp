@@ -1,3 +1,4 @@
+#include "catalyst/dir_gaurd.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "yaml-cpp/node/node.h"
@@ -14,16 +15,9 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
     std::string dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving git dependency: {}", dep_name);
 
-    fs::path project_dir = fs::current_path();
     fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / dep_name;
 
-    catalyst::logger.log(LogLevel::DEBUG, "Changing directory to: {}", dep_path.string());
-    try {
-        fs::current_path(dep_path);
-    } catch (const fs::filesystem_error &e) {
-        return std::unexpected(
-            std::format("Git dependency path not found: {}. Did you run 'catalyst fetch'?", dep_path.string()));
-    }
+    DirectoryChangeGuard dg(dep_path);
 
     std::vector<std::string> profiles{};
     if (dep["profiles"] && dep["profiles"].IsSequence())
@@ -38,11 +32,9 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
 
     YAML::Node profile = *pc;
 
-    fs::current_path(project_dir);
-    catalyst::logger.log(LogLevel::DEBUG, "Changing directory back to: {}", project_dir.string());
-
     std::string include_path_flags;
-    if (auto dep_includes_node = profile["manifest"]["dirs"]["include"]; dep_includes_node && dep_includes_node.IsSequence()) {
+    if (auto dep_includes_node = profile["manifest"]["dirs"]["include"];
+        dep_includes_node && dep_includes_node.IsSequence()) {
         for (const auto &include_dir : dep_includes_node.as<std::vector<std::string>>()) {
             fs::path abs_include_path = fs::absolute(dep_path / include_dir);
             catalyst::logger.log(LogLevel::DEBUG, "Adding include path: {}", abs_include_path.string());

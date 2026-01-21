@@ -11,7 +11,9 @@ Catalyst provides a suite of subcommands to manage the entire project lifecycle.
 | [`test`](test.md) | Run project tests. |
 | [`fetch`](fetch.md) | Fetch remote dependencies. |
 | [`generate`](generate.md) | Generate build scripts (Ninja). |
+| [`install`](install.md) | Install build artifacts. |
 | [`clean`](clean.md) | Remove build artifacts. |
+| [`download`](download.md) | Download, build, and install a project from git. |
 | [`fmt`](fmt.md) | Format source code. |
 | [`tidy`](tidy.md) | Run static analysis. |
 

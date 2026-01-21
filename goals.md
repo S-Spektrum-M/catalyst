@@ -1,3 +1,5 @@
-Goals:
-1. toml support (drop yaml?)
-1. configurable toolchain setting
+- Goals:
+    - [ ] ``catalyst pack`` -- package a artifact and dependencies if required
+    - [x] ``catalyst install`` -- install a dependency to path, directly from source code.
+    - [x] ``catalyst download`` -- install a dependency to path, directly from repo.
+    - [x] Workspaces -- allow monorepo development

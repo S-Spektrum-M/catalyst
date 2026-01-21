@@ -14,7 +14,7 @@ Currently, Catalyst must be built from source.
 1.  **Clone the repository:**
 
 ```bash
-git clone https://github.com/S-Spektrum-M/catalyst.git
+git clone https://github.com/CatalystCPP/catalyst-build-system.git
 cd catalyst
 ```
 

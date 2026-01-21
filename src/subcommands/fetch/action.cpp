@@ -17,8 +17,8 @@ namespace fs = std::filesystem;
 
 std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name);
 std::expected<void, std::string> fetch_vcpkg(const std::string &name);
-std::expected<void, std::string> fetch_local(const std::string &name, const std::string &path,
-                                             const std::vector<std::string> &profiles);
+std::expected<void, std::string>
+fetch_local(const std::string &name, const std::string &path, const std::vector<std::string> &profiles);
 std::expected<void, std::string>
 fetch_git(std::string build_dir, std::string name, std::string source, std::string version);
 std::expected<void, std::string> fetch_system(const std::string &name);
@@ -49,6 +49,35 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             }
             std::string name = dep["name"].as<std::string>();
             std::string source = dep["source"].as<std::string>();
+
+            if (parse_args.workspace) {
+                if (auto member = parse_args.workspace->find_package(name)) {
+                    catalyst::logger.log(LogLevel::INFO, "Dependency '{}' found in workspace at '{}'. Linking...", name, member->path.string());
+                    fs::path lib_path = fs::path(build_dir) / "catalyst-libs" / name;
+                    
+                    try {
+                        if (fs::exists(lib_path) || fs::is_symlink(lib_path)) {
+                            if (fs::is_symlink(lib_path)) {
+                                if (fs::read_symlink(lib_path) != member->path) {
+                                    fs::remove(lib_path);
+                                    fs::create_directory_symlink(member->path, lib_path);
+                                }
+                            } else {
+                                fs::remove_all(lib_path);
+                                fs::create_directory_symlink(member->path, lib_path);
+                            }
+                        } else {
+                            fs::create_directories(lib_path.parent_path());
+                            fs::create_directory_symlink(member->path, lib_path);
+                        }
+                    } catch (const std::exception& e) {
+                         catalyst::logger.log(LogLevel::ERROR, "Failed to link workspace dependency: {}", e.what());
+                         return std::unexpected(e.what());
+                    }
+                    continue;
+                }
+            }
+
             catalyst::logger.log(LogLevel::DEBUG, "Fetching dependency '{}' from '{}'", name, source);
             if (source == "vcpkg") {
                 if (!dep["version"]) {

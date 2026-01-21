@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #define STRINGIFY_IMPL(x) #x
 #define TOSTRING(x) STRINGIFY_IMPL(x)

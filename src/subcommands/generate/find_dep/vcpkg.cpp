@@ -1,10 +1,13 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.h"
 #include "catalyst/subcommands/generate.hpp"
 
 #include <expected>
+#include <filesystem>
 #include <format>
 #include <string>
 #include <unistd.h>
+#include <unordered_map>
 
 namespace catalyst::generate {
 std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
@@ -32,6 +35,41 @@ std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
     fs::path vcpkg_root(vcpkg_root_env);
     fs::path package_dir_name = std::format("{}_{}", dep_name, triplet);
     fs::path lib_path = vcpkg_root / "packages" / package_dir_name / "lib";
+
+    fs::path pkg_config_dir = lib_path / "pkgconfig";
+    fs::path pc_file = pkg_config_dir / std::format("{}.pc", dep_name);
+
+    if (fs::exists(pc_file)) {
+        catalyst::logger.log(LogLevel::DEBUG, "Found pkg-config file for {}: {}", dep_name, pc_file.string());
+
+        std::unordered_map<std::string, std::string> env;
+        if (const char *path_env = std::getenv("PATH")) {
+            env["PATH"] = path_env;
+        }
+        env["PKG_CONFIG_PATH"] = pkg_config_dir.string();
+
+        auto res_L = process_exec_stdout({"pkg-config", "--libs-only-L", dep_name}, std::nullopt, env);
+        auto res_l =
+            process_exec_stdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name}, std::nullopt, env);
+
+        if (res_L && res_l) {
+            std::string L_val = *res_L;
+            std::string l_val = *res_l;
+
+            if (auto last = L_val.find_last_not_of(" \t\n"); last != std::string::npos)
+                L_val.erase(last + 1);
+            if (auto last = l_val.find_last_not_of(" \t\n"); last != std::string::npos)
+                l_val.erase(last + 1);
+
+            catalyst::logger.log(LogLevel::DEBUG, "Resolved via pkg-config: L='{}' l='{}'", L_val, l_val);
+            return find_res{.lib_path = L_val,
+                            .inc_path = "", // already set in write_variables
+                            .libs = l_val};
+        } else {
+            catalyst::logger.log(LogLevel::WARN, "pkg-config failed for {}, falling back.", dep_name);
+        }
+    }
+    catalyst::logger.log(LogLevel::DEBUG, "Did not find pkg-config file for {}: {}", dep_name, pc_file.string());
 
     std::string library_path, libs;
 

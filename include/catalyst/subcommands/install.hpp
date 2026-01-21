@@ -1,15 +1,15 @@
 #pragma once
 #include <CLI/App.hpp>
 #include <expected>
-#include <string>
-#include <vector>
+#include <utility>
 
-namespace catalyst::run {
+namespace catalyst::install {
 struct parse_t {
-    std::string profile;
-    std::vector<std::string> params;
+    std::filesystem::path source_path;
+    std::filesystem::path target_path;
+    std::vector<std::string> profiles;
 };
 
 std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
 std::expected<void, std::string> action(const parse_t &);
-} // namespace catalyst::run
+} // namespace catalyst::install

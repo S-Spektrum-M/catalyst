@@ -43,8 +43,8 @@ These hooks are specific to individual Catalyst subcommands, allowing you to cus
 
 | Hook           | Description                                       |
 | -------------- | ------------------------------------------------- |
-| `pre-generate` | Runs before the `build.ninja` file is generated.  |
-| `post-generate`| Runs after the `build.ninja` file is generated.   |
+| `pre-generate` | Runs before the build file is generated.  |
+| `post-generate`| Runs after the build file is generated.   |
 
 
 #### `fetch`
