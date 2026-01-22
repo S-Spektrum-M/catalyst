@@ -442,6 +442,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Details
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -963,6 +974,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/workspaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workspaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -995,6 +1034,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Details
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
@@ -1033,12 +1083,24 @@ Options:
   -r,--no-regen               regenerate the build file
   --force-rebuild             recompile dependencies
   --force-refetch             refetch dependencies
+  --workspace,--all           Build all members in the workspace
+  -P,--package TEXT           Build a specific package from the root
   -p,--profiles TEXT ...      
   -f,--features TEXT ...      
 </code></pre>
+<h2 id="details">Details</h2>
+<p>When running with <code>--workspace</code> or <code>--all</code>, Catalyst determines the correct build order based on the dependencies between workspace members. It ensures that dependencies are built before the packages that rely on them.</p>
 <h2 id="examples">Examples</h2>
 <p><strong>Standard build:</strong></p>
 <pre><code class="language-bash">catalyst build
+</code></pre>
+<p><strong>Workspace build:</strong>
+Build all packages in the current workspace, automatically ordering them by dependency.</p>
+<pre><code class="language-bash">catalyst build --workspace
+</code></pre>
+<p><strong>Build specific package:</strong>
+Build only the <code>app</code> package and its dependencies within the workspace.</p>
+<pre><code class="language-bash">catalyst build --package app
 </code></pre>
 <p><strong>Debug build:</strong></p>
 <pre><code class="language-bash">catalyst build --profiles debug

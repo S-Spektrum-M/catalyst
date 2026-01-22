@@ -963,6 +963,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/workspaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workspaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1030,11 +1058,16 @@ Usage: catalyst test [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
+  --workspace                 Test all members in the workspace
   -P,--params TEXT ...        
 </code></pre>
 <h2 id="examples">Examples</h2>
 <pre><code class="language-bash">catalyst test
 catalyst test --params &quot;--gtest_filter=MyTest.*&quot;
+</code></pre>
+<p><strong>Test workspace:</strong>
+Run tests for all members in the workspace.</p>
+<pre><code class="language-bash">catalyst test --workspace
 </code></pre>
 
 
