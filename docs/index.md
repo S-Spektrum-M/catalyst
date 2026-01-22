@@ -43,8 +43,8 @@ the C++ ecosystem. It prioritizes declarative configuration, reproducibility, an
 - [tidy](cli/tidy.md)
 
 ### Community & Contributing
-- [Contributing Guidelines](../CONTRIBUTING.md)
-- [Roadmap](../ROADMAP.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Roadmap](ROADMAP.md)
 
 ---
 
