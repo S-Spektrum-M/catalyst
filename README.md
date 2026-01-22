@@ -12,61 +12,41 @@ Catalyst is a declarative build system that brings Cargo-like simplicity to C an
 
 **Why Catalyst?**
 
-- **Declarative, not imperative** – YAML config files instead of scripting languages
-- **Profile-based builds** – Compose configurations like `debug + asan` or `release + lto`
-- **Built-in dependency management** – Native support for vcpkg, git repos, local packages, and system libraries
-- **Reproducible by default** – Per-target isolation with deterministic builds
-- **Modern C++ focused** – Designed for C++20/23/26 workflows
-
-Think Cargo for Rust, but for C++.
+- Declarative – YAML config files instead of scripting languages.
+- Profile-based builds – Compose configurations like `debug + asan` or `release + lto`.
+- Built-in dependency management – Native support for vcpkg, git repos, local packages, and system libraries.
+- Reproducible by default – Per-target isolation with deterministic builds.
+- Modern C++ focused – Designed for C++20/23/26 workflows.
 
 ---
 
-## Quick Start
+## Documentation
 
-### Installation
+Documentation is now in the [`docs/`](docs/) directory and is hosted
+[here](https://catalystcpp.github.io/catalyst-build-system/).
 
-```bash
-# Clone the repository
-git clone https://github.com/CatalystCPP/catalyst-build-system.git
-cd catalyst
+### 🚀 Getting Started
 
-# Build Catalyst using CMake
-cmake -B build -G Ninja
-cmake --build build
-cmake --install build
-```
+- [Installation](docs/installation.md): How to build and install Catalyst.
+- [Getting Started Guide](docs/getting_started.md): Create your first "Hello World" project.
+- [CLI Reference](docs/cli/index.md): Usage guide for `catalyst build`, `catalyst run`, etc.
 
-### Create Your First Project
+### 📘 Core Concepts
 
-```bash
-# Initialize a new C++ project
-mkdir my-project
-cd my-project
-catalyst init my-project
+- [Configuration](docs/concepts/configuration.md): The full schema for `catalyst.yaml`.
+- [Profiles](docs/concepts/profiles.md): How to use and compose build profiles (e.g., Debug, Release).
+- [Dependencies](docs/concepts/dependencies.md): Managing external libraries (Git, Vcpkg, System).
+- [Hooks](docs/concepts/hooks.md): Lifecycle callbacks for custom scripts.
+- [Catalyst Ignore](docs/concepts/catalystignore.md): Excluding files from builds based on profiles.
 
-# YOU: write to any file in src/
+---
 
-# Build it
-catalyst build
+## Quick Look
 
-# Run it
-catalyst run
-```
+### `catalyst.yaml` File
 
-### Example Project Structure
+Catalyst uses a simple YAML file to define your project.
 
-```
-my-project/
-├── catalyst.yaml          # Main configuration
-├── src/
-│   └── main.cpp
-├── include/
-│   └── my-project/
-└── build/                 # Generated build files
-```
-
-**`catalyst.yaml`:**
 ```yaml
 manifest:
   name: my-project
@@ -79,201 +59,31 @@ manifest:
     include: [include]
     source: [src]
     build: build
-```
 
----
-
-## Key Features
-
-### Profile Composition
-
-Create reusable build configurations and compose them:
-
-```yaml
-# catalyst_debug.yaml
-manifest:
-  tooling:
-    CXXFLAGS: -g -O0 -DDEBUG
-
-# catalyst_asan.yaml
-manifest:
-  tooling:
-    CXXFLAGS: -fsanitize=address
-```
-
-Build with composed profiles:
-```bash
-catalyst build --profiles debug,asan
-```
-
-### Dependency Management
-
-Support for multiple dependency sources:
-
-```yaml
 dependencies:
-  # From vcpkg
-  - name: boost
-    source: vcpkg
-    version: 1.82.0
-
-  # From git
-  - name: nlohmann-json
-    source: https://github.com/nlohmann/json.git
-    version: v3.11.2
-
-  # Local packages
-  - name: my-lib
-    source: local
-    path: ../my-lib
-
-  # System packages
-  - name: openssl
-    source: system
+  - name: fmt
+    source: git
+    url: https://github.com/fmtlib/fmt.git
+    version: 10.0.0
 ```
 
-### Feature Flags
-
-Compile-time feature toggles:
-
-```yaml
-features:
-  - logging: true
-  - networking: false
-```
-
-Access in code:
-```cpp
-#if FF_my_project__logging
-  std::cout << "Logging enabled" << std::endl;
-#endif
-```
-
-### Build Hooks
-
-Run custom commands at different build stages:
-
-```yaml
-hooks:
-  pre_build: "echo 'Starting build...'"
-  post_build:
-    - command: "./scripts/generate_docs.sh"
-    - script: "./scripts/notify_slack.sh"
-```
-
-### Smart Source Management
-
-Exclude files with `.catalystignore`:
-
-```yaml
-# src/.catalystignore
-debug:
-  - test_*.cpp
-  - *_benchmark.cpp
-
-release:
-  - *_debug.cpp
-```
-
----
-
-## Documentation
-
-- **[Configuration Guide](docs/configuration.md)** – Complete YAML schema reference
-- **[Profiles](docs/profiles.md)** – How to use and compose profiles
-- **[Hooks](docs/hooks.md)** – Lifecycle callbacks and scripting
-- **[Project Structure](docs/project_structure.md)** – Code organization for contributors
-
-Or run:
-```bash
-catalyst help
-catalyst help <subcommand>
-```
-
----
-
-## Commands
+### Core Commands
 
 | Command | Description |
 |---------|-------------|
 | `catalyst init` | Create a new project |
 | `catalyst build` | Build the project |
 | `catalyst run` | Run the binary |
-| `catalyst test` | Run tests |
-| `catalyst clean` | Clean build artifacts |
-| `catalyst fmt` | Format source code |
-| `catalyst tidy` | Run linter |
 | `catalyst add` | Add a dependency |
-| `catalyst fetch` | Fetch dependencies |
 
-See the [roadmap](ROADMAP.md) for planned features.
-
----
-
-## Why Not CMake?
-
-CMake is powerful but complex. Catalyst trades some of that power for simplicity and developer experience:
-
-| Feature | CMake | Catalyst |
-|---------|-------|----------|
-| Configuration | Imperative scripting | Declarative YAML |
-| Learning curve | Steep | Gentle |
-| Dependency management | Manual or external | Built-in |
-| Profile composition | Complex | Native |
-| Reproducibility | Requires discipline | Default behavior |
-
-**When to use Catalyst:**
-- New projects where you control the build system
-- Projects that value simplicity and maintainability
-- Teams tired of CMake complexity
-
-**When to use CMake:**
-- Existing large codebases
-- Need for complex custom build logic
-- Projects requiring broad platform/toolchain support
+For a full list, see the **[CLI Reference](docs/cli/index.md)**.
 
 ---
 
-## Current Limitations
+## Roadmap & Contributing
 
-- **Early stage** – APIs will change, bugs exist
-- **Linux/macOS focus** – Windows support is limited
-- **Single target per project** – Workspaces are planned but not implemented
-- **No package registry** – Currently uses vcpkg, git, and local dependencies
-
-See [ROADMAP.md](ROADMAP.md) for what's coming.
-
----
-
-## Contributing
-
-Catalyst is in active development and contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get involved.
-
-**Before contributing:**
-1. Open an issue to discuss major changes
-2. Expect API churn in these early stages
-
-**Development setup:**
-```bash
-# Clone the repository
-git clone https://github.com/CatalystCPP/catalyst-build-system.git
-cd catalyst
-catalyst build --profiles debug
-catalyst test
-```
-
----
-
-## Inspiration & Thanks
-
-Catalyst draws inspiration from:
-- **[Cargo](https://github.com/rust-lang/cargo)** – Profile system and declarative config
-- **[Ninja](https://ninja-build.org/)** – Fast incremental builds
-- **[vcpkg](https://vcpkg.io/en/)** – Modern C++ package management
-
-Built with:
-- [yaml-cpp](https://github.com/jbeder/yaml-cpp) – YAML parsing
-- [CLI11](https://github.com/CLIUtils/CLI11) – Command-line interface
+- **[Roadmap](ROADMAP.md)**: See what features are planned (e.g., Workspaces, Windows support).
+- **[Contributing](CONTRIBUTING.md)**: Want to help? Read our contribution guidelines.
 
 ---
 
