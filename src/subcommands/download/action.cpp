@@ -6,6 +6,7 @@
 #include "catalyst/subcommands/install.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <random>
@@ -15,16 +16,17 @@ namespace fs = std::filesystem;
 namespace catalyst::download {
 
 namespace {
-std::string random_string(size_t length) {
+std::string randomString(size_t length) {
     auto randchar = []() -> char {
-        const char charset[] = "0123456789"
-                               "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                               "abcdefghijklmnopqrstuvwxyz";
-        const size_t max_index = (sizeof(charset) - 1);
         static std::random_device rd;
         static std::mt19937 rng(rd());
+
+        constexpr std::array<char, 63> CHARSET = {"0123456789"
+                                                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                  "abcdefghijklmnopqrstuvwxyz"};
+        const size_t max_index = CHARSET.size() - 1;
         static std::uniform_int_distribution<size_t> dist(0, max_index - 1);
-        return charset[dist(rng)];
+        return CHARSET.at(dist(rng));
     };
     std::string str(length, 0);
     std::generate_n(str.begin(), length, randchar);
@@ -35,8 +37,9 @@ std::string random_string(size_t length) {
 std::expected<void, std::string> action(const parse_t &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Download subcommand invoked.");
 
+    constexpr size_t TEMP_DIR_NAME_LEN = 8UZ;
     auto absolute_target_path = fs::absolute(args.target_path);
-    auto temp_dir = fs::temp_directory_path() / std::format("catalyst_dl_{}", random_string(8));
+    auto temp_dir = fs::temp_directory_path() / std::format("catalyst_dl_{}", randomString(TEMP_DIR_NAME_LEN));
 
     // step 1: clone
     catalyst::logger.log(LogLevel::INFO, "Cloning {} into temporary directory {}", args.git_remote, temp_dir.string());
@@ -48,15 +51,13 @@ std::expected<void, std::string> action(const parse_t &args) {
     clone_cmd.push_back(args.git_remote);
     clone_cmd.push_back(temp_dir.string());
 
-    if (auto res = catalyst::process_exec(std::move(clone_cmd)); !res) {
+    auto res = catalyst::process_exec(std::move(clone_cmd));
+    if (!res)
         return std::unexpected(res.error());
-    } else if (auto exit_code = res.value().get(); exit_code != 0) {
+    if (auto exit_code = res.value().get(); exit_code != 0)
         return std::unexpected(std::format("Git clone failed with exit code {}", exit_code));
-    }
-
-    if (!fs::exists(temp_dir)) {
+    if (!fs::exists(temp_dir))
         return std::unexpected("Failed to create temporary directory for clone.");
-    }
 
     catalyst::DirectoryChangeGuard scoped_dir(temp_dir);
 

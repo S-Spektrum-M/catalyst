@@ -40,7 +40,9 @@ log_t::~log_t() {
 }
 
 bool log_t::is_open() const {
+    //NOLINTBEGIN(cppcoreguidelines-pro-type-const-cast)
     std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(log_file_mutex_));
+    //NOLINTEND(cppcoreguidelines-pro-type-const-cast)
     return log_file_.is_open();
 }
 

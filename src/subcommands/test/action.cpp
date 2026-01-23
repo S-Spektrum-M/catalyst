@@ -5,13 +5,11 @@
 #include "catalyst/subcommands/test.hpp"
 
 #include <cctype>
-#include <cstdlib>
 #include <expected>
 #include <filesystem>
 #include <format>
-#include <iostream>
-#include <regex>
 #include <string>
+#include <tuple>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -19,35 +17,37 @@ namespace fs = std::filesystem;
 
 namespace catalyst::test {
 
-std::string command_str(fs::path executable_name, const std::vector<std::string> &params);
+std::string commandStr(const fs::path& executable_name, const std::vector<std::string> &params);
 std::expected<void, std::string> action(const parse_t &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Test subcommand invoked.");
-    
+
     if (args.workspace) {
         fs::path current = fs::current_path();
         bool is_root = false;
         try {
             is_root = fs::equivalent(args.workspace->get_root(), current);
-        } catch (...) {}
+        } catch (...) {
+            std::ignore;
+        }
 
         if (is_root) {
             catalyst::logger.log(LogLevel::INFO, "Running tests for all workspace members.");
             bool any_failed = false;
             std::string failed_members;
 
-            for (const auto& [name, member] : args.workspace->get_members()) {
-                 catalyst::logger.log(LogLevel::INFO, "Testing member: {}", name);
-                 fs::current_path(member.path);
-                 
-                 parse_t member_args = args;
-                 member_args.workspace = std::nullopt; // Prevent recursion loop
-                 
-                 if (auto res = action(member_args); !res) {
-                     catalyst::logger.log(LogLevel::ERROR, "Test failed for member: {}", name);
-                     any_failed = true;
-                     failed_members += name + " ";
-                 }
-                 fs::current_path(current);
+            for (const auto &[name, member] : args.workspace->get_members()) {
+                catalyst::logger.log(LogLevel::INFO, "Testing member: {}", name);
+                fs::current_path(member.path);
+
+                parse_t member_args = args;
+                member_args.workspace = std::nullopt; // Prevent recursion loop
+
+                if (auto res = action(member_args); !res) {
+                    catalyst::logger.log(LogLevel::ERROR, "Test failed for member: {}", name);
+                    any_failed = true;
+                    failed_members += name + " ";
+                }
+                fs::current_path(current);
             }
             if (any_failed) {
                 return std::unexpected("Tests failed for members: " + failed_members);
@@ -56,18 +56,16 @@ std::expected<void, std::string> action(const parse_t &args) {
         }
     }
 
-    std::vector<std::string> profiles;
-    profiles.push_back("common");
-    profiles.push_back("test");
+    std::vector<std::string> profiles{"common", "test"};
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    if (auto res = generate::profile_composition(profiles); !res) {
+    auto res = generate::profile_composition(profiles);
+    if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
-    } else {
-        profile_comp = res.value();
     }
+    profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-test hooks.");
     if (auto res = hooks::pre_test(profile_comp); !res) {
@@ -75,9 +73,10 @@ std::expected<void, std::string> action(const parse_t &args) {
         return res;
     }
 
-    std::string exe, build_dir;
+    std::string exe;
+    std::string build_dir;
     auto str_to_lower = [](std::string &input) -> void {
-        auto lower = [](const char c) -> char { return std::tolower(c); };
+        auto lower = [](const char c) -> char { return static_cast<char>(std::tolower(c)); };
         std::transform(input.begin(), input.end(), input.begin(), lower);
         return;
     };
@@ -92,9 +91,8 @@ std::expected<void, std::string> action(const parse_t &args) {
     if (!profile_comp["manifest"]["dirs"]["build"]) {
         catalyst::logger.log(LogLevel::ERROR, "Build directory is not defined.");
         return std::unexpected("build directory is not defined");
-    } else {
-        build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
     }
+        build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
 
     if (profile_comp["manifest"]["provides"] && profile_comp["manifest"]["provides"].as<std::string>() != "") {
         exe = profile_comp["manifest"]["provides"].as<std::string>();
@@ -107,7 +105,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     }
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
-    std::string command = command_str(exe_path, args.params);
+    std::string command = commandStr(exe_path, args.params);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
 
     std::vector<std::string> exec_args;
@@ -130,7 +128,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     return {};
 }
 
-std::string command_str(fs::path executable, const std::vector<std::string> &params) {
+std::string commandStr(const fs::path& executable, const std::vector<std::string> &params) {
     catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
     std::string command = executable;
     for (const auto &param : params) {

@@ -109,7 +109,7 @@ std::pair<int, bool> parseCli(int argc, char **argv, catalyst::CliContext &ctx) 
     return {0, false};
 }
 
-template <typename T> int dispatchFN(const char *subc_name, const T &parse_res, auto fn) {
+template <typename ParseRes_T> int dispatchFN(const char *subc_name, const ParseRes_T &parse_res, auto fn) {
     catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", subc_name);
     if (std::expected<void, std::string> res = fn(parse_res); !res) {
         catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());

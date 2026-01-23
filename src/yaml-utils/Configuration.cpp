@@ -18,7 +18,7 @@
 #include <yaml-cpp/yaml.h>
 
 using catalyst::LogLevel;
-using namespace catalyst::YAML_UTILS;
+using catalyst::YAML_UTILS::Configuration;
 namespace fs = std::filesystem;
 
 namespace {
@@ -43,7 +43,7 @@ YAML::Node getDefaultConfiguration() {
     root["features"] = std::vector<std::string>{};
     return root;
 }
-std::string ver_max(std::string s1, std::string s2) {
+std::string verMax(std::string s1, std::string s2) {
     catalyst::logger.log(LogLevel::DEBUG, "Comparing versions: {} and {}", s1, s2);
     auto split_ver = [](const std::string &ver) {
         std::vector<int> parts;
@@ -77,14 +77,19 @@ std::string ver_max(std::string s1, std::string s2) {
     return s1;
 }
 
-void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& root_dir) {
+void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path &root_dir) {
     YAML::Node new_profile = YAML::LoadFile(root_dir / profile_path);
     YAML::Node defaults = getDefaultConfiguration();
 
-    auto check_conflict = [&](const std::string &section,
-                              const std::string &key,
-                              const std::string &subkey,
-                              const std::string &incoming_val) {
+    struct NodeAssignment {
+        std::string section;
+        std::string key;
+        std::string subkey;
+        std::string incoming_val;
+    };
+
+    auto check_conflict = [&](const NodeAssignment &assignment) {
+        const auto &[section, key, subkey, incoming_val] = assignment;
         try {
             std::string current_val;
             std::string default_val;
@@ -123,17 +128,18 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                 if (new_profile["meta"]["min_ver"].IsNull()) {
                     composite.remove("meta.min_ver");
                 } else {
-                    composite["meta"]["min_ver"] = ver_max(composite["meta"]["min_ver"].as<std::string>(),
-                                                           new_profile["meta"]["min_ver"].as<std::string>());
+                    composite["meta"]["min_ver"] = verMax(composite["meta"]["min_ver"].as<std::string>(),
+                                                          new_profile["meta"]["min_ver"].as<std::string>());
                 }
             }
             if (new_profile["meta"]["generator"].IsDefined()) {
                 if (new_profile["meta"]["generator"].IsNull()) {
                     composite["meta"]["generator"] = "cbe"; // this should be set to avoid downsteram effects
                 } else {
-                    std::string gen = new_profile["meta"]["generator"].as<std::string>();
+                    auto gen = new_profile["meta"]["generator"].as<std::string>();
                     if (gen == "ninja" || gen == "cbe") {
-                        check_conflict("meta", "generator", "", gen);
+                        check_conflict(
+                            NodeAssignment{.section = "meta", .key = "generator", .subkey = "", .incoming_val = gen});
                         composite["meta"]["generator"] = gen;
                     } else {
                         catalyst::logger.log(LogLevel::WARN,
@@ -155,7 +161,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                 if (new_profile_manifest["name"].IsNull()) {
                     composite["manifest"].remove("name");
                 } else {
-                    check_conflict("manifest", "name", "", new_profile_manifest["name"].as<std::string>());
+                    check_conflict(NodeAssignment{.section = "manifest",
+                                                  .key = "name",
+                                                  .subkey = "",
+                                                  .incoming_val = new_profile_manifest["name"].as<std::string>()});
                     composite["manifest"]["name"] = new_profile_manifest["name"];
                 }
             }
@@ -163,7 +172,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                 if (new_profile_manifest["type"].IsNull()) {
                     composite["manifest"].remove("type");
                 } else {
-                    check_conflict("manifest", "type", "", new_profile_manifest["type"].as<std::string>());
+                    check_conflict(NodeAssignment{.section = "manifest",
+                                                  .key = "type",
+                                                  .subkey = "",
+                                                  .incoming_val = new_profile_manifest["type"].as<std::string>()});
                     composite["manifest"]["type"] = new_profile_manifest["type"];
                 }
             }
@@ -171,7 +183,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                 if (new_profile_manifest["version"].IsNull()) {
                     composite["manifest"].remove("version");
                 } else {
-                    check_conflict("manifest", "version", "", new_profile_manifest["version"].as<std::string>());
+                    check_conflict(NodeAssignment{.section = "manifest",
+                                                  .key = "version",
+                                                  .subkey = "",
+                                                  .incoming_val = new_profile_manifest["version"].as<std::string>()});
                     composite["manifest"]["version"] = new_profile_manifest["version"];
                 }
             }
@@ -179,7 +194,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                 if (new_profile_manifest["provides"].IsNull()) {
                     composite["manifest"].remove("provides");
                 } else {
-                    check_conflict("manifest", "provides", "", new_profile_manifest["provides"].as<std::string>());
+                    check_conflict(NodeAssignment{.section = "manifest",
+                                                  .key = "provides",
+                                                  .subkey = "",
+                                                  .incoming_val = new_profile_manifest["provides"].as<std::string>()});
                     composite["manifest"]["provides"] = new_profile_manifest["provides"];
                 }
             }
@@ -193,7 +211,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                             composite["manifest"]["tooling"].remove("CC");
                         } else {
                             check_conflict(
-                                "manifest", "tooling", "CC", new_profile_manifest_tooling["CC"].as<std::string>());
+                                NodeAssignment{.section = "manifest",
+                                               .key = "tooling",
+                                               .subkey = "CC",
+                                               .incoming_val = new_profile_manifest_tooling["CC"].as<std::string>()});
                             composite["manifest"]["tooling"]["CC"] = new_profile_manifest_tooling["CC"];
                         }
                     }
@@ -202,7 +223,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                             composite["manifest"]["tooling"].remove("CXX");
                         } else {
                             check_conflict(
-                                "manifest", "tooling", "CXX", new_profile_manifest_tooling["CXX"].as<std::string>());
+                                NodeAssignment{.section = "manifest",
+                                               .key = "tooling",
+                                               .subkey = "CXX",
+                                               .incoming_val = new_profile_manifest_tooling["CXX"].as<std::string>()});
                             composite["manifest"]["tooling"]["CXX"] = new_profile_manifest_tooling["CXX"];
                         }
                     }
@@ -211,7 +235,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                             composite["manifest"]["tooling"].remove("FMT");
                         } else {
                             check_conflict(
-                                "manifest", "tooling", "FMT", new_profile_manifest_tooling["FMT"].as<std::string>());
+                                NodeAssignment{.section = "manifest",
+                                               .key = "tooling",
+                                               .subkey = "FMT",
+                                               .incoming_val = new_profile_manifest_tooling["FMT"].as<std::string>()});
                             composite["manifest"]["tooling"]["FMT"] = new_profile_manifest_tooling["FMT"];
                         }
                     }
@@ -219,10 +246,11 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                         if (new_profile_manifest_tooling["LINTER"].IsNull()) {
                             composite["manifest"]["tooling"].remove("LINTER");
                         } else {
-                            check_conflict("manifest",
-                                           "tooling",
-                                           "LINTER",
-                                           new_profile_manifest_tooling["LINTER"].as<std::string>());
+                            check_conflict(NodeAssignment{
+                                .section = "manifest",
+                                .key = "tooling",
+                                .subkey = "LINTER",
+                                .incoming_val = new_profile_manifest_tooling["LINTER"].as<std::string>()});
                             composite["manifest"]["tooling"]["LINTER"] = new_profile_manifest_tooling["LINTER"];
                         }
                     }
@@ -230,10 +258,11 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                         if (new_profile_manifest_tooling["CCFLAGS"].IsNull()) {
                             composite["manifest"]["tooling"].remove("CCFLAGS");
                         } else {
-                            check_conflict("manifest",
-                                           "tooling",
-                                           "CCFLAGS",
-                                           new_profile_manifest_tooling["CCFLAGS"].as<std::string>());
+                            check_conflict(NodeAssignment{
+                                .section = "manifest",
+                                .key = "tooling",
+                                .subkey = "CCFLAGS",
+                                .incoming_val = new_profile_manifest_tooling["CCFLAGS"].as<std::string>()});
                             composite["manifest"]["tooling"]["CCFLAGS"] = new_profile_manifest_tooling["CCFLAGS"];
                         }
                     }
@@ -241,10 +270,11 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                         if (new_profile_manifest_tooling["CXXFLAGS"].IsNull()) {
                             composite["manifest"]["tooling"].remove("CXXFLAGS");
                         } else {
-                            check_conflict("manifest",
-                                           "tooling",
-                                           "CXXFLAGS",
-                                           new_profile_manifest_tooling["CXXFLAGS"].as<std::string>());
+                            check_conflict(NodeAssignment{
+                                .section = "manifest",
+                                .key = "tooling",
+                                .subkey = "CXXFLAGS",
+                                .incoming_val = new_profile_manifest_tooling["CXXFLAGS"].as<std::string>()});
                             composite["manifest"]["tooling"]["CXXFLAGS"] = new_profile_manifest_tooling["CXXFLAGS"];
                         }
                     }
@@ -259,7 +289,7 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                         if (new_profile_manifest_dirs["include"].IsNull()) {
                             composite["manifest"]["dirs"].remove("include");
                         } else if (new_profile_manifest_dirs["include"].IsSequence()) {
-                            for (auto inc : new_profile_manifest_dirs["include"].as<std::vector<std::string>>())
+                            for (const auto &inc : new_profile_manifest_dirs["include"].as<std::vector<std::string>>())
                                 composite["manifest"]["dirs"]["include"].push_back(inc);
                         }
                     }
@@ -267,7 +297,7 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                         if (new_profile_manifest_dirs["source"].IsNull()) {
                             composite["manifest"]["dirs"].remove("source");
                         } else if (new_profile_manifest_dirs["source"].IsSequence()) {
-                            for (auto src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
+                            for (const auto &src : new_profile_manifest_dirs["source"].as<std::vector<std::string>>())
                                 composite["manifest"]["dirs"]["source"].push_back(src);
                         }
                     }
@@ -276,7 +306,10 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
                             composite["manifest"]["dirs"].remove("build");
                         } else {
                             check_conflict(
-                                "manifest", "dirs", "build", new_profile_manifest_dirs["build"].as<std::string>());
+                                NodeAssignment{.section = "manifest",
+                                               .key = "dirs",
+                                               .subkey = "build",
+                                               .incoming_val = new_profile_manifest_dirs["build"].as<std::string>()});
                             composite["manifest"]["dirs"]["build"] = new_profile_manifest_dirs["build"];
                         }
                     }
@@ -307,7 +340,7 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
             composite.remove("hooks");
         } else {
             for (const auto &hook : new_profile["hooks"]) {
-                std::string hook_name = hook.first.as<std::string>();
+                auto hook_name = hook.first.as<std::string>();
                 if (hook.second.IsNull()) {
                     composite["hooks"].remove(hook_name);
                 } else if (hook.second.IsSequence()) {
@@ -321,7 +354,7 @@ void merge(YAML::Node &composite, const fs::path &profile_path, const fs::path& 
         }
     }
 }
-std::vector<std::string> split_path(const std::string &key) {
+std::vector<std::string> splitPath(const std::string &key) {
     std::stringstream ss(key);
     std::string segment;
     std::vector<std::string> segments;
@@ -332,7 +365,7 @@ std::vector<std::string> split_path(const std::string &key) {
 }
 
 std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
-    std::vector<std::string> segments = split_path(key);
+    std::vector<std::string> segments = splitPath(key);
     YAML::Node current = YAML::Node(root);
 
     for (const auto &s : segments) {
@@ -345,7 +378,7 @@ std::optional<YAML::Node> traverse(const std::string &key, YAML::Node &&root) {
 }
 } // namespace
 
-Configuration::Configuration(const std::vector<std::string> &profiles, const std::filesystem::path& root_dir) {
+Configuration::Configuration(const std::vector<std::string> &profiles, const std::filesystem::path &root_dir) {
     std::vector profile_names = profiles;
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles: {}.", profile_names);
 
@@ -379,7 +412,7 @@ Configuration::Configuration(const std::vector<std::string> &profiles, const std
 }
 
 bool Configuration::has(const std::string &key) const {
-    std::vector<std::string> segments = split_path(key);
+    std::vector<std::string> segments = splitPath(key);
     YAML::Node current = YAML::Clone(root);
 
     for (const auto &segment : segments) {
@@ -393,11 +426,11 @@ bool Configuration::has(const std::string &key) const {
 
 std::optional<std::string> Configuration::get_string(const std::string &key) const {
     YAML::Node final;
-    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
+    std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
+    if (!res) {
         return std::nullopt;
-    } else {
-        final = res.value();
     }
+    final = res.value();
 
     try {
         return final.as<std::string>();
@@ -408,11 +441,11 @@ std::optional<std::string> Configuration::get_string(const std::string &key) con
 
 std::optional<int> Configuration::get_int(const std::string &key) const {
     YAML::Node final;
-    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
+    std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
+    if (!res) {
         return std::nullopt;
-    } else {
-        final = res.value();
     }
+    final = res.value();
 
     try {
         return final.as<int>();
@@ -423,11 +456,11 @@ std::optional<int> Configuration::get_int(const std::string &key) const {
 
 std::optional<bool> Configuration::get_bool(const std::string &key) const {
     YAML::Node final;
-    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
+    std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
+    if (!res) {
         return std::nullopt;
-    } else {
-        final = res.value();
     }
+    final = res.value();
 
     try {
         return final.as<bool>();
@@ -438,11 +471,11 @@ std::optional<bool> Configuration::get_bool(const std::string &key) const {
 
 std::optional<std::vector<std::string>> Configuration::get_string_vector(const std::string &key) const {
     YAML::Node final;
-    if (std::optional<YAML::Node> res = traverse(key, YAML::Clone(root)); !res) {
+    std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
+    if (!res) {
         return std::nullopt;
-    } else {
-        final = res.value();
     }
+    final = res.value();
 
     try {
         return final.as<std::vector<std::string>>();

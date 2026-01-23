@@ -5,11 +5,9 @@
 #include "catalyst/subcommands/run.hpp"
 
 #include <cctype>
-#include <cstdlib>
 #include <expected>
 #include <filesystem>
 #include <format>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -17,24 +15,24 @@
 namespace fs = std::filesystem;
 
 namespace catalyst::run {
-std::string command_str(fs::path executable_name, const std::vector<std::string> &params);
+std::string commandStr(const fs::path &executable_name, const std::vector<std::string> &params);
 
 std::expected<void, std::string> action(const parse_t &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Run subcommand invoked.");
     std::vector<std::string> profiles;
     if (args.profile != "common") {
-        profiles.push_back("common");
+        profiles.emplace_back("common");
     }
     profiles.push_back(args.profile);
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    if (std::expected<YAML::Node, std::string> res = generate::profile_composition(profiles); !res) {
+    std::expected<YAML::Node, std::string> res = generate::profile_composition(profiles);
+    if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
-    } else {
-        profile_comp = res.value();
     }
+    profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-run hooks.");
     if (std::expected<void, std::string> res = hooks::pre_run(profile_comp); !res) {
@@ -42,9 +40,10 @@ std::expected<void, std::string> action(const parse_t &args) {
         return res;
     }
 
-    std::string exe, build_dir;
+    std::string exe;
+    std::string build_dir;
     auto str_to_lower = [](std::string &input) -> void {
-        auto lower = [](const char c) -> char { return std::tolower(c); };
+        auto lower = [](const char c) -> char { return static_cast<char>(std::tolower(c)); };
         std::transform(input.begin(), input.end(), input.begin(), lower);
         return;
     };
@@ -55,24 +54,16 @@ std::expected<void, std::string> action(const parse_t &args) {
         if (!profile_comp["manifest"]["type"].IsDefined()) {
             catalyst::logger.log(LogLevel::ERROR, "Profile: {} does not define field: 'manifest.type'.", args.profile);
             return std::unexpected(std::format("Profile: {} does not define field: 'manifest.type'.", args.profile));
-        } else {
-            catalyst::logger.log(LogLevel::ERROR,
-                                 "Profile: {} defines 'manifest.type' = {}. Expected 'manifest.type' = BINARY",
-                                 args.profile,
-                                 target_type);
-            return std::unexpected(
-                std::format("Profile: {} defines 'manifest.type' = {}. Expected 'manifest.type' = BINARY",
-                            args.profile,
-                            target_type));
         }
+        return std::unexpected(std::format(
+            "Profile: {} defines 'manifest.type' = {}. Expected 'manifest.type' = BINARY", args.profile, target_type));
     }
 
     if (!profile_comp["manifest"]["dirs"]["build"]) {
         catalyst::logger.log(LogLevel::ERROR, "Build directory is not defined in profile: {}.", args.profile);
         return std::unexpected(std::format("Build directory is not defined in profile: {}.", args.profile));
-    } else {
-        build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
     }
+    build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
 
     if (profile_comp["manifest"]["provides"] && profile_comp["manifest"]["provides"].as<std::string>() != "") {
         exe = profile_comp["manifest"]["provides"].as<std::string>();
@@ -85,18 +76,19 @@ std::expected<void, std::string> action(const parse_t &args) {
     }
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
-    std::string command = command_str(exe_path, args.params);
-    if (std::expected<std::string, std::string> res = catalyst::generate::lib_path(profile_comp); !res) {
+    std::string command = commandStr(exe_path, args.params);
+    std::expected<std::string, std::string> lib_path_res = catalyst::generate::lib_path(profile_comp);
+    if (!lib_path_res) {
         return std::unexpected("Failed to generate LD_LIBRARY_PATH");
-    } else {
-#if defined(_WIN32)
-        _putenv_s("PATH", res.value().c_str());
-#elif defined(__APPLE__)
-        setenv("DYLD_LIBRARY_PATH", res.value().c_str(), 1);
-#else
-        setenv("LD_LIBRARY_PATH", res.value().c_str(), 1);
-#endif
     }
+#if defined(_WIN32)
+    _putenv_s("PATH", lib_path_res.value().c_str());
+#elif defined(__APPLE__)
+    setenv("DYLD_LIBRARY_PATH", lib_path_res.value().c_str(), 1);
+#else
+    setenv("LD_LIBRARY_PATH", lib_path_res.value().c_str(), 1);
+#endif
+
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
 
     std::vector<std::string> exec_args;
@@ -119,7 +111,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     return {};
 }
 
-std::string command_str(fs::path executable, const std::vector<std::string> &params) {
+std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
     catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
     std::string command = executable;
     for (const auto &param : params) {

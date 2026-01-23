@@ -7,10 +7,10 @@
 #include <string>
 
 namespace catalyst::generate {
-std::optional<find_res> find_system_from_pkg_config(const std::string &dep_name);
+std::optional<find_res> findSystemFromPkgConfig(const std::string &dep_name);
 
 std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
-    std::string dep_name = dep["name"].as<std::string>();
+    auto dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving system dependency: {}", dep_name);
 
     std::string linkage; // assume shared
@@ -44,32 +44,29 @@ std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
     }
 
     // Try pkg-config if not fully explicit
-    auto res_cflags = process_exec_stdout({"pkg-config", "--cflags", dep_name});
-    auto res_L = process_exec_stdout({"pkg-config", "--libs-only-L", dep_name});
-    auto res_l = process_exec_stdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name});
 
-    if (auto res = find_system_from_pkg_config(dep_name); res) {
+    if (auto res = findSystemFromPkgConfig(dep_name); res) {
         std::string cflags_val = res->lib_path;
-        std::string L_val = res->lib_path;
-        std::string l_val = res->libs;
+        std::string lib_path_val = res->lib_path;
+        std::string libs_val = res->libs;
         auto trim = [](std::string &s) {
             if (auto last = s.find_last_not_of(" \t\n"); last != std::string::npos)
                 s.erase(last + 1);
         };
 
         trim(cflags_val);
-        trim(L_val);
-        trim(l_val);
+        trim(lib_path_val);
+        trim(libs_val);
 
         catalyst::logger.log(
-            LogLevel::DEBUG, "Resolved via pkg-config: cflags='{}' L='{}' l='{}'", cflags_val, L_val, l_val);
+            LogLevel::DEBUG, "Resolved via pkg-config: cflags='{}' L='{}' l='{}'", cflags_val, lib_path_val, libs_val);
 
         if (!has_explicit_include)
             inc_path += " " + cflags_val;
         if (!has_explicit_lib)
-            lib_path += " " + L_val;
+            lib_path += " " + lib_path_val;
 
-        libs += " " + l_val;
+        libs += " " + libs_val;
 
         return find_res{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
     }
@@ -101,7 +98,7 @@ std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
     return find_res{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
 }
 
-std::optional<find_res> find_system_from_pkg_config(const std::string &dep_name) {
+std::optional<find_res> findSystemFromPkgConfig(const std::string &dep_name) {
     auto res_cflags = process_exec_stdout({"pkg-config", "--cflags", dep_name});
     auto res_L = process_exec_stdout({"pkg-config", "--libs-only-L", dep_name});
     auto res_l = process_exec_stdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name});

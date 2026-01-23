@@ -6,6 +6,7 @@
 #include <catalyst/subcommands/clean.hpp>
 #include <format>
 #include <string>
+#include <tuple>
 #include <yaml-cpp/node/node.h>
 
 namespace catalyst::clean {
@@ -19,26 +20,29 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         bool is_root = false;
         try {
             is_root = fs::equivalent(parse_args.workspace->get_root(), current);
-        } catch (...) {}
+        } catch (...) {
+            std::ignore;
+        }
 
         if (is_root) {
             catalyst::logger.log(LogLevel::INFO, "Cleaning all workspace members.");
             bool any_failed = false;
 
-            for (const auto& [name, member] : parse_args.workspace->get_members()) {
-                 catalyst::logger.log(LogLevel::INFO, "Cleaning member: {}", name);
-                 fs::current_path(member.path);
-                 
-                 parse_t member_args = parse_args;
-                 member_args.workspace = std::nullopt; // Prevent recursion loop
-                 
-                 if (auto res = action(member_args); !res) {
-                     catalyst::logger.log(LogLevel::ERROR, "Clean failed for member: {}", name);
-                     any_failed = true;
-                 }
-                 fs::current_path(current);
+            for (const auto &[name, member] : parse_args.workspace->get_members()) {
+                catalyst::logger.log(LogLevel::INFO, "Cleaning member: {}", name);
+                fs::current_path(member.path);
+
+                parse_t member_args = parse_args;
+                member_args.workspace = std::nullopt; // Prevent recursion loop
+
+                if (auto res = action(member_args); !res) {
+                    catalyst::logger.log(LogLevel::ERROR, "Clean failed for member: {}", name);
+                    any_failed = true;
+                }
+                fs::current_path(current);
             }
-            if (any_failed) return std::unexpected("Clean failed for some members.");
+            if (any_failed)
+                return std::unexpected("Clean failed for some members.");
             return {};
         }
     }
@@ -50,12 +54,12 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    if (auto res = generate::profile_composition(profiles); !res) {
+    auto res = generate::profile_composition(profiles);
+    if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
-    } else {
-        profile_comp = res.value();
     }
+    profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-clean hooks.");
     if (auto res = hooks::pre_clean(profile_comp); !res) {
@@ -63,8 +67,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         return res;
     }
 
-    std::string build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
-    std::string generator = profile_comp["meta"]["generator"].as<std::string>();
+    auto build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
+    auto generator = profile_comp["meta"]["generator"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
     if (generator == "ninja") {
         if (int rtn = catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get(); rtn != 0) {

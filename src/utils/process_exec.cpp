@@ -8,7 +8,6 @@
 #include <optional>
 #include <reproc++/run.hpp>
 #include <string>
-#include <system_error>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -33,7 +32,7 @@ void env(const std::optional<std::unordered_map<std::string, std::string>> &env,
     }
 }
 
-void working_dir(const std::optional<std::string> working_dir, reproc::options &options) {
+void workingDir(const std::optional<std::string>& working_dir, reproc::options &options) {
     if (working_dir) {
         options.working_directory = working_dir->c_str();
     }
@@ -56,7 +55,7 @@ process_exec(std::vector<std::string> &&args,
 
                           std::vector<std::string> env_strings;
                           std::vector<const char *> env_ptrs;
-                          configure_opt::working_dir(working_dir, options);
+                          configure_opt::workingDir(working_dir, options);
                           configure_opt::env(env, options, env_strings, env_ptrs);
 
                           auto [status, ec] = reproc::run(args, options);
@@ -79,7 +78,7 @@ process_exec_stdout(std::vector<std::string> &&args,
 
     std::vector<std::string> env_strings;
     std::vector<const char *> env_ptrs;
-    configure_opt::working_dir(working_dir, options);
+    configure_opt::workingDir(working_dir, options);
     configure_opt::env(env, options, env_strings, env_ptrs);
 
     std::string output;

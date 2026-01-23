@@ -22,7 +22,8 @@ std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
     catalyst::logger.log(LogLevel::DEBUG, "Changing directory to: {}", dep_path.string());
     catalyst::DirectoryChangeGuard dg(dep_path);
 
-    std::vector<std::string> profiles{}, features{};
+    std::vector<std::string> profiles{};
+    std::vector<std::string> features{};
     if (dep["profiles"] && dep["profiles"].IsSequence())
         profiles = dep["profiles"].as<std::vector<std::string>>();
 

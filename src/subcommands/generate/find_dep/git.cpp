@@ -12,7 +12,7 @@ namespace catalyst::generate {
 namespace fs = std::filesystem;
 
 std::expected<find_res, std::string> find_git(const std::string &build_dir, const YAML::Node &dep) {
-    std::string dep_name = dep["name"].as<std::string>();
+    auto dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving git dependency: {}", dep_name);
 
     fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / dep_name;
@@ -44,7 +44,7 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
 
     std::string library_path_flags;
     if (auto dep_build_dir_node = profile["manifest"]["dirs"]["build"]) {
-        std::string dep_build_dir = dep_build_dir_node.as<std::string>();
+        auto dep_build_dir = dep_build_dir_node.as<std::string>();
         fs::path lib_path = fs::absolute(dep_path / dep_build_dir);
         catalyst::logger.log(LogLevel::DEBUG, "Adding library path: {}", lib_path.string());
         library_path_flags += std::format(" -L{}", lib_path.string());

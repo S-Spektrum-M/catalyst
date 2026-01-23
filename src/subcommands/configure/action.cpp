@@ -68,7 +68,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         } else {
             target_node[var_path.back()] = parse_args.val;
         }
-        auto res = YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+        auto res = YAML_UTILS::profileWriteBack(profile, profile_node);
         if (!res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to write back profile: {}", res.error());
         }

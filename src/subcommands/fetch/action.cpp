@@ -1,9 +1,7 @@
 #include "catalyst/hooks.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/fetch.hpp"
-#include "catalyst/subcommands/generate.hpp"
 
-#include <cstdlib>
 #include <expected>
 #include <filesystem>
 #include <format>
@@ -15,13 +13,12 @@
 namespace catalyst::fetch {
 namespace fs = std::filesystem;
 
-std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name);
-std::expected<void, std::string> fetch_vcpkg(const std::string &name);
+std::expected<void, std::string> fetchVcpkg(const std::string &name);
 std::expected<void, std::string>
-fetch_local(const std::string &name, const std::string &path, const std::vector<std::string> &profiles);
+fetchLocal(const std::string &name, const std::string &path, const std::vector<std::string> &profiles);
 std::expected<void, std::string>
-fetch_git(std::string build_dir, std::string name, std::string source, std::string version);
-std::expected<void, std::string> fetch_system(const std::string &name);
+fetchGit(std::string build_dir, std::string name, std::string source, std::string version);
+std::expected<void, std::string> fetchSystem(const std::string &name);
 
 std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Fetch subcommand invoked.");
@@ -47,14 +44,14 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 return std::unexpected(
                     std::format("Dependency: {} does not define field: source", dep["name"].as<std::string>()));
             }
-            std::string name = dep["name"].as<std::string>();
-            std::string source = dep["source"].as<std::string>();
+            auto name = dep["name"].as<std::string>();
+            auto source = dep["source"].as<std::string>();
 
             if (parse_args.workspace) {
                 if (auto member = parse_args.workspace->find_package(name)) {
                     catalyst::logger.log(LogLevel::INFO, "Dependency '{}' found in workspace at '{}'. Linking...", name, member->path.string());
                     fs::path lib_path = fs::path(build_dir) / "catalyst-libs" / name;
-                    
+
                     try {
                         if (fs::exists(lib_path) || fs::is_symlink(lib_path)) {
                             if (fs::is_symlink(lib_path)) {
@@ -86,21 +83,21 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 if (!dep["triplet"]) {
                     return std::unexpected(std::format("vcpkg dependency '{}' is missing triplet.", name));
                 }
-                if (auto res = fetch_vcpkg(name); !res)
+                if (auto res = fetchVcpkg(name); !res)
                     return std::unexpected(res.error());
             } else if (source == "system") {
-                if (auto res = fetch_system(name); !res)
+                if (auto res = fetchSystem(name); !res)
                     return std::unexpected(res.error());
             } else if (source == "local") {
                 if (!dep["path"]) {
                     return std::unexpected(std::format("Local dependency '{}' is missing path.", name));
                 }
-                std::string path = dep["path"].as<std::string>();
+                auto path = dep["path"].as<std::string>();
                 std::vector<std::string> profiles_vec;
                 if (dep["profiles"] && dep["profiles"].IsSequence()) {
                     profiles_vec = dep["profiles"].as<std::vector<std::string>>();
                 }
-                if (auto res = fetch_local(name, path, profiles_vec); !res)
+                if (auto res = fetchLocal(name, path, profiles_vec); !res)
                     return std::unexpected(res.error());
             } else {
                 fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
@@ -110,8 +107,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                     if (!dep["version"] || !dep["version"].IsScalar()) {
                         return std::unexpected(std::format("git dependency '{}' is missing version.", name));
                     }
-                    std::string version = dep["version"].as<std::string>();
-                    if (auto res = fetch_git(build_dir, name, source, version); !res)
+                    auto version = dep["version"].as<std::string>();
+                    if (auto res = fetchGit(build_dir, name, source, version); !res)
                         return std::unexpected(res.error());
                 }
             }

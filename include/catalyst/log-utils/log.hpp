@@ -49,7 +49,7 @@ private:
     ~log_t();
 
     void log_impl(LogLevel level, const std::string &message);
-    std::string generate_json_log_event(const std::chrono::system_clock::time_point &now,
+    static std::string generate_json_log_event(const std::chrono::system_clock::time_point &now,
                                         LogLevel level,
                                         const std::string &message);
 

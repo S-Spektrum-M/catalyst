@@ -4,10 +4,8 @@
 #include "yaml-cpp/node/node.h"
 
 #include <catalyst/hooks.hpp>
-#include <cstdlib>
 #include <expected>
 #include <format>
-#include <iostream>
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
@@ -15,7 +13,7 @@
 namespace catalyst::hooks {
 
 namespace {
-std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, const std::string &hook_name) {
+std::expected<void, std::string> executeHook(const YAML::Node &profile_comp, const std::string &hook_name) {
     catalyst::logger.log(LogLevel::DEBUG, "Executing hook: {}", hook_name);
     if (!profile_comp["hooks"] || !profile_comp["hooks"][hook_name]) {
         catalyst::logger.log(LogLevel::DEBUG, "No hook defined for: {}", hook_name);
@@ -34,23 +32,23 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
     if (hook_node.IsSequence()) {
         for (const auto &item : hook_node) {
             if (item["command"]) {
-                std::string command = item["command"].as<std::string>();
+                auto command = item["command"].as<std::string>();
                 catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
                 if (catalyst::process_exec(shell_cmd(command)).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
-                    return std::unexpected("Hook '" + hook_name + "' command failed: " + command);
+                    return std::unexpected(std::format("Hook '{}' command failed: {}", hook_name, command));
                 }
             } else if (item["script"]) {
-                std::string script = item["script"].as<std::string>();
+                auto script = item["script"].as<std::string>();
                 catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running script: {}", hook_name, script);
                 if (catalyst::process_exec(shell_cmd(script)).value().get() != 0) {
                     catalyst::logger.log(LogLevel::ERROR, "Hook '{}' script failed: {}", hook_name, script);
-                    return std::unexpected("Hook '" + hook_name + "' script failed: " + script);
+                    return std::unexpected(std::format("Hook '{}' script failed: {}", hook_name, script));
                 }
             }
         }
     } else if (hook_node.IsScalar()) {
-        std::string command = hook_node.as<std::string>();
+        auto command = hook_node.as<std::string>();
         catalyst::logger.log(LogLevel::DEBUG, "[Catalyst Hook: {}] Running command: {}", hook_name, command);
         if (catalyst::process_exec(shell_cmd(command)).value().get() != 0) {
             catalyst::logger.log(LogLevel::ERROR, "Hook '{}' command failed: {}", hook_name, command);
@@ -64,123 +62,123 @@ std::expected<void, std::string> execute_hook(const YAML::Node &profile_comp, co
 } // namespace
 
 std::expected<void, std::string> pre_build(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-build");
+    return executeHook(profile_comp, "pre-build");
 }
 
 std::expected<void, std::string> post_build(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-build");
+    return executeHook(profile_comp, "post-build");
 }
 
 std::expected<void, std::string> on_build_failure(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "on-build-failure");
+    return executeHook(profile_comp, "on-build-failure");
 }
 
 std::expected<void, std::string> pre_generate(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-generate");
+    return executeHook(profile_comp, "pre-generate");
 }
 
 std::expected<void, std::string> post_generate(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-generate");
+    return executeHook(profile_comp, "post-generate");
 }
 
 std::expected<void, std::string> pre_fetch(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-fetch");
+    return executeHook(profile_comp, "pre-fetch");
 }
 
 std::expected<void, std::string> post_fetch(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-fetch");
+    return executeHook(profile_comp, "post-fetch");
 }
 
 std::expected<void, std::string> pre_clean(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-clean");
+    return executeHook(profile_comp, "pre-clean");
 }
 
 std::expected<void, std::string> post_clean(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-clean");
+    return executeHook(profile_comp, "post-clean");
 }
 
 std::expected<void, std::string> pre_run(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-run");
+    return executeHook(profile_comp, "pre-run");
 }
 
 std::expected<void, std::string> post_run(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-run");
+    return executeHook(profile_comp, "post-run");
 }
 
 std::expected<void, std::string> pre_test(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-test");
+    return executeHook(profile_comp, "pre-test");
 }
 
 std::expected<void, std::string> post_test(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-test");
+    return executeHook(profile_comp, "post-test");
 }
 
 std::expected<void, std::string> pre_link(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "pre-link");
+    return executeHook(profile_comp, "pre-link");
 }
 
 std::expected<void, std::string> post_link(const YAML::Node &profile_comp) {
-    return execute_hook(profile_comp, "post-link");
+    return executeHook(profile_comp, "post-link");
 }
 
 std::expected<void, std::string> pre_build(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-build");
+    return executeHook(profile_comp.get_root(), "pre-build");
 }
 
 std::expected<void, std::string> post_build(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-build");
+    return executeHook(profile_comp.get_root(), "post-build");
 }
 
 std::expected<void, std::string> on_build_failure(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "on-build-failure");
+    return executeHook(profile_comp.get_root(), "on-build-failure");
 }
 
 std::expected<void, std::string> pre_generate(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-generate");
+    return executeHook(profile_comp.get_root(), "pre-generate");
 }
 
 std::expected<void, std::string> post_generate(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-generate");
+    return executeHook(profile_comp.get_root(), "post-generate");
 }
 
 std::expected<void, std::string> pre_fetch(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-fetch");
+    return executeHook(profile_comp.get_root(), "pre-fetch");
 }
 
 std::expected<void, std::string> post_fetch(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-fetch");
+    return executeHook(profile_comp.get_root(), "post-fetch");
 }
 
 std::expected<void, std::string> pre_clean(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-clean");
+    return executeHook(profile_comp.get_root(), "pre-clean");
 }
 
 std::expected<void, std::string> post_clean(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-clean");
+    return executeHook(profile_comp.get_root(), "post-clean");
 }
 
 std::expected<void, std::string> pre_run(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-run");
+    return executeHook(profile_comp.get_root(), "pre-run");
 }
 
 std::expected<void, std::string> post_run(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-run");
+    return executeHook(profile_comp.get_root(), "post-run");
 }
 
 std::expected<void, std::string> pre_test(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-test");
+    return executeHook(profile_comp.get_root(), "pre-test");
 }
 
 std::expected<void, std::string> post_test(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-test");
+    return executeHook(profile_comp.get_root(), "post-test");
 }
 
 std::expected<void, std::string> pre_link(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "pre-link");
+    return executeHook(profile_comp.get_root(), "pre-link");
 }
 
 std::expected<void, std::string> post_link(const YAML_UTILS::Configuration &profile_comp) {
-    return execute_hook(profile_comp.get_root(), "post-link");
+    return executeHook(profile_comp.get_root(), "post-link");
 }
 
 std::expected<void, std::string> on_compile([[maybe_unused]] const std::filesystem::path &file) {

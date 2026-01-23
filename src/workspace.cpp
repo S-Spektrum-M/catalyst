@@ -1,15 +1,16 @@
 #include "catalyst/workspace.hpp"
+
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
-#include <yaml-cpp/yaml.h>
+
 #include <format>
-#include <fstream>
+#include <yaml-cpp/yaml.h>
 
 namespace catalyst {
 
 namespace fs = std::filesystem;
 
-std::optional<Workspace> Workspace::find_root(const fs::path& start_path) {
+std::optional<Workspace> Workspace::find_root(const fs::path &start_path) {
     fs::path current = fs::absolute(start_path);
     fs::path root = current.root_path();
 
@@ -25,11 +26,11 @@ std::optional<Workspace> Workspace::find_root(const fs::path& start_path) {
         }
         current = current.parent_path();
     }
-    
+
     return std::nullopt;
 }
 
-std::optional<Workspace> Workspace::load(const fs::path& workspace_file) {
+std::optional<Workspace> Workspace::load(const fs::path &workspace_file) {
     try {
         YAML::Node node = YAML::LoadFile(workspace_file.string());
         Workspace workspace;
@@ -40,13 +41,13 @@ std::optional<Workspace> Workspace::load(const fs::path& workspace_file) {
             return std::nullopt;
         }
 
-        for (const auto& kv : node) {
-            std::string key = kv.first.as<std::string>();
+        for (const auto &kv : node) {
+            auto key = kv.first.as<std::string>();
             YAML::Node value = kv.second;
 
             WorkspaceMember member;
             member.name = key;
-            
+
             if (value["path"]) {
                 member.path = workspace.root_path / value["path"].as<std::string>();
             } else {
@@ -57,7 +58,7 @@ std::optional<Workspace> Workspace::load(const fs::path& workspace_file) {
                 if (value["profiles"].IsSequence()) {
                     member.profiles = value["profiles"].as<std::vector<std::string>>();
                 } else {
-                     logger.log(LogLevel::WARN, "Member '{}' profiles is not a sequence, ignoring.", key);
+                    logger.log(LogLevel::WARN, "Member '{}' profiles is not a sequence, ignoring.", key);
                 }
             }
 
@@ -66,21 +67,21 @@ std::optional<Workspace> Workspace::load(const fs::path& workspace_file) {
 
         return workspace;
 
-    } catch (const YAML::Exception& e) {
+    } catch (const YAML::Exception &e) {
         logger.log(LogLevel::ERROR, "Failed to parse WORKSPACE.yaml: {}", e.what());
         return std::nullopt;
     }
 }
 
-bool Workspace::contains(const fs::path& path) const {
+bool Workspace::contains(const fs::path &path) const {
     fs::path abs_path = fs::absolute(path);
     fs::path rel = abs_path.lexically_relative(root_path);
     return !rel.empty() && rel.native().front() != '.';
 }
 
-std::optional<WorkspaceMember> Workspace::get_member_by_path(const fs::path& path) const {
+std::optional<WorkspaceMember> Workspace::get_member_by_path(const fs::path &path) const {
     fs::path abs_path = fs::absolute(path);
-    for (const auto& [name, member] : members) {
+    for (const auto &[name, member] : members) {
         if (fs::equivalent(member.path, abs_path)) {
             return member;
         }
@@ -88,11 +89,12 @@ std::optional<WorkspaceMember> Workspace::get_member_by_path(const fs::path& pat
     return std::nullopt;
 }
 
-std::optional<WorkspaceMember> Workspace::find_package(const std::string& package_name) const {
-    for (const auto& [key, member] : members) {
+std::optional<WorkspaceMember> Workspace::find_package(const std::string &package_name) const {
+    for (const auto &[key, member] : members) {
         try {
             std::vector<std::string> profiles = member.profiles;
-            if (profiles.empty()) profiles.push_back("common");
+            if (profiles.empty())
+                profiles.emplace_back("common");
 
             YAML_UTILS::Configuration config(profiles, member.path);
             auto name_opt = config.get_string("manifest.name");
@@ -100,7 +102,7 @@ std::optional<WorkspaceMember> Workspace::find_package(const std::string& packag
                 return member;
             }
         } catch (...) {
-            // Ignore errors
+            std::ignore;
         }
     }
     return std::nullopt;

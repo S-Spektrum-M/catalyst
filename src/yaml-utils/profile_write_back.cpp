@@ -8,7 +8,7 @@
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::YAML_UTILS {
-std::expected<void, std::string> profile_write_back(const std::string &profile_name, YAML::Node &&node) {
+std::expected<void, std::string> profileWriteBack(const std::string &profile_name, const YAML::Node &node) {
     catalyst::logger.log(LogLevel::DEBUG, "Writing profile to file: {}", profile_name);
     namespace fs = std::filesystem;
     fs::path profile_path;
@@ -25,7 +25,9 @@ std::expected<void, std::string> profile_write_back(const std::string &profile_n
     std::ofstream profile_file{profile_path};
     YAML::Emitter emmiter;
     emmiter << node;
+    //NOLINTBEGIN(performance-avoid-endl)
     profile_file << emmiter.c_str() << std::endl;
+    //NOLINTEND(performance-avoid-endl)
     catalyst::logger.log(LogLevel::DEBUG, "Profile file written successfully.");
     return {};
 }

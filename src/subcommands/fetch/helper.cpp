@@ -16,22 +16,7 @@ namespace catalyst::fetch {
 
 namespace fs = std::filesystem;
 
-std::expected<YAML::Node, std::string> fetch_profile(const std::string &profile_name) {
-    catalyst::logger.log(LogLevel::DEBUG, "Fetching profile: {}", profile_name);
-    fs::path profile_path;
-    if (profile_name == "common")
-        profile_path = "catalyst.yaml";
-    else
-        profile_path = std::format("catalyst_{}.yaml", profile_name);
-    if (!fs::exists(profile_path)) {
-        catalyst::logger.log(LogLevel::ERROR, "Configuration file not found for profile: {}", profile_name);
-        return std::unexpected(
-            std::format("configuration: {} for profile: {} does not exist", profile_path.string(), profile_name));
-    }
-    return YAML::LoadFile(profile_path);
-}
-
-std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
+std::expected<void, std::string> fetchVcpkg(const std::string &name) {
     catalyst::logger.log(LogLevel::DEBUG, "Fetching vcpkg dependency: {}", name);
     char *vcpkg_root_env = std::getenv("VCPKG_ROOT");
     if (vcpkg_root_env == nullptr) {
@@ -55,7 +40,7 @@ std::expected<void, std::string> fetch_vcpkg(const std::string &name) {
 }
 
 std::expected<void, std::string>
-fetch_git(std::string build_dir, std::string name, std::string source, std::string version) {
+fetchGit(std::string build_dir, std::string name, std::string source, std::string version) {
     catalyst::logger.log(LogLevel::DEBUG, "Fetching git dependency: {}@{} from {}", name, version, source);
     fs::path dep_path = fs::path(build_dir) / "catalyst-libs" / name;
     std::println(std::cout, "Fetching: {}@{} from {}", name, version, source);
@@ -80,14 +65,14 @@ fetch_git(std::string build_dir, std::string name, std::string source, std::stri
     return {};
 }
 
-std::expected<void, std::string> fetch_system(const std::string &name) {
+std::expected<void, std::string> fetchSystem(const std::string &name) {
     // assuming installed on system
     catalyst::logger.log(LogLevel::DEBUG, "Skipping fetch for system dependency: {}", name);
     return {};
 }
 
 std::expected<void, std::string>
-fetch_local(const std::string &name, const std::string &path, const std::vector<std::string> &profiles) {
+fetchLocal(const std::string &name, const std::string &path, const std::vector<std::string> &profiles) {
     fs::path local_path = fs::absolute(path);
     std::string visited_env = std::getenv("CATALYST_VISITED") ? std::getenv("CATALYST_VISITED") : "";
 

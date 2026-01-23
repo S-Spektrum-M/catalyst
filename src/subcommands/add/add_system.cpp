@@ -70,5 +70,5 @@ static inline std::expected<void, std::string> add_to_profile(const std::string 
 
     dependencies.push_back(new_dep);
 
-    return catalyst::YAML_UTILS::profile_write_back(profile, std::move(profile_node));
+    return catalyst::YAML_UTILS::profileWriteBack(profile, profile_node);
 }

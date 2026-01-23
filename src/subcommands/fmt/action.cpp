@@ -5,11 +5,9 @@
 
 #include <algorithm>
 #include <atomic>
-#include <cstdlib>
 #include <execution>
 #include <filesystem>
 #include <format>
-#include <iostream>
 #include <mutex>
 #include <string>
 #include <unordered_set>
@@ -22,19 +20,20 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     const std::vector<std::string> &profiles = parse_args.profiles;
     YAML::Node profile_comp;
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    if (auto res = generate::profile_composition(profiles); !res) {
+    auto res = generate::profile_composition(profiles);
+    if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
-    } else {
-        profile_comp = res.value();
     }
+    profile_comp = res.value();
 
-    std::string formatter = profile_comp["manifest"]["tooling"]["FMT"].as<std::string>();
+    auto formatter = profile_comp["manifest"]["tooling"]["FMT"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Using formatter: {}", formatter);
 
     namespace fs = std::filesystem;
 
-    std::unordered_set<fs::path> source_dirs, include_dirs;
+    std::unordered_set<fs::path> source_dirs;
+    std::unordered_set<fs::path> include_dirs;
 
     for (const auto &node : profile_comp["manifest"]["dirs"]["source"]) {
         source_dirs.insert(node.as<std::string>());
