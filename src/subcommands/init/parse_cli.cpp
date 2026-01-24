@@ -16,9 +16,9 @@ std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {
         ->default_val(std::filesystem::current_path());
 
     std::map<std::string, Parse::Type> type_map{{"binary", Parse::Type::BINARY},
-                                                  {"staticlib", Parse::Type::STATICLIB},
-                                                  {"sharedlib", Parse::Type::SHAREDLIB},
-                                                  {"interface", Parse::Type::INTERFACE}};
+                                                {"staticlib", Parse::Type::STATICLIB},
+                                                {"sharedlib", Parse::Type::SHAREDLIB},
+                                                {"interface", Parse::Type::INTERFACE}};
     init->add_option("-t,--type", ret->type, "the project type")
         ->transform(CLI::CheckedTransformer(type_map, CLI::ignore_case))
         ->default_str("binary");

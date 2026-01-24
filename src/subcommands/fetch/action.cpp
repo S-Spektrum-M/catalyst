@@ -49,7 +49,10 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
             if (parse_args.workspace) {
                 if (auto member = parse_args.workspace->findPackage(name)) {
-                    catalyst::logger.log(LogLevel::INFO, "Dependency '{}' found in workspace at '{}'. Linking...", name, member->path.string());
+                    catalyst::logger.log(LogLevel::INFO,
+                                         "Dependency '{}' found in workspace at '{}'. Linking...",
+                                         name,
+                                         member->path.string());
                     fs::path lib_path = fs::path(build_dir) / "catalyst-libs" / name;
 
                     try {
@@ -67,9 +70,9 @@ std::expected<void, std::string> action(const Parse &parse_args) {
                             fs::create_directories(lib_path.parent_path());
                             fs::create_directory_symlink(member->path, lib_path);
                         }
-                    } catch (const std::exception& e) {
-                         catalyst::logger.log(LogLevel::ERROR, "Failed to link workspace dependency: {}", e.what());
-                         return std::unexpected(e.what());
+                    } catch (const std::exception &e) {
+                        catalyst::logger.log(LogLevel::ERROR, "Failed to link workspace dependency: {}", e.what());
+                        return std::unexpected(e.what());
                     }
                     continue;
                 }

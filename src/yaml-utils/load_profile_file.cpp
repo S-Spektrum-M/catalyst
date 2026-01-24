@@ -10,7 +10,8 @@
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::yaml_utils {
-std::expected<YAML::Node, std::string> loadProfileFile(const std::string &profile, const std::filesystem::path& root_dir) {
+std::expected<YAML::Node, std::string> loadProfileFile(const std::string &profile,
+                                                       const std::filesystem::path &root_dir) {
     catalyst::logger.log(LogLevel::DEBUG, "Loading profile file: {} from {}", profile, root_dir.string());
     namespace fs = std::filesystem;
     fs::path profile_path = root_dir;

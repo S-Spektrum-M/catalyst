@@ -32,7 +32,7 @@ void env(const std::optional<std::unordered_map<std::string, std::string>> &env,
     }
 }
 
-void workingDir(const std::optional<std::string>& working_dir, reproc::options &options) {
+void workingDir(const std::optional<std::string> &working_dir, reproc::options &options) {
     if (working_dir) {
         options.working_directory = working_dir->c_str();
     }
@@ -41,8 +41,8 @@ void workingDir(const std::optional<std::string>& working_dir, reproc::options &
 
 std::expected<std::future<int>, std::string>
 processExec(std::vector<std::string> &&args,
-             std::optional<std::string> working_dir,
-             std::optional<std::unordered_map<std::string, std::string>> env) {
+            std::optional<std::string> working_dir,
+            std::optional<std::unordered_map<std::string, std::string>> env) {
     if (args.empty()) {
         return std::unexpected("Cannot execute empty command");
     }
@@ -68,8 +68,8 @@ processExec(std::vector<std::string> &&args,
 
 std::expected<std::string, std::string>
 processExecStdout(std::vector<std::string> &&args,
-                    std::optional<std::string> working_dir,
-                    std::optional<std::unordered_map<std::string, std::string>> env) {
+                  std::optional<std::string> working_dir,
+                  std::optional<std::unordered_map<std::string, std::string>> env) {
     if (args.empty()) {
         return std::unexpected("Cannot execute empty command");
     }

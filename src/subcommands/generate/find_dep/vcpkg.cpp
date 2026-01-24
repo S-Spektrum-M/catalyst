@@ -63,8 +63,8 @@ std::expected<FindRes, std::string> findVcpkg(const YAML::Node &dep) {
 
             catalyst::logger.log(LogLevel::DEBUG, "Resolved via pkg-config: L='{}' l='{}'", L_val, l_val);
             return FindRes{.lib_path = L_val,
-                            .inc_path = "", // already set in write_variables
-                            .libs = l_val};
+                           .inc_path = "", // already set in write_variables
+                           .libs = l_val};
         } else {
             catalyst::logger.log(LogLevel::WARN, "pkg-config failed for {}, falling back.", dep_name);
         }
@@ -120,7 +120,7 @@ std::expected<FindRes, std::string> findVcpkg(const YAML::Node &dep) {
     }
 
     return FindRes{.lib_path = library_path,
-                    .inc_path = "", // already set in write_variables
-                    .libs = libs};
+                   .inc_path = "", // already set in write_variables
+                   .libs = libs};
 }
 } // namespace catalyst::generate

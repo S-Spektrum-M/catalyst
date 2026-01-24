@@ -1,9 +1,10 @@
 #pragma once
+#include "catalyst/workspace.hpp"
+
 #include <CLI/App.hpp>
 #include <expected>
 #include <string>
 #include <vector>
-#include "catalyst/workspace.hpp"
 
 namespace catalyst::test {
 struct Parse {

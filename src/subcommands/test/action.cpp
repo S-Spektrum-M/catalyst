@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 
 namespace catalyst::test {
 
-std::string commandStr(const fs::path& executable_name, const std::vector<std::string> &params);
+std::string commandStr(const fs::path &executable_name, const std::vector<std::string> &params);
 std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Test subcommand invoked.");
 
@@ -92,7 +92,7 @@ std::expected<void, std::string> action(const Parse &args) {
         catalyst::logger.log(LogLevel::ERROR, "Build directory is not defined.");
         return std::unexpected("build directory is not defined");
     }
-        build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
+    build_dir = profile_comp["manifest"]["dirs"]["build"].as<std::string>();
 
     if (profile_comp["manifest"]["provides"] && profile_comp["manifest"]["provides"].as<std::string>() != "") {
         exe = profile_comp["manifest"]["provides"].as<std::string>();
@@ -128,7 +128,7 @@ std::expected<void, std::string> action(const Parse &args) {
     return {};
 }
 
-std::string commandStr(const fs::path& executable, const std::vector<std::string> &params) {
+std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
     catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
     std::string command = executable;
     for (const auto &param : params) {

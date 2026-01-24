@@ -24,17 +24,17 @@ static std::string escape(std::string_view str) {
 
 template <>
 std::expected<void, std::string> DerivedWriter<TargetType::CBE>::addVariable(std::string_view name,
-                                                                              std::string_view value) {
+                                                                             std::string_view value) {
     std::println(stream, "DEF|{}|{}", name, escape(value));
     return {};
 }
 
 template <>
 std::expected<void, std::string> DerivedWriter<TargetType::CBE>::addRule([[maybe_unused]] std::string_view name,
-                                                                          [[maybe_unused]] std::string_view command,
-                                                                          [[maybe_unused]] std::string_view description,
-                                                                          [[maybe_unused]] std::string_view depfile,
-                                                                          [[maybe_unused]] std::string_view deps) {
+                                                                         [[maybe_unused]] std::string_view command,
+                                                                         [[maybe_unused]] std::string_view description,
+                                                                         [[maybe_unused]] std::string_view depfile,
+                                                                         [[maybe_unused]] std::string_view deps) {
     // CBE has built-in rules mapped to specific keys (cc, cxx, etc.).
     // We do not need to define them in the manifest, but we rely on the
     // generator to pass the correct standard rule names in add_build.
@@ -44,9 +44,9 @@ std::expected<void, std::string> DerivedWriter<TargetType::CBE>::addRule([[maybe
 template <>
 std::expected<void, std::string>
 DerivedWriter<TargetType::CBE>::addBuild(const std::vector<std::string> &outputs,
-                                          std::string_view rule,
-                                          const std::vector<std::string> &inputs,
-                                          [[maybe_unused]] const std::vector<std::string> &implicit_deps) {
+                                         std::string_view rule,
+                                         const std::vector<std::string> &inputs,
+                                         [[maybe_unused]] const std::vector<std::string> &implicit_deps) {
     if (outputs.empty()) {
         return std::unexpected("CBE writer requires at least one output.");
     }
@@ -101,4 +101,4 @@ template <> void DerivedWriter<TargetType::CBE>::addDefault([[maybe_unused]] std
 }
 
 template class DerivedWriter<TargetType::CBE>;
-} // namespace catalyst::generate::BuildWriters
+} // namespace catalyst::generate::buildwriters

@@ -95,8 +95,8 @@ void LogT::logImpl(LogLevel level, const std::string &message) const {
 }
 
 std::string LogT::generateJsonLogEvent(const std::chrono::system_clock::time_point &now,
-                                           LogLevel level,
-                                           const std::string &message) {
+                                       LogLevel level,
+                                       const std::string &message) {
     nlohmann::json j;
     j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
     j["level"] = toString(level);

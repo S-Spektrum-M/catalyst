@@ -9,11 +9,11 @@
 namespace catalyst {
 std::expected<std::future<int>, std::string>
 processExec(std::vector<std::string> &&args,
-             std::optional<std::string> working_dir = std::nullopt,
-             std::optional<std::unordered_map<std::string, std::string>> env = std::nullopt);
+            std::optional<std::string> working_dir = std::nullopt,
+            std::optional<std::unordered_map<std::string, std::string>> env = std::nullopt);
 
 std::expected<std::string, std::string>
 processExecStdout(std::vector<std::string> &&args,
-                    std::optional<std::string> working_dir = std::nullopt,
-                    std::optional<std::unordered_map<std::string, std::string>> env = std::nullopt);
+                  std::optional<std::string> working_dir = std::nullopt,
+                  std::optional<std::unordered_map<std::string, std::string>> env = std::nullopt);
 } // namespace catalyst

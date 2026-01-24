@@ -1,16 +1,17 @@
 #pragma once
 #include "yaml-cpp/yaml.h"
 
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 namespace catalyst::yaml_utils {
 class Configuration {
 public:
     Configuration() = default;
-    explicit Configuration(const std::vector<std::string> &profiles, const std::filesystem::path& root_dir = std::filesystem::current_path());
+    explicit Configuration(const std::vector<std::string> &profiles,
+                           const std::filesystem::path &root_dir = std::filesystem::current_path());
 
     bool has(const std::string &key) const;
 
