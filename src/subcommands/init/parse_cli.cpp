@@ -15,13 +15,13 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
     init->add_option("--path", ret->path, "the default path for the project")
         ->default_val(std::filesystem::current_path());
 
-    std::map<std::string, parse_t::type_t> type_map{{"binary", parse_t::type_t::BINARY},
-                                                    {"staticlib", parse_t::type_t::STATICLIB},
-                                                    {"sharedlib", parse_t::type_t::SHAREDLIB},
-                                                    {"interface", parse_t::type_t::INTERFACE}};
+    std::map<std::string, parse_t::Type> type_map{{"binary", parse_t::Type::BINARY},
+                                                  {"staticlib", parse_t::Type::STATICLIB},
+                                                  {"sharedlib", parse_t::Type::SHAREDLIB},
+                                                  {"interface", parse_t::Type::INTERFACE}};
     init->add_option("-t,--type", ret->type, "the project type")
         ->transform(CLI::CheckedTransformer(type_map, CLI::ignore_case))
-        ->default_val(parse_t::type_t::BINARY);
+        ->default_val(parse_t::Type::BINARY);
 
     init->add_option("-v,--version", ret->version, "the project's version")->default_str("0.0.1");
 

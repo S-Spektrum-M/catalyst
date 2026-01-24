@@ -21,16 +21,16 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     node["meta"]["min_ver"] = catalyst::CATALYST_VERSION;
     node["manifest"]["name"] = parse_args.name;
     switch (parse_args.type) {
-        case parse_t::type_t::BINARY:
+        case parse_t::Type::BINARY:
             node["manifest"]["type"] = "BINARY";
             break;
-        case parse_t::type_t::STATICLIB:
+        case parse_t::Type::STATICLIB:
             node["manifest"]["type"] = "STATICLIB";
             break;
-        case parse_t::type_t::SHAREDLIB:
+        case parse_t::Type::SHAREDLIB:
             node["manifest"]["type"] = "SHAREDLIB";
             break;
-        case parse_t::type_t::INTERFACE:
+        case parse_t::Type::INTERFACE:
             node["manifest"]["type"] = "INTERFACE";
             break;
     }
@@ -64,7 +64,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
-    if (parse_args.type == parse_t::type_t::BINARY) {
+    if (parse_args.type == parse_t::Type::BINARY) {
         fs::path entry_cpp_path =
             parse_args.path / fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
         std::ofstream entry_cpp{entry_cpp_path};

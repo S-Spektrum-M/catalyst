@@ -7,11 +7,11 @@
 
 namespace catalyst::init {
 struct parse_t {
-    enum class type_t { BINARY, STATICLIB, SHAREDLIB, INTERFACE };
+    enum class Type { BINARY, STATICLIB, SHAREDLIB, INTERFACE };
 
     std::string name{std::filesystem::current_path().filename().string()};
     std::filesystem::path path{std::filesystem::current_path()};
-    type_t type{parse_t::type_t::BINARY};
+    Type type{parse_t::Type::BINARY};
     std::string version{"0.0.1"};
     std::string description{"Your description goes here."};
     std::string provides{""};
