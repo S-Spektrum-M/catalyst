@@ -1,6 +1,6 @@
 #include "catalyst/hooks.hpp"
 #include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.h"
+#include "catalyst/process_exec.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"

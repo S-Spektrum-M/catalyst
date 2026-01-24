@@ -1,4 +1,4 @@
-#include "catalyst/process_exec.h"
+#include "catalyst/process_exec.hpp"
 
 #include "reproc++/drain.hpp"
 #include "reproc++/reproc.hpp"

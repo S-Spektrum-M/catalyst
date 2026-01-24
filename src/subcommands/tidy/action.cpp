@@ -1,5 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.h"
+#include "catalyst/process_exec.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/subcommands/tidy.hpp"
 #include "yaml-cpp/node/node.h"
