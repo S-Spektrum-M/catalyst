@@ -54,7 +54,7 @@ private:
                                         const std::string &message);
 
     std::ofstream log_file_;
-    std::mutex log_file_mutex_;
+    mutable std::mutex log_file_mutex_;
     std::mutex stdio_mutex;
 };
 
