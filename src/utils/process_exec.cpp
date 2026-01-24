@@ -40,7 +40,7 @@ void workingDir(const std::optional<std::string>& working_dir, reproc::options &
 } // namespace configure_opt
 
 std::expected<std::future<int>, std::string>
-process_exec(std::vector<std::string> &&args,
+processExec(std::vector<std::string> &&args,
              std::optional<std::string> working_dir,
              std::optional<std::unordered_map<std::string, std::string>> env) {
     if (args.empty()) {
@@ -67,7 +67,7 @@ process_exec(std::vector<std::string> &&args,
 }
 
 std::expected<std::string, std::string>
-process_exec_stdout(std::vector<std::string> &&args,
+processExecStdout(std::vector<std::string> &&args,
                     std::optional<std::string> working_dir,
                     std::optional<std::unordered_map<std::string, std::string>> env) {
     if (args.empty()) {

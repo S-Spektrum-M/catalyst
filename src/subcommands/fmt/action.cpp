@@ -15,12 +15,12 @@
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::fmt {
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Fmt subcommand invoked.");
     const std::vector<std::string> &profiles = parse_args.profiles;
     YAML::Node profile_comp;
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    auto res = generate::profile_composition(profiles);
+    auto res = generate::profileComposition(profiles);
     if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
@@ -74,7 +74,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             return;
         }
         catalyst::logger.log(LogLevel::DEBUG, "Formatting {}", file.string());
-        if (int res = catalyst::process_exec({formatter, "-i", file.string()}).value().get(); res) {
+        if (int res = catalyst::processExec({formatter, "-i", file.string()}).value().get(); res) {
             std::lock_guard<std::mutex> lock(error_mutex);
             if (!formatting_error) {
                 error_message = "Error running clang-format on " + file.string();

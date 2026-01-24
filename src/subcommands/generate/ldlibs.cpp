@@ -14,7 +14,7 @@ namespace catalyst::generate {
 std::string ld_filter(std::string &ldflags);
 
 // NOTE: used for run::action. Needs to be updated to use find_*.
-std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
+std::expected<std::string, std::string> libPath(const YAML::Node &profile) {
     catalyst::logger.log(LogLevel::DEBUG, "Calculating LD_LIBRARY_PATH.");
     fs::path current_dir = fs::current_path();
     fs::path build_dir{profile["manifest"]["dirs"]["build"].as<std::string>()};
@@ -35,7 +35,7 @@ std::expected<std::string, std::string> lib_path(const YAML::Node &profile) {
 
     if (auto deps = profile["dependencies"]; deps && deps.IsSequence()) {
         for (const auto &dep : deps) {
-            if (auto res = find_dep(build_dir.string(), dep); !res) {
+            if (auto res = findDep(build_dir.string(), dep); !res) {
                 catalyst::logger.log(
                     LogLevel::ERROR, "Failed to resolve dependency {}: {}", dep["name"].as<std::string>(), res.error());
             } else {

@@ -9,12 +9,12 @@
 #include <vector>
 
 static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
-                                                              const catalyst::add::vcpkg::parse_t &args);
+                                                              const catalyst::add::vcpkg::Parse &args);
 
 namespace catalyst::add::vcpkg {
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &add) {
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &add) {
     CLI::App *add_vcpkg = add.add_subcommand("vcpkg", "add a vcpkg dependency");
-    auto ret = std::make_unique<parse_t>();
+    auto ret = std::make_unique<Parse>();
 
     add_vcpkg->add_option("name", ret->name)->required();
     add_vcpkg->add_option("-t,--triplet", ret->triplet)->required();
@@ -25,7 +25,7 @@ std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &add) {
     return {add_vcpkg, std::move(ret)};
 }
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     for (const auto &profile_name : parse_args.profiles) {
         if (auto res = add_to_profile(profile_name, parse_args); !res)
             return std::unexpected(res.error());
@@ -36,8 +36,8 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 } // namespace catalyst::add::vcpkg
 
 static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
-                                                              const catalyst::add::vcpkg::parse_t &args) {
-    auto res = catalyst::YAML_UTILS::load_profile_file(profile);
+                                                              const catalyst::add::vcpkg::Parse &args) {
+    auto res = catalyst::yaml_utils::loadProfileFile(profile);
     if (!res) {
         catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
         return std::unexpected(res.error());
@@ -79,5 +79,5 @@ static inline std::expected<void, std::string> add_to_profile(const std::string 
 
     dependencies.push_back(new_dep);
 
-    return catalyst::YAML_UTILS::profileWriteBack(profile, profile_node);
+    return catalyst::yaml_utils::profileWriteBack(profile, profile_node);
 }

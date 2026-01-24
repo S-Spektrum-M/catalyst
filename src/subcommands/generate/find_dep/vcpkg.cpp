@@ -10,7 +10,7 @@
 #include <unordered_map>
 
 namespace catalyst::generate {
-std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
+std::expected<FindRes, std::string> findVcpkg(const YAML::Node &dep) {
     auto triplet = dep["triplet"].as<std::string>();
     std::string linkage;
     if (dep["linkage"] && dep["linkage"].IsScalar()) {
@@ -48,9 +48,9 @@ std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
         }
         env["PKG_CONFIG_PATH"] = pkg_config_dir.string();
 
-        auto res_L = process_exec_stdout({"pkg-config", "--libs-only-L", dep_name}, std::nullopt, env);
+        auto res_L = processExecStdout({"pkg-config", "--libs-only-L", dep_name}, std::nullopt, env);
         auto res_l =
-            process_exec_stdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name}, std::nullopt, env);
+            processExecStdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name}, std::nullopt, env);
 
         if (res_L && res_l) {
             std::string L_val = *res_L;
@@ -62,7 +62,7 @@ std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
                 l_val.erase(last + 1);
 
             catalyst::logger.log(LogLevel::DEBUG, "Resolved via pkg-config: L='{}' l='{}'", L_val, l_val);
-            return find_res{.lib_path = L_val,
+            return FindRes{.lib_path = L_val,
                             .inc_path = "", // already set in write_variables
                             .libs = l_val};
         } else {
@@ -119,7 +119,7 @@ std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep) {
         }
     }
 
-    return find_res{.lib_path = library_path,
+    return FindRes{.lib_path = library_path,
                     .inc_path = "", // already set in write_variables
                     .libs = libs};
 }

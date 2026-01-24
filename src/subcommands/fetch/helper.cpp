@@ -32,7 +32,7 @@ std::expected<void, std::string> fetchVcpkg(const std::string &name) {
     std::string command = std::format("\"{}\" install {}", vcpkg_exe.string(), name);
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
     catalyst::logger.log(LogLevel::DEBUG, "Fetching: {} from vcpkg", name);
-    if (catalyst::process_exec({vcpkg_exe.string(), "install", name}).value().get() != 0) {
+    if (catalyst::processExec({vcpkg_exe.string(), "install", name}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
@@ -58,7 +58,7 @@ fetchGit(std::string build_dir, std::string name, std::string source, std::strin
         args.push_back(dep_path.string());
     }
     catalyst::logger.log(LogLevel::DEBUG, "Executing command: {}", command);
-    if (catalyst::process_exec(std::move(args)).value().get() != 0) {
+    if (catalyst::processExec(std::move(args)).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependency: {}", name);
         return std::unexpected(std::format("Failed to fetch dependency: {}", name));
     }
@@ -101,7 +101,7 @@ fetchLocal(const std::string &name, const std::string &path, const std::vector<s
     std::unordered_map<std::string, std::string> env_map;
     env_map["CATALYST_VISITED"] = new_visited;
 
-    auto res = catalyst::process_exec(std::move(args), local_path.string(), env_map);
+    auto res = catalyst::processExec(std::move(args), local_path.string(), env_map);
     if (!res) {
         return std::unexpected(res.error());
     }

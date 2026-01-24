@@ -33,13 +33,13 @@ struct PackageInfo {
 std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
     std::unordered_map<std::string, PackageInfo> packages;
 
-    for (const auto &[key, member] : ws.get_members()) {
+    for (const auto &[key, member] : ws.getMembers()) {
         try {
             std::vector<std::string> profiles = member.profiles;
             if (profiles.empty())
                 profiles.emplace_back("common");
 
-            YAML_UTILS::Configuration config(profiles, member.path);
+            yaml_utils::Configuration config(profiles, member.path);
             auto name_opt = config.get_string("manifest.name");
             if (!name_opt) {
                 catalyst::logger.log(LogLevel::WARN, "Member {} has no manifest.name", key);
@@ -88,8 +88,8 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
             }
 
             std::string key = info.workspace_member_key;
-            auto it = ws.get_members().find(key);
-            if (it != ws.get_members().end()) {
+            auto it = ws.getMembers().find(key);
+            if (it != ws.getMembers().end()) {
                 order.push_back(it->second);
             }
         }
@@ -104,7 +104,7 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
     return order;
 }
 
-bool depMissing(const YAML_UTILS::Configuration &config) {
+bool depMissing(const yaml_utils::Configuration &config) {
     catalyst::logger.log(LogLevel::DEBUG, "Checking for missing dependencies.");
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
     if (!config.has("dependencies")) {
@@ -127,13 +127,13 @@ bool depMissing(const YAML_UTILS::Configuration &config) {
 
 std::expected<void, std::string> generateCompileCommands(const fs::path &build_dir, const std::string &generator) {
     if (generator != "ninja") {
-        if (auto res = catalyst::process_exec({"cbe", "-d", build_dir, "--compdb"}); !res)
+        if (auto res = catalyst::processExec({"cbe", "-d", build_dir, "--compdb"}); !res)
             return std::unexpected(res.error());
         return {};
     }
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands database.");
     auto res =
-        catalyst::process_exec_stdout({"ninja", "-C", build_dir.string(), "-t", "compdb", "cc_compile", "cxx_compile"});
+        catalyst::processExecStdout({"ninja", "-C", build_dir.string(), "-t", "compdb", "cc_compile", "cxx_compile"});
     if (!res)
         return std::unexpected(res.error());
 
@@ -146,14 +146,14 @@ std::expected<void, std::string> generateCompileCommands(const fs::path &build_d
     return {};
 }
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Build subcommand invoked.");
 
     if (parse_args.workspace) {
         fs::path current = fs::current_path();
         bool is_root = false;
         try {
-            is_root = fs::equivalent(parse_args.workspace->get_root(), current);
+            is_root = fs::equivalent(parse_args.workspace->getRoot(), current);
         } catch (...) {
             std::ignore;
         }
@@ -173,7 +173,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 // For now, let's just loop.
                 bool found = false;
                 for (const auto &m : order) {
-                    YAML_UTILS::Configuration c(m.profiles.empty() ? std::vector<std::string>{"common"} : m.profiles,
+                    yaml_utils::Configuration c(m.profiles.empty() ? std::vector<std::string>{"common"} : m.profiles,
                                                 m.path);
                     if (c.get_string("manifest.name").value_or("") == parse_args.package) {
                         targets.push_back(m);
@@ -191,7 +191,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                 catalyst::logger.log(LogLevel::INFO, "Building workspace member: {}", member.name);
                 fs::current_path(member.path);
 
-                parse_t member_args = parse_args;
+                Parse member_args = parse_args;
                 member_args.workspace_build = false;
                 member_args.package = ""; // Clear package arg so we don't recurse logic
 
@@ -213,7 +213,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    YAML_UTILS::Configuration config{parse_args.profiles};
+    yaml_utils::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::INFO, "Running pre-build hooks.");
     if (auto res = hooks::pre_build(config); !res) {
@@ -272,7 +272,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         build_command = {"cbe", "-d", build_dir};
     }
 
-    if (int res = catalyst::process_exec(std::move(build_command)).value().get(); res != 0) {
+    if (int res = catalyst::processExec(std::move(build_command)).value().get(); res != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
         if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());

@@ -14,33 +14,33 @@ namespace catalyst::init {
 
 namespace fs = std::filesystem;
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Init subcommand invoked.");
     // TODO: change directory to parse_args->path;
     YAML::Node node;
     node["meta"]["min_ver"] = catalyst::CATALYST_VERSION;
     node["manifest"]["name"] = parse_args.name;
     switch (parse_args.type) {
-        case parse_t::Type::BINARY:
+        case Parse::Type::BINARY:
             node["manifest"]["type"] = "BINARY";
             break;
-        case parse_t::Type::STATICLIB:
+        case Parse::Type::STATICLIB:
             node["manifest"]["type"] = "STATICLIB";
             break;
-        case parse_t::Type::SHAREDLIB:
+        case Parse::Type::SHAREDLIB:
             node["manifest"]["type"] = "SHAREDLIB";
             break;
-        case parse_t::Type::INTERFACE:
+        case Parse::Type::INTERFACE:
             node["manifest"]["type"] = "INTERFACE";
             break;
     }
     node["manifest"]["version"] = parse_args.version;
     node["manifest"]["description"] = parse_args.description;
     node["manifest"]["provides"] = parse_args.provides;
-    node["manifest"]["tooling"]["CC"] = parse_args.tooling.CC;
-    node["manifest"]["tooling"]["CXX"] = parse_args.tooling.CXX;
-    node["manifest"]["tooling"]["CCFLAGS"] = parse_args.tooling.CCFLAGS;
-    node["manifest"]["tooling"]["CXXFLAGS"] = parse_args.tooling.CXXFLAGS;
+    node["manifest"]["tooling"]["CC"] = parse_args.tooling.cc;
+    node["manifest"]["tooling"]["CXX"] = parse_args.tooling.cxx;
+    node["manifest"]["tooling"]["CCFLAGS"] = parse_args.tooling.ccflags;
+    node["manifest"]["tooling"]["CXXFLAGS"] = parse_args.tooling.cxxflags;
     node["manifest"]["dirs"]["include"] = parse_args.dirs.include;
     node["manifest"]["dirs"]["source"] = parse_args.dirs.source;
     node["manifest"]["dirs"]["build"] = parse_args.dirs.build;
@@ -64,7 +64,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         }
     }
 
-    if (parse_args.type == parse_t::Type::BINARY) {
+    if (parse_args.type == Parse::Type::BINARY) {
         fs::path entry_cpp_path =
             parse_args.path / fs::path{parse_args.dirs.source[0]} / std::format("{}.cpp", parse_args.name);
         std::ofstream entry_cpp{entry_cpp_path};

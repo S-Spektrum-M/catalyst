@@ -7,9 +7,9 @@
 #include <utility>
 
 namespace catalyst::install {
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {
     CLI::App *install = app.add_subcommand("install", "Install the build artifacts");
-    auto ret = std::make_unique<parse_t>();
+    auto ret = std::make_unique<Parse>();
     install->add_option("-p,--profiles", ret->profiles, "the profiles to compose in the build artifact")
         ->default_val(std::vector<std::string>{"common"});
     install->add_option("-s,--source", ret->source_path, "the source of the path to build")

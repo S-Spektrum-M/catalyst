@@ -11,7 +11,7 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
-std::expected<find_res, std::string> find_git(const std::string &build_dir, const YAML::Node &dep) {
+std::expected<FindRes, std::string> findGit(const std::string &build_dir, const YAML::Node &dep) {
     auto dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving git dependency: {}", dep_name);
 
@@ -24,7 +24,7 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
         profiles = dep["profiles"].as<std::vector<std::string>>();
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles for git dependency.");
-    std::expected<YAML::Node, std::string> pc = catalyst::generate::profile_composition(profiles);
+    std::expected<YAML::Node, std::string> pc = catalyst::generate::profileComposition(profiles);
 
     if (!pc) {
         return std::unexpected(pc.error());
@@ -57,6 +57,6 @@ std::expected<find_res, std::string> find_git(const std::string &build_dir, cons
         libs_flags += std::format(" -l{}", lib_name);
     }
 
-    return find_res{.lib_path = library_path_flags, .inc_path = include_path_flags, .libs = libs_flags};
+    return FindRes{.lib_path = library_path_flags, .inc_path = include_path_flags, .libs = libs_flags};
 }
 } // namespace catalyst::generate

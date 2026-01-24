@@ -6,14 +6,14 @@
 #include <string>
 
 // ANSI color codes
-inline const char *RED = "\033[31m";
-inline const char *ORANGE = "\033[33m";
-inline const char *BLUE = "\033[34m";
-inline const char *PURPLE = "\033[35m";
-inline const char *RESET = "\033[0m";
+inline const char *const RED = "\033[31m";
+inline const char *const ORANGE = "\033[33m";
+inline const char *const BLUE = "\033[34m";
+inline const char *const PURPLE = "\033[35m";
+inline const char *const RESET = "\033[0m";
 
 namespace catalyst {
-enum class LogLevel {
+enum class LogLevel : std::uint8_t {
     DEBUG, // hidden info (unless asked for opt in with -V)
     INFO,  // user facing milestones
     WARN,  // warnings
@@ -21,44 +21,48 @@ enum class LogLevel {
 };
 
 // Helper function to convert LogLevel to string
-const char *to_string(LogLevel level);
+const char *toString(LogLevel level);
 
-class log_t {
+class LogT {
 public:
-    static log_t &instance() {
-        static log_t logger_instance;
+    static LogT &instance() {
+        static LogT logger_instance;
         return logger_instance;
     }
 
-    log_t(const log_t &) = delete;
-    log_t &operator=(const log_t &) = delete;
+    LogT(const LogT &) = delete;
+    LogT &operator=(const LogT &) = delete;
+    LogT(LogT &&) = delete;
+    LogT &operator=(LogT &&) = delete;
 
-    template <typename... Args> void log(LogLevel level, std::format_string<Args...> fmt, Args &&...args) {
-        std::string message = std::format(fmt, std::forward<Args>(args)...);
-        log_impl(level, message);
+    template <typename... Args_T> void log(LogLevel level, std::format_string<Args_T...> fmt, Args_T &&...args) const {
+        std::string message = std::format(fmt, std::forward<Args_T>(args)...);
+        logImpl(level, message);
     }
 
-    bool is_open() const;
-    void flush();
-    void close();
+    bool isOpen() const;
+    void flush() const;
+    void close() const;
 
-    bool verbose_logging = false;
+    bool &getVerboseLogging() const {
+        return verbose_logging;
+    }
 
 private:
-    log_t();
-    ~log_t();
+    LogT();
+    ~LogT();
 
-    void log_impl(LogLevel level, const std::string &message);
-    static std::string generate_json_log_event(const std::chrono::system_clock::time_point &now,
-                                        LogLevel level,
-                                        const std::string &message);
+    void logImpl(LogLevel level, const std::string &message) const;
+    static std::string
+    generateJsonLogEvent(const std::chrono::system_clock::time_point &now, LogLevel level, const std::string &message);
 
-    std::ofstream log_file_;
-    mutable std::mutex log_file_mutex_;
-    std::mutex stdio_mutex;
+    mutable std::ofstream log_file;
+    mutable std::mutex log_file_mutex;
+    mutable std::mutex stdio_mutex;
+    mutable bool verbose_logging = false;
 };
 
 // Global logger instance
-inline log_t &logger = log_t::instance();
+inline const LogT &logger = LogT::instance();
 
 } // namespace catalyst

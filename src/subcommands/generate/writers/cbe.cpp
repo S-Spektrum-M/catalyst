@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace catalyst::generate::BuildWriters {
+namespace catalyst::generate::buildwriters {
 
 static std::string escape(std::string_view str) {
     std::string result;
@@ -23,14 +23,14 @@ static std::string escape(std::string_view str) {
 }
 
 template <>
-std::expected<void, std::string> DerivedWriter<TargetType::CBE>::add_variable(std::string_view name,
+std::expected<void, std::string> DerivedWriter<TargetType::CBE>::addVariable(std::string_view name,
                                                                               std::string_view value) {
     std::println(stream, "DEF|{}|{}", name, escape(value));
     return {};
 }
 
 template <>
-std::expected<void, std::string> DerivedWriter<TargetType::CBE>::add_rule([[maybe_unused]] std::string_view name,
+std::expected<void, std::string> DerivedWriter<TargetType::CBE>::addRule([[maybe_unused]] std::string_view name,
                                                                           [[maybe_unused]] std::string_view command,
                                                                           [[maybe_unused]] std::string_view description,
                                                                           [[maybe_unused]] std::string_view depfile,
@@ -43,10 +43,10 @@ std::expected<void, std::string> DerivedWriter<TargetType::CBE>::add_rule([[mayb
 
 template <>
 std::expected<void, std::string>
-DerivedWriter<TargetType::CBE>::add_build(const std::vector<target_t> &outputs,
+DerivedWriter<TargetType::CBE>::addBuild(const std::vector<std::string> &outputs,
                                           std::string_view rule,
-                                          const std::vector<target_t> &inputs,
-                                          [[maybe_unused]] const std::vector<target_t> &implicit_deps) {
+                                          const std::vector<std::string> &inputs,
+                                          [[maybe_unused]] const std::vector<std::string> &implicit_deps) {
     if (outputs.empty()) {
         return std::unexpected("CBE writer requires at least one output.");
     }
@@ -89,11 +89,11 @@ DerivedWriter<TargetType::CBE>::add_build(const std::vector<target_t> &outputs,
     return {};
 }
 
-template <> void DerivedWriter<TargetType::CBE>::add_comment(std::string_view comment) {
+template <> void DerivedWriter<TargetType::CBE>::addComment(std::string_view comment) {
     std::println(stream, "# {}", escape(comment));
 }
 
-template <> void DerivedWriter<TargetType::CBE>::add_default([[maybe_unused]] std::string_view target) {
+template <> void DerivedWriter<TargetType::CBE>::addDefault([[maybe_unused]] std::string_view target) {
     // CBE does not have a 'default' target directive.
     // It builds the graph required to produce the requested targets or all if unspecified?
     // The docs don't say, but typical low-level builders might just build everything defined

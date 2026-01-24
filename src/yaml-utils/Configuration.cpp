@@ -18,7 +18,7 @@
 #include <yaml-cpp/yaml.h>
 
 using catalyst::LogLevel;
-using catalyst::YAML_UTILS::Configuration;
+using catalyst::yaml_utils::Configuration;
 namespace fs = std::filesystem;
 
 namespace {

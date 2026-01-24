@@ -1,17 +1,14 @@
 #pragma once
 #include <CLI/App.hpp>
 #include <expected>
-#include <regex>
-#include <shared_mutex>
 #include <string>
-#include <vector>
 
 namespace catalyst::configure {
-struct parse_t {
+struct Parse {
     std::string var;
     std::string val;
 };
 
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
-std::expected<void, std::string> action(const parse_t &);
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
+std::expected<void, std::string> action(const Parse &);
 } // namespace catalyst::configure

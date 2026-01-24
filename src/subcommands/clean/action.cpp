@@ -12,14 +12,14 @@
 namespace catalyst::clean {
 namespace fs = std::filesystem;
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Clean subcommand invoked.");
 
     if (parse_args.workspace) {
         fs::path current = fs::current_path();
         bool is_root = false;
         try {
-            is_root = fs::equivalent(parse_args.workspace->get_root(), current);
+            is_root = fs::equivalent(parse_args.workspace->getRoot(), current);
         } catch (...) {
             std::ignore;
         }
@@ -28,11 +28,11 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             catalyst::logger.log(LogLevel::INFO, "Cleaning all workspace members.");
             bool any_failed = false;
 
-            for (const auto &[name, member] : parse_args.workspace->get_members()) {
+            for (const auto &[name, member] : parse_args.workspace->getMembers()) {
                 catalyst::logger.log(LogLevel::INFO, "Cleaning member: {}", name);
                 fs::current_path(member.path);
 
-                parse_t member_args = parse_args;
+                Parse member_args = parse_args;
                 member_args.workspace = std::nullopt; // Prevent recursion loop
 
                 if (auto res = action(member_args); !res) {
@@ -54,7 +54,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    auto res = generate::profile_composition(profiles);
+    auto res = generate::profileComposition(profiles);
     if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
@@ -71,13 +71,13 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     auto generator = profile_comp["meta"]["generator"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
     if (generator == "ninja") {
-        if (int rtn = catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get(); rtn != 0) {
+        if (int rtn = catalyst::processExec({"ninja", "-C", build_dir, "-t", "clean"}).value().get(); rtn != 0) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
             return std::unexpected(
                 std::format("Command: ninja -C {} -t clean failed with exit code: {}", build_dir, rtn));
         }
     } else if (generator == "cbe") {
-        if (int rtn = catalyst::process_exec({"cbe", "-d", build_dir, "--clean"}).value().get(); rtn != 0) {
+        if (int rtn = catalyst::processExec({"cbe", "-d", build_dir, "--clean"}).value().get(); rtn != 0) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
             return std::unexpected(std::format("Command: cbe -d {} --clean failed with exit code: {}", build_dir, rtn));
         }
@@ -93,9 +93,9 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     return {};
 }
 
-std::expected<void, std::string> action2(const parse_t &parse_args) {
+std::expected<void, std::string> action2(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Clean subcommand invoked.");
-    YAML_UTILS::Configuration config{parse_args.profiles};
+    yaml_utils::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-clean hooks.");
     if (auto res = hooks::pre_clean(config); !res) {
@@ -105,7 +105,7 @@ std::expected<void, std::string> action2(const parse_t &parse_args) {
 
     std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
     catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (catalyst::process_exec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
+    if (catalyst::processExec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
         return std::unexpected("error in cleaning.");
     }

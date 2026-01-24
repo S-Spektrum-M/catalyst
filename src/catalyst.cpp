@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     catalyst::logger.log(catalyst::LogLevel::DEBUG, "{}", args_str);
 
     catalyst::CliContext ctx;
-    ctx.workspace = catalyst::Workspace::find_root();
+    ctx.workspace = catalyst::Workspace::findRoot();
     auto [exit_code, should_return] = catalyst::parseCli(argc, argv, ctx);
     if (should_return)
         return exit_code;

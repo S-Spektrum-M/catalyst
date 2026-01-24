@@ -10,7 +10,7 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
-std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
+std::expected<FindRes, std::string> findLocal(const YAML::Node &dep) {
     catalyst::logger.log(LogLevel::DEBUG, "Resolving local dependency: {}", dep["name"].as<std::string>());
 
     if (!dep["path"]) {
@@ -33,7 +33,7 @@ std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
     if (dep["using"] && dep["using"].IsSequence())
         features = dep["using"].as<std::vector<std::string>>();
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles for local dependency.");
-    auto pc = catalyst::generate::profile_composition(profiles);
+    auto pc = catalyst::generate::profileComposition(profiles);
 
     if (!pc) {
         return std::unexpected(pc.error());
@@ -69,6 +69,6 @@ std::expected<find_res, std::string> find_local(const YAML::Node &dep) {
         libs += std::format(" -l{}", dep_name);
     }
 
-    return find_res{.lib_path = library_path, .inc_path = include_path, .libs = libs};
+    return FindRes{.lib_path = library_path, .inc_path = include_path, .libs = libs};
 }
 } // namespace catalyst::generate

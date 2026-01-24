@@ -17,9 +17,9 @@
 #include <vector>
 
 namespace catalyst::tidy {
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     YAML::Node profile_comp;
-    auto res = catalyst::generate::profile_composition(parse_args.profiles);
+    auto res = catalyst::generate::profileComposition(parse_args.profiles);
     if (!res)
         return std::unexpected(res.error());
     profile_comp = *res;
@@ -43,7 +43,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     }
 
     std::unordered_set<std::filesystem::path> source_set;
-    auto source_set_res = generate::build_source_set(absolute_source_dirs, parse_args.profiles);
+    auto source_set_res = generate::buildSourceSet(absolute_source_dirs, parse_args.profiles);
     if (!source_set_res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build source set: {}", source_set_res.error());
         return std::unexpected(source_set_res.error());
@@ -74,7 +74,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
                     work_queue.pop();
                 }
 
-                if (int res = catalyst::process_exec({linter, file_to_process.string()}).value().get(); res != 0) {
+                if (int res = catalyst::processExec({linter, file_to_process.string()}).value().get(); res != 0) {
                     err_log_mt.lock();
                     catalyst::logger.log(
                         LogLevel::ERROR, "Linter failed for {}: exit code {}", file_to_process.string(), res);

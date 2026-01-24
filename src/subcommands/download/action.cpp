@@ -34,7 +34,7 @@ std::string randomString(size_t length) {
 }
 } // namespace
 
-std::expected<void, std::string> action(const parse_t &args) {
+std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Download subcommand invoked.");
 
     constexpr size_t TEMP_DIR_NAME_LEN = 8UZ;
@@ -51,7 +51,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     clone_cmd.push_back(args.git_remote);
     clone_cmd.push_back(temp_dir.string());
 
-    auto res = catalyst::process_exec(std::move(clone_cmd));
+    auto res = catalyst::processExec(std::move(clone_cmd));
     if (!res)
         return std::unexpected(res.error());
     if (auto exit_code = res.value().get(); exit_code != 0)
@@ -65,7 +65,7 @@ std::expected<void, std::string> action(const parse_t &args) {
                          "Building downloaded project with profiles: {} and features: {}",
                          std::format("{}", args.profiles),
                          std::format("{}", args.enabled_features));
-    catalyst::build::parse_t build_args{
+    catalyst::build::Parse build_args{
         .regen = false,
         .force_rebuild = false,
         .force_refetch = false,

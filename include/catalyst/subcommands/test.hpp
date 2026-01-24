@@ -6,11 +6,11 @@
 #include "catalyst/workspace.hpp"
 
 namespace catalyst::test {
-struct parse_t {
+struct Parse {
     std::vector<std::string> params;
     std::optional<Workspace> workspace;
 };
 
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
-std::expected<void, std::string> action(const parse_t &);
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
+std::expected<void, std::string> action(const Parse &);
 } // namespace catalyst::test

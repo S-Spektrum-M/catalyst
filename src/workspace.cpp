@@ -10,7 +10,7 @@ namespace catalyst {
 
 namespace fs = std::filesystem;
 
-std::optional<Workspace> Workspace::find_root(const fs::path &start_path) {
+std::optional<Workspace> Workspace::findRoot(const fs::path &start_path) {
     fs::path current = fs::absolute(start_path);
     fs::path root = current.root_path();
 
@@ -79,7 +79,7 @@ bool Workspace::contains(const fs::path &path) const {
     return !rel.empty() && rel.native().front() != '.';
 }
 
-std::optional<WorkspaceMember> Workspace::get_member_by_path(const fs::path &path) const {
+std::optional<WorkspaceMember> Workspace::getMemberByPath(const fs::path &path) const {
     fs::path abs_path = fs::absolute(path);
     for (const auto &[name, member] : members) {
         if (fs::equivalent(member.path, abs_path)) {
@@ -89,14 +89,14 @@ std::optional<WorkspaceMember> Workspace::get_member_by_path(const fs::path &pat
     return std::nullopt;
 }
 
-std::optional<WorkspaceMember> Workspace::find_package(const std::string &package_name) const {
+std::optional<WorkspaceMember> Workspace::findPackage(const std::string &package_name) const {
     for (const auto &[key, member] : members) {
         try {
             std::vector<std::string> profiles = member.profiles;
             if (profiles.empty())
                 profiles.emplace_back("common");
 
-            YAML_UTILS::Configuration config(profiles, member.path);
+            yaml_utils::Configuration config(profiles, member.path);
             auto name_opt = config.get_string("manifest.name");
             if (name_opt && *name_opt == package_name) {
                 return member;

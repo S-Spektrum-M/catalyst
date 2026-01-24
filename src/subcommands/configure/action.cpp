@@ -19,7 +19,7 @@ namespace catalyst::configure {
 
 bool is_int(const std::string &str);
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Configure subcommand invoked.");
     // 1. Parse the variable string
     size_t colon_pos = parse_args.var.find(':');
@@ -37,7 +37,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     // 2. Load the profile
     catalyst::logger.log(LogLevel::DEBUG, "Loading profile file for '{}'", profile);
     YAML::Node profile_node;
-    if (auto res = YAML_UTILS::load_profile_file(profile); !res) {
+    if (auto res = yaml_utils::loadProfileFile(profile); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to load profile: {}", res.error());
         return std::unexpected(res.error());
     } else {
@@ -68,7 +68,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
         } else {
             target_node[var_path.back()] = parse_args.val;
         }
-        auto res = YAML_UTILS::profileWriteBack(profile, profile_node);
+        auto res = yaml_utils::profileWriteBack(profile, profile_node);
         if (!res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to write back profile: {}", res.error());
         }

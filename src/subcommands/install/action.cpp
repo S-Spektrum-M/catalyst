@@ -11,7 +11,7 @@
 namespace catalyst::install {
 namespace fs = std::filesystem;
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Install subcommand invoked.");
 
     // Handle source and target paths
@@ -26,9 +26,9 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
     catalyst::DirectoryChangeGuard dg(source_path);
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    YAML_UTILS::Configuration config;
+    yaml_utils::Configuration config;
     try {
-        config = YAML_UTILS::Configuration(parse_args.profiles);
+        config = yaml_utils::Configuration(parse_args.profiles);
     } catch (const std::exception &e) {
         return std::unexpected(e.what());
     }

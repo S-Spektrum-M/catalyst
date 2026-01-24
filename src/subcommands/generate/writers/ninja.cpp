@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-namespace catalyst::generate::BuildWriters {
+namespace catalyst::generate::buildwriters {
 
 static std::string escape(std::string_view str) {
     constexpr double ESCAPE_TUNING_FACTOR = 1.25;
@@ -36,7 +36,7 @@ static std::string escape(std::string_view str) {
 }
 
 template <>
-std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::add_variable(std::string_view name,
+std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::addVariable(std::string_view name,
                                                                                 std::string_view value) {
     static auto escape_quotes = [](std::string_view str) -> std::string {
         std::string result;
@@ -60,7 +60,7 @@ std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::add_variable(
 }
 
 template <>
-std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::add_rule(std::string_view name,
+std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::addRule(std::string_view name,
                                                                             std::string_view command,
                                                                             std::string_view description,
                                                                             std::string_view depfile,
@@ -81,10 +81,10 @@ std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::add_rule(std:
 
 template <>
 std::expected<void, std::string>
-DerivedWriter<TargetType::Ninja>::add_build(const std::vector<target_t> &outputs,
+DerivedWriter<TargetType::Ninja>::addBuild(const std::vector<std::string> &outputs,
                                             std::string_view rule,
-                                            const std::vector<target_t> &inputs,
-                                            const std::vector<target_t> &implicit_deps) {
+                                            const std::vector<std::string> &inputs,
+                                            const std::vector<std::string> &implicit_deps) {
     std::print(stream, "build");
     for (const auto &out : outputs)
         std::print(stream, " {}", escape(out));
@@ -104,11 +104,11 @@ DerivedWriter<TargetType::Ninja>::add_build(const std::vector<target_t> &outputs
     return {};
 }
 
-template <> void DerivedWriter<TargetType::Ninja>::add_comment(std::string_view comment) {
+template <> void DerivedWriter<TargetType::Ninja>::addComment(std::string_view comment) {
     std::println(stream, "# {}", comment);
 }
 
-template <> void DerivedWriter<TargetType::Ninja>::add_default(std::string_view target) {
+template <> void DerivedWriter<TargetType::Ninja>::addDefault(std::string_view target) {
     std::println(stream, "default {}", escape(target));
 }
 

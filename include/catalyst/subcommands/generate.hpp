@@ -10,32 +10,53 @@
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::generate {
-struct parse_t {
+struct Parse {
     std::vector<std::string> profiles;
     std::vector<std::string> enabled_features;
 };
 
-struct find_res {
+struct FindRes {
     std::string lib_path;
     std::string inc_path;
     std::string libs;
 };
 
-std::expected<YAML::Node, std::string> profile_composition(const std::vector<std::string> &profiles);
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
-std::expected<void, std::string> action(const parse_t &);
+std::expected<YAML::Node, std::string> profileComposition(const std::vector<std::string> &profiles);
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
+std::expected<void, std::string> action(const Parse &);
 
-std::expected<std::string, std::string> lib_path(const YAML::Node &profile);
-std::expected<find_res, std::string> find_dep(const std::string &build_dir, const YAML::Node &dep);
-std::expected<find_res, std::string> find_local(const YAML::Node &dep);
-std::expected<find_res, std::string> find_system(const YAML::Node &dep);
-std::expected<find_res, std::string> find_vcpkg(const YAML::Node &dep);
-std::expected<find_res, std::string> find_git(const std::string &build_dir, const YAML::Node &dep);
+std::expected<std::string, std::string> libPath(const YAML::Node &profile);
+std::expected<FindRes, std::string> findDep(const std::string &build_dir, const YAML::Node &dep);
+std::expected<FindRes, std::string> findLocal(const YAML::Node &dep);
+std::expected<FindRes, std::string> findSystem(const YAML::Node &dep);
+std::expected<FindRes, std::string> findVcpkg(const YAML::Node &dep);
+std::expected<FindRes, std::string> findGit(const std::string &build_dir, const YAML::Node &dep);
 
 std::expected<std::unordered_set<std::filesystem::path>, std::string>
-build_source_set(std::vector<std::string> source_dirs, const std::vector<std::string> &profiles);
+buildSourceSet(std::vector<std::string> source_dirs, const std::vector<std::string> &profiles);
 
-namespace BuildWriters {
+namespace buildwriters {
+
+struct WriterVariable {
+    std::string_view name;
+    std::string_view value;
+};
+
+struct WriterRule {
+    std::string_view name;
+    std::string_view command;
+    std::string_view description;
+    std::string_view depfile;
+    std::string_view deps;
+};
+
+struct WriterBuild {
+    std::vector<std::string> outputs;
+    std::string_view rule;
+    std::vector<std::string> inputs;
+    std::vector<std::string> implicit_deps;
+};
+
 class BaseWriter {
 protected:
     std::ostream &stream;
@@ -43,29 +64,30 @@ protected:
     }
 
 public:
-    using rule_t = std::string;
-    using target_t = std::string;
-
+    BaseWriter(const BaseWriter &) = default;
+    BaseWriter(BaseWriter &&) = delete;
+    BaseWriter &operator=(const BaseWriter &) = delete;
+    BaseWriter &operator=(BaseWriter &&) = delete;
     virtual ~BaseWriter() = default;
 
-    virtual std::expected<void, std::string> add_variable(std::string_view name, std::string_view value) = 0;
-    virtual std::expected<void, std::string> add_rule(std::string_view name,
-                                                      std::string_view command,
-                                                      std::string_view description,
-                                                      std::string_view depfile = "",
-                                                      std::string_view deps = "") = 0;
-    virtual std::expected<void, std::string> add_build(const std::vector<target_t> &outputs,
-                                                       std::string_view rule,
-                                                       const std::vector<target_t> &inputs,
-                                                       const std::vector<target_t> &implicit_deps = {}
-                                                       // e.g., headers for validation
-                                                       ) = 0;
+    virtual std::expected<void, std::string> addVariable(std::string_view name, std::string_view value) = 0;
+    virtual std::expected<void, std::string> addRule(std::string_view name,
+                                                     std::string_view command,
+                                                     std::string_view description,
+                                                     std::string_view depfile = "",
+                                                     std::string_view deps = "") = 0;
+    virtual std::expected<void, std::string> addBuild(const std::vector<std::string> &outputs,
+                                                      std::string_view rule,
+                                                      const std::vector<std::string> &inputs,
+                                                      const std::vector<std::string> &implicit_deps = {}
+                                                      // e.g., headers for validation
+                                                      ) = 0;
 
-    virtual void add_comment(std::string_view comment) = 0;
-    virtual void add_default(std::string_view target) = 0;
+    virtual void addComment(std::string_view comment) = 0;
+    virtual void addDefault(std::string_view target) = 0;
 };
 
-enum class TargetType {
+enum class TargetType : std::uint8_t {
     Ninja,
     Make,
     VisualStudio,
@@ -73,10 +95,10 @@ enum class TargetType {
     CBE,
 };
 
-template <TargetType T> class DerivedWriter : public BaseWriter {
+template <TargetType Target_T> class DerivedWriter : public BaseWriter {
 private:
-    static consteval bool is_implemented(TargetType __t) {
-        return __t == TargetType::Ninja || __t == TargetType::CBE;
+    static consteval bool isImplemented(TargetType t) {
+        return t == TargetType::Ninja || t == TargetType::CBE;
     }
 
 #if __cplusplus >= 202602L
@@ -102,7 +124,7 @@ private:
     }
     static_assert(is_implemented(T), warning_msg(T));
 #else
-    static_assert(is_implemented(T),
+    static_assert(isImplemented(Target_T),
                   "Unimplemented specialization for DerivedWriter. Add explicit template specialization.");
 #endif
 
@@ -118,34 +140,34 @@ public:
     DerivedWriter(DerivedWriter &&) = delete;
     DerivedWriter &operator=(DerivedWriter &&) = delete;
 
-    std::expected<void, std::string> add_variable([[maybe_unused]] std::string_view name,
-                                                  [[maybe_unused]] std::string_view value) override {
+    std::expected<void, std::string> addVariable([[maybe_unused]] std::string_view name,
+                                                 [[maybe_unused]] std::string_view value) override {
         throw std::logic_error("Unimplemented base template method");
     }
 
-    std::expected<void, std::string> add_rule([[maybe_unused]] std::string_view name,
-                                              [[maybe_unused]] std::string_view command,
-                                              [[maybe_unused]] std::string_view description,
-                                              [[maybe_unused]] std::string_view depfile = "",
-                                              [[maybe_unused]] std::string_view deps = "") override {
+    std::expected<void, std::string> addRule([[maybe_unused]] std::string_view name,
+                                             [[maybe_unused]] std::string_view command,
+                                             [[maybe_unused]] std::string_view description,
+                                             [[maybe_unused]] std::string_view depfile = "",
+                                             [[maybe_unused]] std::string_view deps = "") override {
         throw std::logic_error("Unimplemented base template method");
     }
 
     std::expected<void, std::string>
-    add_build([[maybe_unused]] const std::vector<target_t> &outputs,
-              [[maybe_unused]] std::string_view rule,
-              [[maybe_unused]] const std::vector<target_t> &inputs,
-              [[maybe_unused]] const std::vector<target_t> &implicit_deps = {}) override {
+    addBuild([[maybe_unused]] const std::vector<std::string> &outputs,
+             [[maybe_unused]] std::string_view rule,
+             [[maybe_unused]] const std::vector<std::string> &inputs,
+             [[maybe_unused]] const std::vector<std::string> &implicit_deps = {}) override {
         throw std::logic_error("Unimplemented base template method");
     }
 
-    void add_comment([[maybe_unused]] std::string_view comment) override {
+    void addComment([[maybe_unused]] std::string_view comment) override {
         throw std::logic_error("Unimplemented base template method");
     }
 
-    void add_default([[maybe_unused]] std::string_view target) override {
+    void addDefault([[maybe_unused]] std::string_view target) override {
         throw std::logic_error("Unimplemented base template method");
     }
 };
-} // namespace BuildWriters
+} // namespace buildwriters
 } // namespace catalyst::generate

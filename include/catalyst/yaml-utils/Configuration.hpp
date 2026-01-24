@@ -6,11 +6,11 @@
 #include <vector>
 #include <filesystem>
 
-namespace catalyst::YAML_UTILS {
+namespace catalyst::yaml_utils {
 class Configuration {
 public:
     Configuration() = default;
-    Configuration(const std::vector<std::string> &profiles, const std::filesystem::path& root_dir = std::filesystem::current_path());
+    explicit Configuration(const std::vector<std::string> &profiles, const std::filesystem::path& root_dir = std::filesystem::current_path());
 
     bool has(const std::string &key) const;
 
@@ -26,4 +26,4 @@ public:
 private:
     YAML::Node root;
 };
-} // namespace catalyst::YAML_UTILS
+} // namespace catalyst::yaml_utils

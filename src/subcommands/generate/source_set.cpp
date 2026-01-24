@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 #include <expected>
 #include <filesystem>
@@ -14,8 +15,8 @@ namespace catalyst::generate {
 
 namespace fs = std::filesystem;
 
-std::expected<std::unordered_set<fs::path>, std::string> build_source_set(std::vector<std::string> source_dirs,
-                                                                          const std::vector<std::string> &profiles) {
+std::expected<std::unordered_set<fs::path>, std::string> buildSourceSet(std::vector<std::string> source_dirs,
+                                                                        const std::vector<std::string> &profiles) {
     catalyst::logger.log(LogLevel::DEBUG, "Building source set.");
     namespace sv = std::views;
     auto str_to_path = [](const std::string &str) { return fs::path{str}; };

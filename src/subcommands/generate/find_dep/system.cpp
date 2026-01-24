@@ -7,9 +7,9 @@
 #include <string>
 
 namespace catalyst::generate {
-std::optional<find_res> findSystemFromPkgConfig(const std::string &dep_name);
+std::optional<FindRes> findSystemFromPkgConfig(const std::string &dep_name);
 
-std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
+std::expected<FindRes, std::string> findSystem(const YAML::Node &dep) {
     auto dep_name = dep["name"].as<std::string>();
     catalyst::logger.log(LogLevel::DEBUG, "Resolving system dependency: {}", dep_name);
 
@@ -40,7 +40,7 @@ std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
         if (linkage == "static" || linkage == "shared") {
             libs = std::format(" -l{}", dep_name);
         }
-        return find_res{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
+        return FindRes{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
     }
 
     // Try pkg-config if not fully explicit
@@ -68,7 +68,7 @@ std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
 
         libs += " " + libs_val;
 
-        return find_res{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
+        return FindRes{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "pkg-config failed for {}, falling back to default paths.", dep_name);
@@ -95,13 +95,13 @@ std::expected<find_res, std::string> find_system(const YAML::Node &dep) {
     if (linkage == "static" || linkage == "shared") {
         libs += std::format(" -l{}", dep_name);
     }
-    return find_res{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
+    return FindRes{.lib_path = lib_path, .inc_path = inc_path, .libs = libs};
 }
 
-std::optional<find_res> findSystemFromPkgConfig(const std::string &dep_name) {
-    auto res_cflags = process_exec_stdout({"pkg-config", "--cflags", dep_name});
-    auto res_L = process_exec_stdout({"pkg-config", "--libs-only-L", dep_name});
-    auto res_l = process_exec_stdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name});
+std::optional<FindRes> findSystemFromPkgConfig(const std::string &dep_name) {
+    auto res_cflags = processExecStdout({"pkg-config", "--cflags", dep_name});
+    auto res_L = processExecStdout({"pkg-config", "--libs-only-L", dep_name});
+    auto res_l = processExecStdout({"pkg-config", "--libs-only-l", "--libs-only-other", dep_name});
 
     if (res_cflags && res_L && res_l) {
         std::string cflags_val = *res_cflags;
@@ -120,7 +120,7 @@ std::optional<find_res> findSystemFromPkgConfig(const std::string &dep_name) {
         catalyst::logger.log(
             LogLevel::DEBUG, "Resolved via pkg-config: cflags='{}' L='{}' l='{}'", cflags_val, L_val, l_val);
 
-        return find_res{.lib_path = L_val, .inc_path = cflags_val, .libs = l_val};
+        return FindRes{.lib_path = L_val, .inc_path = cflags_val, .libs = l_val};
     }
     return std::nullopt;
 }

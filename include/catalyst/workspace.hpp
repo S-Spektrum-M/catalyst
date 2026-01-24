@@ -16,21 +16,21 @@ struct WorkspaceMember {
 
 class Workspace {
 public:
-    static std::optional<Workspace> find_root(const std::filesystem::path& start_path = std::filesystem::current_path());
+    static std::optional<Workspace> findRoot(const std::filesystem::path& start_path = std::filesystem::current_path());
     static std::optional<Workspace> load(const std::filesystem::path& workspace_file);
 
-    const std::filesystem::path& get_root() const { return root_path; }
-    const std::unordered_map<std::string, WorkspaceMember>& get_members() const { return members; }
-    
+    const std::filesystem::path& getRoot() const { return root_path; }
+    const std::unordered_map<std::string, WorkspaceMember>& getMembers() const { return members; }
+
     // Check if a path is within the workspace
     bool contains(const std::filesystem::path& path) const;
-    
+
     // Get member by path (if it is a registered member)
-    std::optional<WorkspaceMember> get_member_by_path(const std::filesystem::path& path) const;
+    std::optional<WorkspaceMember> getMemberByPath(const std::filesystem::path& path) const;
 
     // Find member by package name (manifest.name)
     // Note: This involves loading configuration of members
-    std::optional<WorkspaceMember> find_package(const std::string& package_name) const;
+    std::optional<WorkspaceMember> findPackage(const std::string& package_name) const;
 
 private:
     std::filesystem::path root_path;

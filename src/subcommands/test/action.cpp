@@ -18,14 +18,14 @@ namespace fs = std::filesystem;
 namespace catalyst::test {
 
 std::string commandStr(const fs::path& executable_name, const std::vector<std::string> &params);
-std::expected<void, std::string> action(const parse_t &args) {
+std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Test subcommand invoked.");
 
     if (args.workspace) {
         fs::path current = fs::current_path();
         bool is_root = false;
         try {
-            is_root = fs::equivalent(args.workspace->get_root(), current);
+            is_root = fs::equivalent(args.workspace->getRoot(), current);
         } catch (...) {
             std::ignore;
         }
@@ -35,11 +35,11 @@ std::expected<void, std::string> action(const parse_t &args) {
             bool any_failed = false;
             std::string failed_members;
 
-            for (const auto &[name, member] : args.workspace->get_members()) {
+            for (const auto &[name, member] : args.workspace->getMembers()) {
                 catalyst::logger.log(LogLevel::INFO, "Testing member: {}", name);
                 fs::current_path(member.path);
 
-                parse_t member_args = args;
+                Parse member_args = args;
                 member_args.workspace = std::nullopt; // Prevent recursion loop
 
                 if (auto res = action(member_args); !res) {
@@ -60,7 +60,7 @@ std::expected<void, std::string> action(const parse_t &args) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    auto res = generate::profile_composition(profiles);
+    auto res = generate::profileComposition(profiles);
     if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
@@ -112,7 +112,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     exec_args.push_back(exe_path.string());
     exec_args.insert(exec_args.end(), args.params.begin(), args.params.end());
 
-    if (int res = catalyst::process_exec(std::move(exec_args)).value().get(); res) {
+    if (int res = catalyst::processExec(std::move(exec_args)).value().get(); res) {
         catalyst::logger.log(LogLevel::ERROR, "Command exited with code: {}", res);
         return std::unexpected(
             std::format("Target executable: {} exited with failure code: {}", exe_path.string(), res));

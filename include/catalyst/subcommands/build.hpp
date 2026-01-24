@@ -6,7 +6,7 @@
 #include "catalyst/workspace.hpp"
 
 namespace catalyst::build {
-struct parse_t {
+struct Parse {
     bool regen;
     bool force_rebuild;
     bool force_refetch;
@@ -17,6 +17,6 @@ struct parse_t {
     std::optional<Workspace> workspace;
 };
 
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app);
-std::expected<void, std::string> action(const parse_t &);
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
+std::expected<void, std::string> action(const Parse &);
 } // namespace catalyst::build

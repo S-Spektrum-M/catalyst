@@ -3,9 +3,9 @@
 #include <memory>
 
 namespace catalyst::download {
-std::pair<CLI::App *, std::unique_ptr<parse_t>> parse(CLI::App &app) {
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {
     auto download = app.add_subcommand("download", "Install a catalyst configured package from git.");
-    auto ret = std::make_unique<parse_t>();
+    auto ret = std::make_unique<Parse>();
     download->add_option("remote", ret->git_remote, "the remote to clone")->required();
     download->add_option("branch", ret->git_branch, "the branch to clone");
     download->add_option("-p,--profiles", ret->profiles, "the profiles to compose in the build artifact")

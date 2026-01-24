@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 namespace catalyst::run {
 std::string commandStr(const fs::path &executable_name, const std::vector<std::string> &params);
 
-std::expected<void, std::string> action(const parse_t &args) {
+std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Run subcommand invoked.");
     std::vector<std::string> profiles;
     if (args.profile != "common") {
@@ -27,7 +27,7 @@ std::expected<void, std::string> action(const parse_t &args) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     YAML::Node profile_comp;
-    std::expected<YAML::Node, std::string> res = generate::profile_composition(profiles);
+    std::expected<YAML::Node, std::string> res = generate::profileComposition(profiles);
     if (!res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to compose profiles: {}", res.error());
         return std::unexpected(res.error());
@@ -77,7 +77,7 @@ std::expected<void, std::string> action(const parse_t &args) {
 
     fs::path exe_path = fs::absolute(fs::path(std::format("{}/{}", build_dir, exe)));
     std::string command = commandStr(exe_path, args.params);
-    std::expected<std::string, std::string> lib_path_res = catalyst::generate::lib_path(profile_comp);
+    std::expected<std::string, std::string> lib_path_res = catalyst::generate::libPath(profile_comp);
     if (!lib_path_res) {
         return std::unexpected("Failed to generate LD_LIBRARY_PATH");
     }
@@ -95,7 +95,7 @@ std::expected<void, std::string> action(const parse_t &args) {
     exec_args.push_back(exe_path.string());
     exec_args.insert(exec_args.end(), args.params.begin(), args.params.end());
 
-    if (int res = catalyst::process_exec(std::move(exec_args)).value().get(); res) {
+    if (int res = catalyst::processExec(std::move(exec_args)).value().get(); res) {
         catalyst::logger.log(LogLevel::ERROR, "Target exited with code: {}", res);
         return std::unexpected(
             std::format("Target executable: {} exited with failure code: {}", exe_path.string(), res));

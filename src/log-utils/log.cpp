@@ -5,7 +5,7 @@
 
 namespace catalyst {
 
-const char *to_string(LogLevel level) {
+const char *toString(LogLevel level) {
     switch (level) {
         case LogLevel::DEBUG:
             return "DEBUG";
@@ -19,51 +19,51 @@ const char *to_string(LogLevel level) {
     return "UNKNOWN";
 }
 
-log_t::log_t() : log_file_{".catalyst.log", std::ios_base::app} {
+LogT::LogT() : log_file{".catalyst.log", std::ios_base::app} {
     auto now = std::chrono::system_clock::now();
     nlohmann::json j;
     j["event"] = "begin_session";
     j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
-    log_file_ << j.dump() << "\n";
+    log_file << j.dump() << "\n";
 }
 
-log_t::~log_t() {
+LogT::~LogT() {
     auto now = std::chrono::system_clock::now();
     // Destructor assumes single thread or end of life
     nlohmann::json j;
     j["event"] = "end_session";
     j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
-    log_file_ << j.dump() << "\n";
-    if (log_file_.is_open()) {
-        log_file_.close();
+    log_file << j.dump() << "\n";
+    if (log_file.is_open()) {
+        log_file.close();
     }
 }
 
-bool log_t::is_open() const {
-    std::lock_guard<std::mutex> lock(log_file_mutex_);
-    return log_file_.is_open();
+bool LogT::isOpen() const {
+    std::lock_guard<std::mutex> lock(log_file_mutex);
+    return log_file.is_open();
 }
 
-void log_t::flush() {
-    std::lock_guard<std::mutex> lock(log_file_mutex_);
-    log_file_.flush();
+void LogT::flush() const {
+    std::lock_guard<std::mutex> lock(log_file_mutex);
+    log_file.flush();
 }
 
-void log_t::close() {
-    std::lock_guard<std::mutex> lock(log_file_mutex_);
-    if (log_file_.is_open()) {
-        log_file_.close();
+void LogT::close() const {
+    std::lock_guard<std::mutex> lock(log_file_mutex);
+    if (log_file.is_open()) {
+        log_file.close();
     }
 }
 
-void log_t::log_impl(LogLevel level, const std::string &message) {
-    std::lock_guard<std::mutex> lock(log_file_mutex_);
-    if (!log_file_.is_open()) {
+void LogT::logImpl(LogLevel level, const std::string &message) const {
+    std::lock_guard<std::mutex> lock(log_file_mutex);
+    if (!log_file.is_open()) {
         return;
     }
 
     auto now = std::chrono::system_clock::now();
-    log_file_ << generate_json_log_event(now, level, message) << "\n";
+    log_file << generateJsonLogEvent(now, level, message) << "\n";
 
     if (verbose_logging || level != LogLevel::DEBUG) {
         const char *color = RESET;
@@ -85,21 +85,21 @@ void log_t::log_impl(LogLevel level, const std::string &message) {
         if (level == LogLevel::ERROR) {
             std::lock_guard<std::mutex> lock{stdio_mutex};
             std::cerr << std::format("[{:%Y-%m-%d %H:%M:%S}] ", now) << color
-                      << std::format("[{}] {}", to_string(level), message) << RESET << "\n";
+                      << std::format("[{}] {}", toString(level), message) << RESET << "\n";
         } else {
             std::lock_guard<std::mutex> lock{stdio_mutex};
             std::cout << std::format("[{:%Y-%m-%d %H:%M:%S}] ", now) << color
-                      << std::format("[{}] {}", to_string(level), message) << RESET << "\n";
+                      << std::format("[{}] {}", toString(level), message) << RESET << "\n";
         }
     }
 }
 
-std::string log_t::generate_json_log_event(const std::chrono::system_clock::time_point &now,
+std::string LogT::generateJsonLogEvent(const std::chrono::system_clock::time_point &now,
                                            LogLevel level,
                                            const std::string &message) {
     nlohmann::json j;
     j["timestamp"] = std::format("{:%Y-%m-%d %H:%M:%S}", now);
-    j["level"] = to_string(level);
+    j["level"] = toString(level);
     j["message"] = message;
     return j.dump();
 }

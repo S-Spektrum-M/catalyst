@@ -20,10 +20,10 @@ std::expected<void, std::string>
 fetchGit(std::string build_dir, std::string name, std::string source, std::string version);
 std::expected<void, std::string> fetchSystem(const std::string &name);
 
-std::expected<void, std::string> action(const parse_t &parse_args) {
+std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Fetch subcommand invoked.");
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    YAML_UTILS::Configuration config{parse_args.profiles};
+    yaml_utils::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-fetch hooks.");
     if (auto res = hooks::pre_fetch(config); !res) {
@@ -48,7 +48,7 @@ std::expected<void, std::string> action(const parse_t &parse_args) {
             auto source = dep["source"].as<std::string>();
 
             if (parse_args.workspace) {
-                if (auto member = parse_args.workspace->find_package(name)) {
+                if (auto member = parse_args.workspace->findPackage(name)) {
                     catalyst::logger.log(LogLevel::INFO, "Dependency '{}' found in workspace at '{}'. Linking...", name, member->path.string());
                     fs::path lib_path = fs::path(build_dir) / "catalyst-libs" / name;
 

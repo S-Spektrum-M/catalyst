@@ -78,7 +78,7 @@ std::pair<int, bool> parseCli(int argc, char **argv, catalyst::CliContext &ctx) 
     ctx.add_vcpkg_res = std::move(add_vcpkg_res);
 
     ctx.app.add_flag("-v,--version", ctx.show_version, "current version");
-    ctx.app.add_flag("-V,--verbose", catalyst::logger.verbose_logging, "verbose stdout logging output");
+    ctx.app.add_flag("-V,--verbose", catalyst::logger.getVerboseLogging(), "verbose stdout logging output");
 
     ctx.app.add_subcommand("help", "Display help information for a subcommand.")->callback([&]() {
         std::cout << ctx.app.help() << '\n';
