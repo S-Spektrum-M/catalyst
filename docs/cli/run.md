@@ -1,7 +1,7 @@
 # catalyst run
 
 ```
-run a dependency
+Run a built executable
 Usage: catalyst run [OPTIONS]
 
 Options:

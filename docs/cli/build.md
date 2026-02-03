@@ -6,13 +6,13 @@ Usage: catalyst build [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
-  -r,--no-regen               regenerate the build file
-  --force-rebuild             recompile dependencies
-  --force-refetch             refetch dependencies
+  -r,--regen                  Regenerate the build file
+  -b,--force-rebuild          Recompile dependencies
+  --force-refetch             Refetch dependencies
   --workspace,--all           Build all members in the workspace
   -P,--package TEXT           Build a specific package from the root
-  -p,--profiles TEXT ...      
-  -f,--features TEXT ...      
+  -p,--profiles TEXT ...      Profile composition to build (default: common)
+  -f,--features TEXT ...      Features to enable
 ```
 
 ## Details

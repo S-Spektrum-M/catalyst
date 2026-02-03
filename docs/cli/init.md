@@ -9,11 +9,10 @@ Options:
   -h,--help                   Print this help message and exit
   -n,--name TEXT              the name of the project
   --path TEXT                 the default path for the project
-  -t,--type ENUM:value in {binary->0,interface->3,sharedlib->2,staticlib->1} OR {0,3,2,1}
-                              the project type
+  -t,--type TEXT              the project type {binary, staticlib, sharedlib, interface}
   -v,--version TEXT           the project's version
   -d,--description TEXT       a description for the project
-  --provides TEXT             a list of provided libraries for this project.
+  --provides TEXT             Artifact provided by this project.
   --cc TEXT                   the c compiler to use
   --cxx TEXT                  the cxx compiler to use
   --ccflags TEXT              c compiler flags

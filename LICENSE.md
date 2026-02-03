@@ -170,3 +170,20 @@ incurred by, or claims asserted against, such Contributor by reason of your
 accepting any such warranty or additional liability.
 
 _END OF TERMS AND CONDITIONS_
+
+## License: yaml-cpp
+
+Copyright (c) 2008-2015 Jesse Beder.
+
+## License: cli11
+
+CLI11 2.6 Copyright (c) 2017-2026 University of Cincinnati, developed by Henry
+Schreiner under NSF AWARD 1414736. All rights reserved.
+
+## License: reproc
+
+Copyright (c) Daan De Meyer
+
+## License: nlohmann-json
+
+Copyright (c) 2013-2026 Niels Lohmann
