@@ -28,7 +28,7 @@ catalyst build
 ```
 
 This will:
-1.  Generate build files (using Ninja (ensure this is installed)).
+1.  Generate build files (using Ninja by default, or GNU Make).
 2.  Compile your source code.
 3.  Link the executable.
 
