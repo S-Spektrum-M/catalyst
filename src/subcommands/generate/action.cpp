@@ -76,8 +76,19 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         return std::unexpected("Failed to create object directory: " + obj_dir.string());
     }
 
-    std::string generator = config.get_string("meta.generator").value_or("cbe");
-    std::string build_filename = (generator == "ninja") ? "build.ninja" : "catalyst.build";
+    std::string generator = parse_args.backend;
+    if (generator.empty()) {
+        generator = config.get_string("meta.generator").value_or("cbe");
+    }
+
+    std::string build_filename;
+    if (generator == "ninja") {
+        build_filename = "build.ninja";
+    } else if (generator == "gmake" || generator == "make") {
+        build_filename = "Makefile";
+    } else {
+        build_filename = "catalyst.build";
+    }
 
     const fs::path buildfile_path = build_dir / build_filename;
     catalyst::logger.log(LogLevel::DEBUG, "Writing build file to: {}", buildfile_path.string());
@@ -97,6 +108,9 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
     if (generator == "ninja") {
         buildwriters::DerivedWriter<buildwriters::TargetType::Ninja> writer(buildfile);
+        generate_build(writer);
+    } else if (generator == "gmake" || generator == "make") {
+        buildwriters::DerivedWriter<buildwriters::TargetType::Make> writer(buildfile);
         generate_build(writer);
     } else {
         buildwriters::DerivedWriter<buildwriters::TargetType::CBE> writer(buildfile);

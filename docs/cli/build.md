@@ -13,6 +13,7 @@ Options:
   -P,--package TEXT           Build a specific package from the root
   -p,--profiles TEXT ...      Profile composition to build (default: common)
   -f,--features TEXT ...      Features to enable
+  --backend TEXT              Backend to use for generation (ninja, gmake, cbe)
 ```
 
 ## Details
@@ -51,6 +52,11 @@ catalyst build --force-rebuild
 **Enable features:**
 ```bash
 catalyst build --features logging
+```
+
+**Gmake backend:**
+```bash
+catalyst build --backend gmake
 ```
 
 **Disable features:**

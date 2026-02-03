@@ -15,6 +15,7 @@ struct Parse {
     std::string package;
     std::vector<std::string> profiles;
     std::vector<std::string> enabled_features;
+    std::string backend;
     std::optional<Workspace> workspace;
 };
 

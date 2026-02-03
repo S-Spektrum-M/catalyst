@@ -7,6 +7,7 @@ std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {
     auto ret = std::make_unique<Parse>();
     generate->add_option("-p,--profiles", ret->profiles);
     generate->add_option("-f,--features", ret->enabled_features);
+    generate->add_option("-b,--backend", ret->backend, "Backend to use for generation (ninja, gmake, cbe).");
     return {generate, std::move(ret)};
 }
 } // namespace catalyst::generate

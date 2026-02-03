@@ -17,6 +17,7 @@ std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {
         ->default_val(std::vector{"common"});
     build->add_option("-f,--features", ret->enabled_features, "Features to enable.")
         ->default_val(std::vector<std::string>{});
+    build->add_option("--backend", ret->backend, "Backend to use for generation (ninja, gmake, cbe).");
     return {build, std::move(ret)};
 }
 } // namespace catalyst::build

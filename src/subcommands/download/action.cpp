@@ -73,6 +73,7 @@ std::expected<void, std::string> action(const Parse &args) {
         .package = "",
         .profiles = args.profiles,
         .enabled_features = args.enabled_features,
+        .backend = "",
         .workspace = std::nullopt,
     };
 

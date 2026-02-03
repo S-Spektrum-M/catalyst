@@ -13,6 +13,7 @@ namespace catalyst::generate {
 struct Parse {
     std::vector<std::string> profiles;
     std::vector<std::string> enabled_features;
+    std::string backend;
 };
 
 struct FindRes {
@@ -98,7 +99,7 @@ enum class TargetType : std::uint8_t {
 template <TargetType Target_T> class DerivedWriter : public BaseWriter {
 private:
     static consteval bool isImplemented(TargetType t) {
-        return t == TargetType::Ninja || t == TargetType::CBE;
+        return t == TargetType::Ninja || t == TargetType::CBE || t == TargetType::Make;
     }
 
 #if __cplusplus >= 202602L

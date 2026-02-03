@@ -1,0 +1,96 @@
+#include "catalyst/subcommands/generate.hpp"
+
+#include <expected>
+#include <print>
+#include <string>
+#include <string_view>
+#include <regex>
+
+namespace catalyst::generate::buildwriters {
+
+static std::string translateNinjaToMake(std::string_view command) {
+    std::string result(command);
+    // 1. Replace $in and $out with placeholders
+    result = std::regex_replace(result, std::regex(R"(\$in\b)"), "___CATALYST_IN___");
+    result = std::regex_replace(result, std::regex(R"(\$out\b)"), "___CATALYST_OUT___");
+
+    // 2. Replace $var with $(var) for other variables
+    result = std::regex_replace(result, std::regex(R"(\$([a-zA-Z0-9_]+))"), "$$($1)");
+
+    // 3. Replace placeholders with their Make equivalents
+    result = std::regex_replace(result, std::regex("___CATALYST_IN___"), "$$(filter-out %.h %.hpp, $$^)");
+    result = std::regex_replace(result, std::regex("___CATALYST_OUT___"), "$$@");
+
+    return result;
+}
+
+
+
+static std::string escape(std::string_view str) {
+    std::string result;
+    for (char c : str) {
+        if (c == ' ') {
+            result.append("\\ ");
+        } else {
+            result.push_back(c);
+        }
+    }
+    return result;
+}
+
+template <>
+std::expected<void, std::string> DerivedWriter<TargetType::Make>::addVariable(std::string_view name,
+                                                                              std::string_view value) {
+    std::println(stream, "{} := {}", name, value);
+    return {};
+}
+
+template <>
+std::expected<void, std::string> DerivedWriter<TargetType::Make>::addRule(std::string_view name,
+                                                                          std::string_view command,
+                                                                          [[maybe_unused]] std::string_view description,
+                                                                          [[maybe_unused]] std::string_view depfile,
+                                                                          [[maybe_unused]] std::string_view deps) {
+    // In Make, we define a variable that holds the command.
+    std::println(stream, "{} = {}", name, translateNinjaToMake(command));
+    return {};
+}
+
+template <>
+std::expected<void, std::string>
+DerivedWriter<TargetType::Make>::addBuild(const std::vector<std::string> &outputs,
+                                          std::string_view rule,
+                                          const std::vector<std::string> &inputs,
+                                          const std::vector<std::string> &implicit_deps) {
+    if (outputs.empty()) return {};
+
+    for (const auto &out : outputs) {
+        std::print(stream, "{} ", escape(out));
+    }
+    std::print(stream, ":");
+    for (const auto &in : inputs) {
+        std::print(stream, " {}", escape(in));
+    }
+    if (!implicit_deps.empty()) {
+        std::print(stream, " |");
+        for (const auto &dep : implicit_deps) {
+            std::print(stream, " {}", escape(dep));
+        }
+    }
+    std::println(stream);
+    std::println(stream, "\t$({})", rule);
+    std::println(stream);
+    return {};
+}
+
+template <> void DerivedWriter<TargetType::Make>::addComment(std::string_view comment) {
+    std::println(stream, "# {}", comment);
+}
+
+template <> void DerivedWriter<TargetType::Make>::addDefault(std::string_view target) {
+    std::println(stream, ".DEFAULT_GOAL := {}", escape(target));
+    std::println(stream, "-include $(wildcard obj/*.d)");
+}
+
+template class DerivedWriter<TargetType::Make>;
+} // namespace catalyst::generate::buildwriters
