@@ -6,7 +6,7 @@ Currently, Catalyst must be built from source.
 
 - **CMake**: 3.20 or newer
 - **C++ Compiler**: Clang 16+ or GCC 13+ (Must support C++23)
-- **Build Backend**: Ninja (recommended) or GNU Make
+- **Build Backend**: CBE (recommended), Ninja, or GNU Make
 - **Git**
 
 ## Building from Source
