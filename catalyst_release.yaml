@@ -1,0 +1,4 @@
+manifest:
+  tooling:
+    CCFLAGS: -O3 -DNDEBUG --std=c++23 -Wall -Wextra -Wpedantic
+    CXXFLAGS: -O3 -DNDEBUG --std=c++23 -Wall -Wextra -Wpedantic
