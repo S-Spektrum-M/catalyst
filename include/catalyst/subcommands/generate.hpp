@@ -34,7 +34,7 @@ std::expected<FindRes, std::string> findVcpkg(const YAML::Node &dep);
 std::expected<FindRes, std::string> findGit(const std::string &build_dir, const YAML::Node &dep);
 
 std::expected<std::unordered_set<std::filesystem::path>, std::string>
-buildSourceSet(std::vector<std::string> source_dirs, const std::vector<std::string> &profiles);
+buildSourceSet(const std::vector<std::string> &source_dirs, const std::vector<std::string> &profiles);
 
 namespace buildwriters {
 
