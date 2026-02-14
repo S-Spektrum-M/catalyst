@@ -1,4 +1,5 @@
 #include "catalyst/subcommands/add.hpp"
+#include "catalyst/GLOBALS.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/clean.hpp"
 #include "catalyst/subcommands/download.hpp"
@@ -14,7 +15,7 @@
 
 namespace catalyst {
 struct CliContext {
-    CLI::App app{"Catalyst is a Modern Declarative C++ Build System."};
+    CLI::App app{"Catalyst " + CATALYST_VERSION + " is a Modern Declarative C++ Build System."};
     std::optional<Workspace> workspace;
     bool show_version{false};
     bool helped{false};
@@ -69,5 +70,5 @@ struct CliContext {
 };
 
 std::pair<int, bool> parseCli(int argc, char **argv, catalyst::CliContext &ctx);
-int dispatch(const catalyst::CliContext &ctx, const std::string &args_str);
+int dispatch(const catalyst::CliContext &ctx);
 } // namespace catalyst

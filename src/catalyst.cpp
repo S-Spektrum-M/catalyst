@@ -41,5 +41,5 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    return dispatch(ctx, args_str);
+    return dispatch(ctx);
 }
