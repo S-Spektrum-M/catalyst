@@ -1,5 +1,5 @@
-#include "catalyst/subcommands/add.hpp"
 #include "catalyst/GLOBALS.hpp"
+#include "catalyst/subcommands/add.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/clean.hpp"
 #include "catalyst/subcommands/download.hpp"

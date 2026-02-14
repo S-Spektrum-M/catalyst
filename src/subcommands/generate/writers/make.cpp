@@ -2,9 +2,9 @@
 
 #include <expected>
 #include <print>
+#include <regex>
 #include <string>
 #include <string_view>
-#include <regex>
 
 namespace catalyst::generate::buildwriters {
 
@@ -23,8 +23,6 @@ static std::string translateNinjaToMake(std::string_view command) {
 
     return result;
 }
-
-
 
 static std::string escape(std::string_view str) {
     std::string result;
@@ -62,7 +60,8 @@ DerivedWriter<TargetType::Make>::addBuild(const std::vector<std::string> &output
                                           std::string_view rule,
                                           const std::vector<std::string> &inputs,
                                           const std::vector<std::string> &implicit_deps) {
-    if (outputs.empty()) return {};
+    if (outputs.empty())
+        return {};
 
     for (const auto &out : outputs) {
         std::print(stream, "{} ", escape(out));

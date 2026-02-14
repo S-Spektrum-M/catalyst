@@ -232,8 +232,9 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
     if (!fs::exists(build_dir / build_filename) || parse_args.regen) {
         catalyst::logger.log(LogLevel::INFO, "Generating build files.");
-        auto res = catalyst::generate::action(
-            {.profiles = parse_args.profiles, .enabled_features = parse_args.enabled_features, .backend = parse_args.backend});
+        auto res = catalyst::generate::action({.profiles = parse_args.profiles,
+                                               .enabled_features = parse_args.enabled_features,
+                                               .backend = parse_args.backend});
         if (!res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to generate build files: {}", res.error());
             if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
