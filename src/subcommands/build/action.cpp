@@ -127,7 +127,7 @@ bool depMissing(const yaml_utils::Configuration &config) {
 
 std::expected<void, std::string> generateCompileCommands(const fs::path &build_dir, const std::string &generator) {
     if (generator != "ninja") {
-        if (auto res = catalyst::processExec({"cbe", "-d", build_dir, "--compdb"}); !res)
+        if (auto res = catalyst::processExec({"cbe", "-C", build_dir, "--compdb"}); !res)
             return std::unexpected(res.error());
         return {};
     }
@@ -266,12 +266,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Building project.");
-    std::vector<std::string> build_command;
-    if (generator == "ninja") {
-        build_command = {"ninja", "-C", build_dir};
-    } else {
-        build_command = {"cbe", "-d", build_dir};
-    }
+    std::vector<std::string> build_command = {generator, "-C", build_dir};
 
     if (int res = catalyst::processExec(std::move(build_command)).value().get(); res != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
