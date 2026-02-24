@@ -1,0 +1,63 @@
+common:
+  meta:
+    min_ver: 1.0.0
+  manifest:
+    name: catalyst
+    type: BINARY
+    version: 1.1.0
+    description: Catalyst is a Declarative Modern C++ Package Manager
+    provides: catalyst
+    tooling:
+      CC: clang
+      CXX: clang++
+      CCFLAGS: --std=c++23 -Wall -Wextra -Wpedantic
+      CXXFLAGS: --std=c++23 -Wall -Wextra -Wpedantic
+      FMT: clang-format
+    dirs:
+      include:
+        - include
+      source:
+        - src
+      build: build
+  dependencies:
+    - name: yaml-cpp
+      source: vcpkg
+      triplet: x64-linux
+      version: latest
+      using: []
+    - name: cli11
+      source: system
+      linkage: interface
+    - name: reproc
+      source: vcpkg
+      triplet: x64-linux
+      version: latest
+    - name: nlohmann-json
+      source: vcpkg
+      triplet: x64-linux
+      version: latest
+      linkage: interface
+ccache:
+  manifest:
+    tooling:
+      CC: ccache clang
+      CXX: ccache clang++
+test:
+  manifest:
+    name: catalyst_tests
+    provides: catalyst_tests
+    type: binary
+    dirs:
+      source:
+        - tests
+      build: build/test
+debug:
+  manifest:
+    tooling:
+      CCFLAGS: -g --std=c++23 -Wall -Wextra -Wpedantic
+      CXXFLAGS: -g --std=c++23 -Wall -Wextra -Wpedantic
+release:
+  manifest:
+    tooling:
+      CCFLAGS: -O3 -DNDEBUG --std=c++23 -Wall -Wextra -Wpedantic
+      CXXFLAGS: -O3 -DNDEBUG --std=c++23 -Wall -Wextra -Wpedantic
