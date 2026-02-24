@@ -1,9 +1,0 @@
-manifest:
-  name: catalyst_tests
-  provides: catalyst_tests
-  type: binary
-  dirs:
-    source:
-      # - src
-      - tests
-    build: build/test

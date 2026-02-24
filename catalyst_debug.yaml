@@ -1,4 +1,0 @@
-manifest:
-  tooling:
-    CCFLAGS: -g --std=c++23 -Wall -Wextra -Wpedantic
-    CXXFLAGS: -g --std=c++23 -Wall -Wextra -Wpedantic
