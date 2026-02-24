@@ -59,3 +59,31 @@ meta: null  # Removes 'meta' section entirely
 
 - **`common`**: The base profile (`catalyst.yaml`).
 - **`test`**: Automatically used by `catalyst test` (`catalyst_test.yaml`).
+
+## Centralized Definition
+
+For projects defining multiple profiles, managing multiple `catalyst_*.yaml` files can become cumbersome. Catalyst supports a centralized `CATALYST.yaml` file where all profiles can be defined in a single place.
+
+When `CATALYST.yaml` is present, Catalyst will prioritize loading profiles from it. If a profile is not found in `CATALYST.yaml`, it will fall back to looking for the corresponding `catalyst_<profile>.yaml` file.
+
+**Example `CATALYST.yaml`:**
+```yaml
+common:
+  manifest:
+    name: my-app
+    version: 1.0.0
+
+debug:
+  manifest:
+    tooling:
+      CXXFLAGS: "-g -O0 -DDEBUG"
+
+release:
+  manifest:
+    tooling:
+      CXXFLAGS: "-O3 -DNDEBUG"
+
+test:
+  manifest:
+    name: my-app-tests
+```

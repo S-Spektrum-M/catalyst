@@ -1,6 +1,8 @@
 # Configuration
 
-Catalyst projects are configured using YAML files. The primary configuration file is `catalyst.yaml`, which defines the `common` profile. Additional profiles can be defined in `catalyst_<profile>.yaml` files.
+Catalyst projects are configured using YAML files. The primary configuration file
+is `catalyst.yaml`, which defines the `common` profile. Additional profiles can be defined
+in `catalyst_<profile>.yaml` files.
 
 ## Schema Overview
 
@@ -100,3 +102,20 @@ hooks:
 ```
 
 See [Hooks](hooks.md) for the full list of available hooks.
+
+## Centralized Configuration
+
+For projects that will be defining multiple profiles, having multiple `catalyst_*.yaml` profile files is cumbersome to
+manage and pollutes the top level of the directory. Instead, these projects can opt to use a `CATALYST.yaml` for
+centralized configuration as such (for brevity, actual contents are omitted):
+
+```yaml
+common:
+    # what one would expect in a catalyst.yaml
+debug:
+    # what one would expect in a catalyst_debug.yaml
+release:
+    # what one would expect in a catalyst_release.yaml
+test:
+    # what one would expect in a catalyst_test.yaml
+```
