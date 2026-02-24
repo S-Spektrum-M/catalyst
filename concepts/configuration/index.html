@@ -979,6 +979,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#centralized-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centralized Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1255,6 +1266,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#centralized-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centralized Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1273,7 +1295,9 @@
 
 
 <h1 id="configuration">Configuration</h1>
-<p>Catalyst projects are configured using YAML files. The primary configuration file is <code>catalyst.yaml</code>, which defines the <code>common</code> profile. Additional profiles can be defined in <code>catalyst_&lt;profile&gt;.yaml</code> files.</p>
+<p>Catalyst projects are configured using YAML files. The primary configuration file
+is <code>catalyst.yaml</code>, which defines the <code>common</code> profile. Additional profiles can be defined
+in <code>catalyst_&lt;profile&gt;.yaml</code> files.</p>
 <h2 id="schema-overview">Schema Overview</h2>
 <p>A Catalyst profile configuration consists of several top-level sections:</p>
 <pre><code class="language-yaml">meta:        # Catalyst-specific metadata
@@ -1305,7 +1329,7 @@ hooks:       # Lifecycle scripts
 <td><code>generator</code></td>
 <td>String</td>
 <td><code>cbe</code></td>
-<td>The generator to use. Currently supported: <code>cbe, ninja</code></td>
+<td>The generator to use. Supported: <code>cbe</code> (default/recommended), <code>ninja</code>, <code>gmake</code> (or <code>make</code>).</td>
 </tr>
 </tbody>
 </table>
@@ -1453,6 +1477,19 @@ hooks:       # Lifecycle scripts
     - command: &quot;echo 'Starting build...'&quot;
 </code></pre>
 <p>See <a href="../hooks/">Hooks</a> for the full list of available hooks.</p>
+<h2 id="centralized-configuration">Centralized Configuration</h2>
+<p>For projects that will be defining multiple profiles, having multiple <code>catalyst_*.yaml</code> profile files is cumbersome to
+manage and pollutes the top level of the directory. Instead, these projects can opt to use a <code>CATALYST.yaml</code> for
+centralized configuration as such (for brevity, actual contents are omitted):</p>
+<pre><code class="language-yaml">common:
+    # what one would expect in a catalyst.yaml
+debug:
+    # what one would expect in a catalyst_debug.yaml
+release:
+    # what one would expect in a catalyst_release.yaml
+test:
+    # what one would expect in a catalyst_test.yaml
+</code></pre>
 
 
 

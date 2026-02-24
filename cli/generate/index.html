@@ -585,24 +585,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    catalyst generate
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -619,36 +601,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#details" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Details
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -1072,25 +1024,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#details" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Details
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -1107,16 +1040,17 @@
 
 
 <h1 id="catalyst-generate">catalyst generate</h1>
-<pre><code>generate a build script
-Usage: catalyst generate [OPTIONS]
-
-Options:
+<p>```
+generate a build script
+Usage: catalyst generate [OPTIONS]</p>
+<p>Options:
   -h,--help                   Print this help message and exit
-  -p,--profiles TEXT ...      
-  -f,--features TEXT ...      
-</code></pre>
-<h2 id="details">Details</h2>
-<p>This command translates the declarative YAML configuration into a concrete Ninja build plan. It resolves source files, include paths, compile flags, and dependency links. It is typically invoked automatically by <code>catalyst build</code>.</p>
+    -p,--profiles TEXT ...    <br />
+    -f,--features TEXT ...    <br />
+    -b,--backend TEXT           Backend to use for generation (ninja, gmake, cbe)
+  ```</p>
+<p>## Details</p>
+<p>This command translates the declarative YAML configuration into a concrete build plan (e.g., Ninja build file, Makefile, or CBE manifest). It resolves source files, include paths, compile flags, and dependency links. It is typically invoked automatically by <code>catalyst build</code>.</p>
 
 
 

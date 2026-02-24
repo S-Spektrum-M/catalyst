@@ -1134,7 +1134,6 @@ Usage: catalyst fetch [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
-  --workspace                 Link local workspace members if available
   --profiles TEXT ...         
 </code></pre>
 <h2 id="details">Details</h2>
@@ -1143,15 +1142,10 @@ Options:
 <li><strong>Git</strong>: Clones repositories.</li>
 <li><strong>Vcpkg</strong>: Installs packages.</li>
 <li><strong>System</strong>: Verifies presence via pkg-config.</li>
-<li><strong>Workspace</strong>: When <code>--workspace</code> is used, Catalyst checks if a dependency exists as a member of the current workspace. If found, it creates a symbolic link to the local folder instead of downloading the dependency.</li>
 </ul>
 <h2 id="examples">Examples</h2>
 <pre><code class="language-bash">catalyst fetch
 catalyst fetch --profiles debug
-</code></pre>
-<p><strong>Workspace fetch:</strong>
-Link local packages where possible.</p>
-<pre><code class="language-bash">catalyst fetch --workspace
 </code></pre>
 
 

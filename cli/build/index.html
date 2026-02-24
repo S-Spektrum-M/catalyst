@@ -1134,13 +1134,14 @@ Usage: catalyst build [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
-  -r,--no-regen               regenerate the build file
-  --force-rebuild             recompile dependencies
-  --force-refetch             refetch dependencies
+  -r,--regen                  Regenerate the build file
+  -b,--force-rebuild          Recompile dependencies
+  --force-refetch             Refetch dependencies
   --workspace,--all           Build all members in the workspace
   -P,--package TEXT           Build a specific package from the root
-  -p,--profiles TEXT ...      
-  -f,--features TEXT ...      
+  -p,--profiles TEXT ...      Profile composition to build (default: common)
+  -f,--features TEXT ...      Features to enable
+  --backend TEXT              Backend to use for generation (ninja, gmake, cbe)
 </code></pre>
 <h2 id="details">Details</h2>
 <p>When running with <code>--workspace</code> or <code>--all</code>, Catalyst determines the correct build order based on the dependencies between workspace members. It ensures that dependencies are built before the packages that rely on them.</p>
@@ -1164,6 +1165,9 @@ Build only the <code>app</code> package and its dependencies within the workspac
 </code></pre>
 <p><strong>Enable features:</strong></p>
 <pre><code class="language-bash">catalyst build --features logging
+</code></pre>
+<p><strong>Gmake backend:</strong></p>
+<pre><code class="language-bash">catalyst build --backend gmake
 </code></pre>
 <p><strong>Disable features:</strong></p>
 <pre><code class="language-bash">catalyst build --features no-logging
