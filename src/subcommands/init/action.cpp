@@ -102,6 +102,23 @@ int main(int argc, char **argv) {
     emmiter << node;
     profile_file << emmiter.c_str() << std::endl;
     catalyst::logger.log(LogLevel::DEBUG, "Init subcommand finished successfully.");
+
+    // has to be done like this because of templated dispatch and the fact that we want to
+    // emit multiple IDE configs if multiple ides are specified.
+    for (const Parse::IdeType &ide : parse_args.ides) {
+        std::function<std::expected<void, std::string>(const Parse &)> emit_fn;
+        switch (ide) {
+            case Parse::IdeType::vsc:
+                emit_fn = emitIDEConfig<Parse::IdeType::vsc>;
+                break;
+            case Parse::IdeType::clion:
+                emit_fn = emitIDEConfig<Parse::IdeType::clion>;
+                break;
+        }
+        if (auto res = emit_fn(parse_args); !res) {
+            return std::unexpected(res.error());
+        }
+    }
     return {};
 }
 
