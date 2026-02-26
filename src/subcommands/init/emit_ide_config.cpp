@@ -1,4 +1,5 @@
 #include "catalyst/log-utils/log.hpp"
+#include "catalyst/os_utils/os_defs.hpp"
 #include "catalyst/subcommands/init.hpp"
 
 #include <expected>
@@ -29,6 +30,30 @@ std::expected<std::ofstream, std::string> createFile(const fs::path &file_path, 
 template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generating VS Code IDE configuration");
 
+    catalyst::os_utils::OSInfo os_info{};
+    std::string os_str{"linux"};
+    std::string arch_str{"x64"};
+    std::string mi_mode{"gdb"};
+    std::string exe_ext;
+
+    if (os_info.os == catalyst::os_utils::OperatingSystem::Windows) {
+        os_str = "windows";
+        exe_ext = ".exe";
+    } else if (os_info.os == catalyst::os_utils::OperatingSystem::MacOS) {
+        os_str = "macos";
+        mi_mode = "lldb";
+    }
+
+    if (os_info.arch == catalyst::os_utils::Architecture::x86) {
+        arch_str = "x86";
+    } else if (os_info.arch == catalyst::os_utils::Architecture::ARM64) {
+        arch_str = "arm64";
+    } else if (os_info.arch == catalyst::os_utils::Architecture::ARM32) {
+        arch_str = "arm";
+    }
+
+    const std::string intellisense_mode = std::format("{}-clang-{}", os_str, arch_str);
+
     const fs::path vscode_dir{parse_args.path / ".vscode"};
     if (!fs::exists(vscode_dir)) {
         fs::create_directories(vscode_dir);
@@ -41,17 +66,18 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(
         if (!cpp_props) {
             return std::unexpected(cpp_props.error());
         }
-        *cpp_props << R"json({
+        *cpp_props << std::format(R"json({{
     "configurations": [
-        {
+        {{
             "name": "Catalyst",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
-            "intelliSenseMode": "linux-clang-x64"
-        }
+            "compileCommands": "${{workspaceFolder}}/build/compile_commands.json",
+            "intelliSenseMode": "{}"
+        }}
     ],
     "version": 4
-}
-)json";
+}}
+)json",
+                                  intellisense_mode);
     }
 
     // tasks.json
@@ -112,19 +138,19 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(
             "name": "Debug (Catalyst)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${{workspaceFolder}}/build/{}",
+            "program": "${{workspaceFolder}}/build/{}{}",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${{workspaceFolder}}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
+            "MIMode": "{}",
             "preLaunchTask": "catalyst build"
         }}
     ]
 }}
 )json",
-                               parse_args.name);
+                               parse_args.name, exe_ext, mi_mode);
     }
 
     // settings.json
@@ -147,6 +173,12 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(
 
 template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::clion>(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generating CLion IDE configuration");
+
+    catalyst::os_utils::OSInfo os_info{};
+    std::string exe_ext{""};
+    if (os_info.os == catalyst::os_utils::OperatingSystem::Windows) {
+        exe_ext = ".exe";
+    }
 
     const fs::path idea_dir{parse_args.path / ".idea"};
     const fs::path run_configs_dir{idea_dir / "runConfigurations"};
@@ -193,14 +225,14 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::clion
             return std::unexpected(run_xml.error());
         }
         *run_xml << std::format(R"xml(<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Catalyst Run/Debug" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="{0}" TARGET_NAME="{0}" CONFIG_NAME="{0}" version="1" RUN_PATH="$PROJECT_DIR$/build/{0}">
+  <configuration default="false" name="Catalyst Run/Debug" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="{0}" TARGET_NAME="{0}" CONFIG_NAME="{0}" version="1" RUN_PATH="$PROJECT_DIR$/build/{0}{1}">
     <method v="2">
       <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_catalyst build" />
     </method>
   </configuration>
 </component>
 )xml",
-                                parse_args.name);
+                                parse_args.name, exe_ext);
     }
 
     return {};
