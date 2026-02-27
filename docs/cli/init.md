@@ -20,7 +20,9 @@ Options:
   --include-dirs TEXT ...     include directories
   --source-dirs TEXT ...      source directories
   --build-dir TEXT            build directory
+  --ides TEXT ...             IDEs to generate project files for {vscode, clion}
   -p,--profile TEXT           the profile to initialize
+  --force-ide                 force emitting IDE config even if one already exists
 ```
 
 ## Examples
@@ -38,4 +40,9 @@ catalyst init --name my-lib --type staticlib --cxx g++-13
 **Create a debug profile:**
 ```bash
 catalyst init --profile debug --cxxflags "-g -O0"
+```
+
+**Create a project and generate IDE configurations:**
+```bash
+catalyst init --name my-tool --ides vscode clion
 ```

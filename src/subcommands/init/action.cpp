@@ -102,6 +102,10 @@ int main(int argc, char **argv) {
     emmiter << node;
     profile_file << emmiter.c_str() << std::endl;
     catalyst::logger.log(LogLevel::DEBUG, "Init subcommand finished successfully.");
+
+    if (auto res = invokeIDEConfigEmitters(parse_args); !res) {
+        return std::unexpected(res.error());
+    }
     return {};
 }
 
