@@ -1,21 +1,32 @@
-#include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/subcommands/run.hpp"
-
 #include <cctype>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <string>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/hooks.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/run.hpp"
 
 namespace fs = std::filesystem;
 
 namespace catalyst::run {
-std::string commandStr(const fs::path &executable_name, const std::vector<std::string> &params);
+
+namespace {
+std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
+    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
+    std::string command = executable;
+    for (const auto &param : params) {
+        command += " " + param;
+    }
+    return command;
+}
+} // namespace
 
 std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Run subcommand invoked.");
@@ -35,7 +46,7 @@ std::expected<void, std::string> action(const Parse &args) {
     profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-run hooks.");
-    if (std::expected<void, std::string> res = hooks::pre_run(profile_comp); !res) {
+    if (std::expected<void, std::string> res = hooks::preRun(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-run hook failed: {}", res.error());
         return res;
     }
@@ -102,7 +113,7 @@ std::expected<void, std::string> action(const Parse &args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-run hooks.");
-    if (std::expected<void, std::string> res = hooks::post_run(profile_comp); !res) {
+    if (std::expected<void, std::string> res = hooks::postRun(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-run hook failed: {}", res.error());
         return res;
     }
@@ -111,12 +122,4 @@ std::expected<void, std::string> action(const Parse &args) {
     return {};
 }
 
-std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
-    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
-    std::string command = executable;
-    for (const auto &param : params) {
-        command += " " + param;
-    }
-    return command;
-}
 } // namespace catalyst::run

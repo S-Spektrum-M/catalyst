@@ -1,7 +1,8 @@
 #pragma once
-#include <CLI/App.hpp>
 #include <expected>
 #include <string>
+
+#include <CLI/App.hpp>
 
 namespace catalyst::tidy {
 struct Parse {

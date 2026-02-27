@@ -1,5 +1,3 @@
-#include "catalyst/subcommands/generate.hpp"
-
 #include <algorithm>
 #include <expected>
 #include <print>
@@ -7,9 +5,10 @@
 #include <string_view>
 #include <vector>
 
-namespace catalyst::generate::buildwriters {
+#include "catalyst/subcommands/generate.hpp"
 
-static std::string escape(std::string_view str) {
+namespace {
+std::string escape(std::string_view str) {
     std::string result;
     result.reserve(str.size());
     for (char c : str) {
@@ -21,6 +20,9 @@ static std::string escape(std::string_view str) {
     }
     return result;
 }
+} // namespace
+
+namespace catalyst::generate::buildwriters {
 
 template <>
 std::expected<void, std::string> DerivedWriter<TargetType::CBE>::addVariable(std::string_view name,

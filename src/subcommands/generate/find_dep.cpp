@@ -1,9 +1,10 @@
-#include "catalyst/subcommands/generate.hpp"
-#include "yaml-cpp/node/node.h"
-
 #include <expected>
 #include <format>
 #include <string>
+
+#include "catalyst/subcommands/generate.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 using std::string;
 

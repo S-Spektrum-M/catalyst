@@ -1,13 +1,14 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
-
-#include <catalyst/hooks.hpp>
-#include <catalyst/subcommands/clean.hpp>
 #include <format>
 #include <string>
 #include <tuple>
+
+#include <catalyst/hooks.hpp>
+#include <catalyst/subcommands/clean.hpp>
 #include <yaml-cpp/node/node.h>
+
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::clean {
 namespace fs = std::filesystem;
@@ -62,7 +63,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-clean hooks.");
-    if (auto res = hooks::pre_clean(profile_comp); !res) {
+    if (auto res = hooks::preClean(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-clean hook failed: {}", res.error());
         return res;
     }
@@ -84,34 +85,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-clean hooks.");
-    if (auto res = hooks::post_clean(profile_comp); !res) {
-        catalyst::logger.log(LogLevel::ERROR, "Post-clean hook failed: {}", res.error());
-        return res;
-    }
-
-    catalyst::logger.log(LogLevel::DEBUG, "Clean subcommand finished successfully.");
-    return {};
-}
-
-std::expected<void, std::string> action2(const Parse &parse_args) {
-    catalyst::logger.log(LogLevel::DEBUG, "Clean subcommand invoked.");
-    yaml_utils::Configuration config{parse_args.profiles};
-
-    catalyst::logger.log(LogLevel::DEBUG, "Running pre-clean hooks.");
-    if (auto res = hooks::pre_clean(config); !res) {
-        catalyst::logger.log(LogLevel::ERROR, "Pre-clean hook failed: {}", res.error());
-        return res;
-    }
-
-    std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
-    catalyst::logger.log(LogLevel::DEBUG, "Cleaning build directory: {}", build_dir);
-    if (catalyst::processExec({"ninja", "-C", build_dir, "-t", "clean"}).value().get() != 0) {
-        catalyst::logger.log(LogLevel::ERROR, "Failed to clean project.");
-        return std::unexpected("error in cleaning.");
-    }
-
-    catalyst::logger.log(LogLevel::DEBUG, "Running post-clean hooks.");
-    if (auto res = hooks::post_clean(config); !res) {
+    if (auto res = hooks::postClean(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-clean hook failed: {}", res.error());
         return res;
     }

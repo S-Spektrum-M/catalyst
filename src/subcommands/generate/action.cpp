@@ -1,21 +1,26 @@
-#include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
-#include "yaml-cpp/node/node.h"
+#include <sys/wait.h>
 
 #include <expected>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include <sys/wait.h>
 #include <unordered_set>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/hooks.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/yaml_utils/configuration.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::generate {
 namespace fs = std::filesystem;
+
+namespace {
 
 void writeVariables(const catalyst::yaml_utils::Configuration &config,
                     catalyst::generate::buildwriters::BaseWriter &writer,
@@ -26,6 +31,8 @@ std::vector<std::string> intermediateTargets(catalyst::generate::buildwriters::B
 void finalTarget(const yaml_utils::Configuration &config,
                  const auto &object_files,
                  catalyst::generate::buildwriters::BaseWriter &writer);
+
+} // namespace
 
 std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
@@ -40,7 +47,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-generate hooks.");
-    if (auto res = hooks::pre_generate(config); !res) {
+    if (auto res = hooks::preGenerate(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-generate hook failed: {}", res.error());
         return res;
     }
@@ -126,7 +133,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     profile_comp_file << config.get_root();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-generate hooks.");
-    if (auto res = hooks::post_generate(config); !res) {
+    if (auto res = hooks::postGenerate(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-generate hook failed: {}", res.error());
         return res;
     }
@@ -134,6 +141,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     return {};
 }
 
+namespace {
 std::vector<std::string> intermediateTargets(catalyst::generate::buildwriters::BaseWriter &writer,
                                              const std::unordered_set<std::filesystem::path> &source_set) {
     catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
@@ -307,4 +315,6 @@ void writeRules(catalyst::generate::buildwriters::BaseWriter &writer) {
     writer.addRule("static_link", "ar rcs $out $in", "LINK $out");
     writer.addRule("shared_link", "$cxx -shared $in -o $out", "LINK $out");
 }
+} // namespace
+
 } // namespace catalyst::generate

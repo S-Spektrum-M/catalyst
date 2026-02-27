@@ -1,40 +1,16 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/yaml-utils/load_profile_file.hpp"
-#include "catalyst/yaml-utils/profile_write_back.hpp"
-#include "yaml-cpp/node/node.h"
-
-#include <catalyst/subcommands/add.hpp>
 #include <expected>
 #include <string>
 
-static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
-                                                              const catalyst::add::local::Parse &args);
+#include <catalyst/subcommands/add.hpp>
 
-namespace catalyst::add::local {
-std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &add) {
-    CLI::App *add_local = add.add_subcommand("local", "add a local dependency");
-    auto ret = std::make_unique<Parse>();
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/yaml_utils/load_profile_file.hpp"
+#include "catalyst/yaml_utils/profile_write_back.hpp"
 
-    add_local->add_option("name", ret->name)->required();
-    add_local->add_option("path", ret->path)->required();
-    add_local->add_option("-p,--profiles", ret->profiles);
-    add_local->add_option("-f,--features", ret->enabled_features);
+#include "yaml-cpp/node/node.h"
 
-    return {add_local, std::move(ret)};
-}
-
-std::expected<void, std::string> action(const Parse &parse_args) {
-    for (const auto &profile_name : parse_args.profiles) {
-        if (auto res = add_to_profile(profile_name, parse_args); !res)
-            return std::unexpected(res.error());
-    }
-    return {};
-}
-
-}; // namespace catalyst::add::local
-
-static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
-                                                              const catalyst::add::local::Parse &args) {
+namespace {
+std::expected<void, std::string> addToProfile(const std::string &profile, const catalyst::add::local::Parse &args) {
     auto res = catalyst::yaml_utils::loadProfileFile(profile);
     if (!res) {
         catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
@@ -72,3 +48,27 @@ static inline std::expected<void, std::string> add_to_profile(const std::string 
 
     return catalyst::yaml_utils::profileWriteBack(profile, profile_node);
 }
+} // namespace
+
+namespace catalyst::add::local {
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &add) {
+    CLI::App *add_local = add.add_subcommand("local", "add a local dependency");
+    auto ret = std::make_unique<Parse>();
+
+    add_local->add_option("name", ret->name)->required();
+    add_local->add_option("path", ret->path)->required();
+    add_local->add_option("-p,--profiles", ret->profiles);
+    add_local->add_option("-f,--features", ret->enabled_features);
+
+    return {add_local, std::move(ret)};
+}
+
+std::expected<void, std::string> action(const Parse &parse_args) {
+    for (const auto &profile_name : parse_args.profiles) {
+        if (auto res = addToProfile(profile_name, parse_args); !res)
+            return std::unexpected(res.error());
+    }
+    return {};
+}
+
+}; // namespace catalyst::add::local

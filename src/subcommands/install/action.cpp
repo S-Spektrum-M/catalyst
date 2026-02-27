@@ -1,12 +1,12 @@
-#include "catalyst/dir_gaurd.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/install.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
-
 #include <filesystem>
 #include <format>
 #include <string>
 #include <vector>
+
+#include "catalyst/dir_guard.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/subcommands/install.hpp"
+#include "catalyst/yaml_utils/configuration.hpp"
 
 namespace catalyst::install {
 namespace fs = std::filesystem;

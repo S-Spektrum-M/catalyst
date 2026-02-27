@@ -1,5 +1,4 @@
 #pragma once
-#include <CLI/App.hpp>
 #include <expected>
 #include <ostream>
 #include <stdexcept>
@@ -7,6 +6,8 @@
 #include <string_view>
 #include <unordered_set>
 #include <vector>
+
+#include <CLI/App.hpp>
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::generate {

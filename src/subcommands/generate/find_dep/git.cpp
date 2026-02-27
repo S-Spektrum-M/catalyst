@@ -1,12 +1,13 @@
-#include "catalyst/dir_gaurd.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "yaml-cpp/node/node.h"
-
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <string>
+
+#include "catalyst/dir_guard.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::generate {
 namespace fs = std::filesystem;

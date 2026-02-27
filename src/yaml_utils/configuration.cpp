@@ -1,8 +1,4 @@
-#include "catalyst/yaml-utils/Configuration.hpp"
-
-#include "catalyst/log-utils/log.hpp"
-#include "yaml-cpp/node/node.h"
-#include "yaml-cpp/node/parse.h"
+#include "catalyst/yaml_utils/configuration.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -15,7 +11,13 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/log_utils/log.hpp"
+
+#include "yaml-cpp/node/node.h"
+#include "yaml-cpp/node/parse.h"
 
 using catalyst::LogLevel;
 using catalyst::yaml_utils::Configuration;

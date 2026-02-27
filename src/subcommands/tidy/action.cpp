@@ -1,9 +1,3 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/subcommands/tidy.hpp"
-#include "yaml-cpp/node/node.h"
-
 #include <atomic>
 #include <deque>
 #include <expected>
@@ -15,6 +9,13 @@
 #include <thread>
 #include <unordered_set>
 #include <vector>
+
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/tidy.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::tidy {
 std::expected<void, std::string> action(const Parse &parse_args) {

@@ -1,8 +1,9 @@
 #pragma once
-#include <CLI/App.hpp>
 #include <expected>
 #include <string>
 #include <vector>
+
+#include <CLI/App.hpp>
 
 namespace catalyst::fmt {
 struct Parse {

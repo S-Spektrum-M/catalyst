@@ -1,10 +1,10 @@
 #pragma once
-#include "yaml-cpp/yaml.h"
-
 #include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
+
+#include "yaml-cpp/yaml.h"
 
 namespace catalyst::yaml_utils {
 class Configuration {

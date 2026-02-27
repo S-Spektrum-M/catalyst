@@ -1,14 +1,15 @@
-#include "catalyst/GLOBALS.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/init.hpp"
-#include "catalyst/yaml-utils/profile_write_back.hpp"
-
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <string>
+
 #include <yaml-cpp/node/node.h>
+
+#include "catalyst/globals.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/subcommands/init.hpp"
+#include "catalyst/yaml_utils/profile_write_back.hpp"
 
 namespace catalyst::init {
 

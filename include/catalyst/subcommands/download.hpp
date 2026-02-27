@@ -1,7 +1,8 @@
 #pragma once
-#include <CLI/App.hpp>
 #include <expected>
 #include <utility>
+
+#include <CLI/App.hpp>
 
 namespace catalyst::download {
 struct Parse {

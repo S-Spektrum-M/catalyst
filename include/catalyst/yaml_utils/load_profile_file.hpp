@@ -2,6 +2,7 @@
 #include <expected>
 #include <filesystem>
 #include <string>
+
 #include <yaml-cpp/yaml.h>
 
 namespace catalyst::yaml_utils {

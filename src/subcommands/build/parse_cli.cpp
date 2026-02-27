@@ -1,7 +1,8 @@
-#include "catalyst/subcommands/build.hpp"
+#include <vector>
 
 #include <CLI/App.hpp>
-#include <vector>
+
+#include "catalyst/subcommands/build.hpp"
 
 namespace catalyst::build {
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {

@@ -1,13 +1,13 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/ide_sync.hpp"
-#include "catalyst/subcommands/init.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
-
 #include <expected>
 #include <filesystem>
-#include <functional>
 #include <string>
+
 #include <yaml-cpp/node/node.h>
+
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/subcommands/ide_sync.hpp"
+#include "catalyst/subcommands/init.hpp"
+#include "catalyst/yaml_utils/configuration.hpp"
 
 namespace catalyst::ide_sync {
 

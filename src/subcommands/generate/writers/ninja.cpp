@@ -1,13 +1,12 @@
-#include "catalyst/subcommands/generate.hpp"
-
 #include <expected>
 #include <print>
 #include <string>
 #include <string_view>
 
-namespace catalyst::generate::buildwriters {
+#include "catalyst/subcommands/generate.hpp"
 
-static std::string escape(std::string_view str) {
+namespace {
+std::string escape(std::string_view str) {
     constexpr double ESCAPE_TUNING_FACTOR = 1.25;
     std::string result;
     result.reserve(static_cast<size_t>(str.size() * ESCAPE_TUNING_FACTOR)); // NOTE: allow some extra space for escape
@@ -34,7 +33,9 @@ static std::string escape(std::string_view str) {
     }
     return result;
 }
+} // namespace
 
+namespace catalyst::generate::buildwriters {
 template <>
 std::expected<void, std::string> DerivedWriter<TargetType::Ninja>::addVariable(std::string_view name,
                                                                                std::string_view value) {

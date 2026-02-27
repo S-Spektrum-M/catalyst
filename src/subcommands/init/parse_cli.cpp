@@ -1,11 +1,12 @@
-#include "catalyst/subcommands/init.hpp"
-
-#include <CLI/App.hpp>
-#include <CLI/Validators.hpp>
 #include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
+
+#include <CLI/App.hpp>
+#include <CLI/Validators.hpp>
+
+#include "catalyst/subcommands/init.hpp"
 
 namespace catalyst::init {
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {

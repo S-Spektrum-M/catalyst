@@ -1,9 +1,3 @@
-#include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/subcommands/test.hpp"
-
 #include <cctype>
 #include <expected>
 #include <filesystem>
@@ -11,13 +5,30 @@
 #include <string>
 #include <tuple>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/hooks.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/test.hpp"
 
 namespace fs = std::filesystem;
 
 namespace catalyst::test {
 
-std::string commandStr(const fs::path &executable_name, const std::vector<std::string> &params);
+namespace {
+std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
+    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
+    std::string command = executable;
+    for (const auto &param : params) {
+        command += " " + param;
+    }
+    return command;
+}
+} // namespace
+
 std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Test subcommand invoked.");
 
@@ -68,7 +79,7 @@ std::expected<void, std::string> action(const Parse &args) {
     profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-test hooks.");
-    if (auto res = hooks::pre_test(profile_comp); !res) {
+    if (auto res = hooks::preTest(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-test hook failed: {}", res.error());
         return res;
     }
@@ -119,7 +130,7 @@ std::expected<void, std::string> action(const Parse &args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-test hooks.");
-    if (auto res = hooks::post_test(profile_comp); !res) {
+    if (auto res = hooks::postTest(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-test hook failed: {}", res.error());
         return res;
     }
@@ -128,12 +139,4 @@ std::expected<void, std::string> action(const Parse &args) {
     return {};
 }
 
-std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
-    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
-    std::string command = executable;
-    for (const auto &param : params) {
-        command += " " + param;
-    }
-    return command;
-}
 } // namespace catalyst::test

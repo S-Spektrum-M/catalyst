@@ -1,11 +1,12 @@
 #pragma once
-#include "catalyst/workspace.hpp"
-
-#include <CLI/App.hpp>
 #include <expected>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <CLI/App.hpp>
+
+#include "catalyst/workspace.hpp"
 
 namespace catalyst::fetch {
 struct Parse {

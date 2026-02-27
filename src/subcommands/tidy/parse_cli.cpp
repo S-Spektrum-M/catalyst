@@ -1,7 +1,8 @@
-#include "catalyst/subcommands/tidy.hpp"
+#include <vector>
 
 #include <CLI/App.hpp>
-#include <vector>
+
+#include "catalyst/subcommands/tidy.hpp"
 
 namespace catalyst::tidy {
 

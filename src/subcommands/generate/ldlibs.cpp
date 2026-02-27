@@ -1,17 +1,42 @@
 // a helper function to just get ldlibs for use in run/action.cpp
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "yaml-cpp/yaml.h"
-
 #include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
+
+#include "yaml-cpp/yaml.h"
+
 namespace fs = std::filesystem;
 namespace catalyst::generate {
 
-std::string ld_filter(std::string &ldflags);
+namespace {
+std::string ld_filter(std::string &ldflags) {
+    std::stringstream ss(ldflags);
+    std::string item;
+    std::vector<std::string> tokens;
+    while (std::getline(ss, item, ' ')) {
+        if (item.rfind("-L", 0) == 0) {
+            tokens.push_back(fs::absolute(item.substr(2)).string());
+        }
+    }
+
+    std::string result;
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        result += tokens[i];
+        if (i < tokens.size() - 1) {
+#if defined(_WIN32)
+            result += ";";
+#else
+            result += ":";
+#endif
+        }
+    }
+    return result;
+}
+} // namespace
 
 // NOTE: used for run::action. Needs to be updated to use find_*.
 std::expected<std::string, std::string> libPath(const YAML::Node &profile) {
@@ -46,27 +71,4 @@ std::expected<std::string, std::string> libPath(const YAML::Node &profile) {
     return ld_filter(ldflags);
 }
 
-std::string ld_filter(std::string &ldflags) {
-    std::stringstream ss(ldflags);
-    std::string item;
-    std::vector<std::string> tokens;
-    while (std::getline(ss, item, ' ')) {
-        if (item.rfind("-L", 0) == 0) {
-            tokens.push_back(fs::absolute(item.substr(2)).string());
-        }
-    }
-
-    std::string result;
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        result += tokens[i];
-        if (i < tokens.size() - 1) {
-#if defined(_WIN32)
-            result += ";";
-#else
-            result += ":";
-#endif
-        }
-    }
-    return result;
-}
 } // namespace catalyst::generate

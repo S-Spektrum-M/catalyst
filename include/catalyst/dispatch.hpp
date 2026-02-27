@@ -1,4 +1,6 @@
-#include "catalyst/GLOBALS.hpp"
+#pragma once
+
+#include "catalyst/globals.hpp"
 #include "catalyst/subcommands/add.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/clean.hpp"

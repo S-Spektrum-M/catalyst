@@ -1,11 +1,11 @@
 #include "catalyst/dispatch.hpp"
 
-#include "catalyst/log-utils/log.hpp"
-
 #include <algorithm>
 #include <functional>
 #include <tuple>
 #include <utility>
+
+#include "catalyst/log_utils/log.hpp"
 
 namespace {
 std::string concatArgv(int argc, char **argv) {
@@ -17,6 +17,18 @@ std::string concatArgv(int argc, char **argv) {
 } // namespace
 
 namespace catalyst {
+
+namespace {
+template <typename ParseRes_T> int dispatchFN(const char *subc_name, const ParseRes_T &parse_res, auto fn) {
+    catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", subc_name);
+    if (std::expected<void, std::string> res = fn(parse_res); !res) {
+        catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
+        return 1;
+    }
+    return 0;
+}
+} // namespace
+
 std::pair<int, bool> parseCli(int argc, char **argv, catalyst::CliContext &ctx) {
     using std::tie, std::string_view;
 
@@ -66,15 +78,6 @@ std::pair<int, bool> parseCli(int argc, char **argv, catalyst::CliContext &ctx) 
         return {0, true};
 
     return {0, false};
-}
-
-template <typename ParseRes_T> int dispatchFN(const char *subc_name, const ParseRes_T &parse_res, auto fn) {
-    catalyst::logger.log(catalyst::LogLevel::DEBUG, "Executing {} subcommand", subc_name);
-    if (std::expected<void, std::string> res = fn(parse_res); !res) {
-        catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
-        return 1;
-    }
-    return 0;
 }
 
 int dispatch(const catalyst::CliContext &ctx) {

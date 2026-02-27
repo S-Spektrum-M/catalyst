@@ -1,14 +1,13 @@
-#include "catalyst/subcommands/generate.hpp"
-
 #include <expected>
 #include <print>
 #include <regex>
 #include <string>
 #include <string_view>
 
-namespace catalyst::generate::buildwriters {
+#include "catalyst/subcommands/generate.hpp"
 
-static std::string translateNinjaToMake(std::string_view command) {
+namespace {
+std::string translateNinjaToMake(std::string_view command) {
     std::string result(command);
     // 1. Replace $in and $out with placeholders
     result = std::regex_replace(result, std::regex(R"(\$in\b)"), "___CATALYST_IN___");
@@ -24,7 +23,7 @@ static std::string translateNinjaToMake(std::string_view command) {
     return result;
 }
 
-static std::string escape(std::string_view str) {
+std::string escape(std::string_view str) {
     std::string result;
     for (char c : str) {
         if (c == ' ') {
@@ -35,7 +34,9 @@ static std::string escape(std::string_view str) {
     }
     return result;
 }
+} // namespace
 
+namespace catalyst::generate::buildwriters {
 template <>
 std::expected<void, std::string> DerivedWriter<TargetType::Make>::addVariable(std::string_view name,
                                                                               std::string_view value) {
