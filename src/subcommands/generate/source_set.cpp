@@ -1,15 +1,17 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
+#include <sys/wait.h>
 
 #include <expected>
 #include <filesystem>
 #include <ranges>
 #include <regex>
 #include <string>
-#include <sys/wait.h>
 #include <unordered_set>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace fs = std::filesystem;
 

@@ -1,10 +1,11 @@
-#include "catalyst/subcommands/install.hpp"
-
-#include <CLI/App.hpp>
 #include <filesystem>
 #include <memory>
 #include <string>
 #include <utility>
+
+#include <CLI/App.hpp>
+
+#include "catalyst/subcommands/install.hpp"
 
 namespace catalyst::install {
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {

@@ -1,16 +1,17 @@
 #include "catalyst/process_exec.hpp"
 
-#include "reproc++/drain.hpp"
-#include "reproc++/reproc.hpp"
-
 #include <expected>
 #include <future>
 #include <optional>
-#include <reproc++/run.hpp>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <reproc++/run.hpp>
+
+#include "reproc++/drain.hpp"
+#include "reproc++/reproc.hpp"
 
 namespace catalyst {
 

@@ -1,14 +1,16 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
-#include "yaml-cpp/node/node.h"
-
-#include <catalyst/hooks.hpp>
 #include <expected>
 #include <format>
 #include <string>
 #include <vector>
+
+#include <catalyst/hooks.hpp>
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/yaml-utils/Configuration.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::hooks {
 

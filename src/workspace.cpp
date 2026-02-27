@@ -1,10 +1,11 @@
 #include "catalyst/workspace.hpp"
 
+#include <format>
+
+#include <yaml-cpp/yaml.h>
+
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
-
-#include <format>
-#include <yaml-cpp/yaml.h>
 
 namespace catalyst {
 

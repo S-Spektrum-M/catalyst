@@ -1,6 +1,6 @@
-#include "catalyst/subcommands/download.hpp"
-
 #include <memory>
+
+#include "catalyst/subcommands/download.hpp"
 
 namespace catalyst::download {
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {

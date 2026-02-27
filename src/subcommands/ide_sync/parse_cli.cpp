@@ -1,10 +1,11 @@
-#include "catalyst/subcommands/ide_sync.hpp"
-
-#include <CLI/App.hpp>
-#include <CLI/Validators.hpp>
 #include <map>
 #include <string>
 #include <vector>
+
+#include <CLI/App.hpp>
+#include <CLI/Validators.hpp>
+
+#include "catalyst/subcommands/ide_sync.hpp"
 
 namespace catalyst::ide_sync {
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app) {

@@ -1,10 +1,11 @@
 #pragma once
-#include "catalyst/yaml-utils/Configuration.hpp"
-#include "yaml-cpp/node/node.h"
-
 #include <expected>
 #include <filesystem>
 #include <string>
+
+#include "catalyst/yaml-utils/Configuration.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::hooks {
 std::expected<void, std::string> pre_clean(const YAML::Node &profile_comp);

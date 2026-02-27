@@ -1,13 +1,14 @@
-#include "catalyst/log-utils/log.hpp"
-
-#include <catalyst/yaml-utils/load_profile_file.hpp>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <string>
+
+#include <catalyst/yaml-utils/load_profile_file.hpp>
 #include <yaml-cpp/exceptions.h>
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/log-utils/log.hpp"
 
 namespace catalyst::yaml_utils {
 std::expected<YAML::Node, std::string> loadProfileFile(const std::string &profile,

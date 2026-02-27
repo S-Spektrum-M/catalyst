@@ -1,9 +1,10 @@
 #pragma once
-#include "catalyst/subcommands/init.hpp"
-
-#include <CLI/App.hpp>
 #include <expected>
 #include <utility>
+
+#include <CLI/App.hpp>
+
+#include "catalyst/subcommands/init.hpp"
 
 namespace catalyst::ide_sync {
 struct Parse {

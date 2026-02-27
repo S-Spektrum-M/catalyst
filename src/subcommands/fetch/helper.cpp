@@ -1,6 +1,3 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-
 #include <cstdlib>
 #include <expected>
 #include <filesystem>
@@ -10,7 +7,11 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.hpp"
 
 namespace catalyst::fetch {
 

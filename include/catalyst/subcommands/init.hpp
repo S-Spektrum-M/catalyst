@@ -1,9 +1,10 @@
 #pragma once
-#include <CLI/App.hpp>
 #include <expected>
 #include <filesystem>
 #include <string>
 #include <vector>
+
+#include <CLI/App.hpp>
 
 namespace catalyst::init {
 struct Parse {

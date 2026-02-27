@@ -1,14 +1,15 @@
-#include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/fetch.hpp"
-
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <iostream>
 #include <print>
 #include <string>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/hooks.hpp"
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/fetch.hpp"
 
 namespace catalyst::fetch {
 namespace fs = std::filesystem;

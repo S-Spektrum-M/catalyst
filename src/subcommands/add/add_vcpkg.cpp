@@ -1,12 +1,14 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/yaml-utils/load_profile_file.hpp"
-#include "catalyst/yaml-utils/profile_write_back.hpp"
-#include "yaml-cpp/node/node.h"
-
-#include <catalyst/subcommands/add.hpp>
 #include <expected>
 #include <string>
 #include <vector>
+
+#include <catalyst/subcommands/add.hpp>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/yaml-utils/load_profile_file.hpp"
+#include "catalyst/yaml-utils/profile_write_back.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
                                                               const catalyst::add::vcpkg::Parse &args);

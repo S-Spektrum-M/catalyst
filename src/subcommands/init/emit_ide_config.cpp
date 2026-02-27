@@ -1,12 +1,12 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/os_utils/os_defs.hpp"
-#include "catalyst/subcommands/init.hpp"
-
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <string>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/os_utils/os_defs.hpp"
+#include "catalyst/subcommands/init.hpp"
 
 namespace catalyst::init {
 
@@ -171,7 +171,9 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(
     ]
 }}
 )json",
-                               parse_args.name, exe_ext, mi_mode);
+                               parse_args.name,
+                               exe_ext,
+                               mi_mode);
     }
 
     // settings.json
@@ -253,7 +255,8 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::clion
   </configuration>
 </component>
 )xml",
-                                parse_args.name, exe_ext);
+                                parse_args.name,
+                                exe_ext);
     }
 
     return {};

@@ -1,16 +1,17 @@
-#include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/subcommands/run.hpp"
-
 #include <cctype>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <string>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/hooks.hpp"
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/run.hpp"
 
 namespace fs = std::filesystem;
 

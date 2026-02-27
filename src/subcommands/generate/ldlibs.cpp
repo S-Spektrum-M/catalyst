@@ -1,12 +1,13 @@
 // a helper function to just get ldlibs for use in run/action.cpp
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "yaml-cpp/yaml.h"
-
 #include <filesystem>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
+
+#include "yaml-cpp/yaml.h"
 
 namespace fs = std::filesystem;
 namespace catalyst::generate {

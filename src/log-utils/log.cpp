@@ -1,6 +1,7 @@
 #include "catalyst/log-utils/log.hpp"
 
 #include <iostream>
+
 #include <nlohmann/json.hpp>
 
 namespace catalyst {

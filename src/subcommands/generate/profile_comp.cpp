@@ -1,16 +1,19 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
-#include "yaml-cpp/node/node.h"
+#include <sys/wait.h>
 
 #include <exception>
 #include <expected>
 #include <filesystem>
 #include <stdexcept>
 #include <string>
-#include <sys/wait.h>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/yaml-utils/Configuration.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::generate {
 // NOTE: eventually get rid of all calls to profile_composition

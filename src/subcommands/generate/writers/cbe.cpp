@@ -1,11 +1,11 @@
-#include "catalyst/subcommands/generate.hpp"
-
 #include <algorithm>
 #include <expected>
 #include <print>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::generate::buildwriters {
 

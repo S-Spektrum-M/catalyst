@@ -1,11 +1,11 @@
 #include "catalyst/dispatch.hpp"
 
-#include "catalyst/log-utils/log.hpp"
-
 #include <algorithm>
 #include <functional>
 #include <tuple>
 #include <utility>
+
+#include "catalyst/log-utils/log.hpp"
 
 namespace {
 std::string concatArgv(int argc, char **argv) {

@@ -1,12 +1,13 @@
-#include "catalyst/globals.hpp"
-#include "catalyst/dispatch.hpp"
-#include "catalyst/log-utils/log.hpp"
-
-#include <CLI/App.hpp>
-#include <CLI/CLI.hpp>
 #include <format>
 #include <print>
 #include <string>
+
+#include <CLI/App.hpp>
+#include <CLI/CLI.hpp>
+
+#include "catalyst/dispatch.hpp"
+#include "catalyst/globals.hpp"
+#include "catalyst/log-utils/log.hpp"
 
 namespace {
 std::string concatArgv(int argc, char **argv) {

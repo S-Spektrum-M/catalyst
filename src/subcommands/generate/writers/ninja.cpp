@@ -1,9 +1,9 @@
-#include "catalyst/subcommands/generate.hpp"
-
 #include <expected>
 #include <print>
 #include <string>
 #include <string_view>
+
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::generate::buildwriters {
 

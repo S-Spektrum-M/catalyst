@@ -1,18 +1,21 @@
-#include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
-#include "yaml-cpp/node/node.h"
+#include <sys/wait.h>
 
 #include <expected>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include <sys/wait.h>
 #include <unordered_set>
 #include <vector>
+
 #include <yaml-cpp/yaml.h>
+
+#include "catalyst/hooks.hpp"
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/subcommands/generate.hpp"
+#include "catalyst/yaml-utils/Configuration.hpp"
+
+#include "yaml-cpp/node/node.h"
 
 namespace catalyst::generate {
 namespace fs = std::filesystem;

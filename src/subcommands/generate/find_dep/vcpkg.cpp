@@ -1,13 +1,14 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
+#include <unistd.h>
 
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <string>
-#include <unistd.h>
 #include <unordered_map>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::generate {
 std::expected<FindRes, std::string> findVcpkg(const YAML::Node &dep) {

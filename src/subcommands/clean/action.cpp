@@ -1,13 +1,14 @@
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/process_exec.hpp"
-#include "catalyst/subcommands/generate.hpp"
-
-#include <catalyst/hooks.hpp>
-#include <catalyst/subcommands/clean.hpp>
 #include <format>
 #include <string>
 #include <tuple>
+
+#include <catalyst/hooks.hpp>
+#include <catalyst/subcommands/clean.hpp>
 #include <yaml-cpp/node/node.h>
+
+#include "catalyst/log-utils/log.hpp"
+#include "catalyst/process_exec.hpp"
+#include "catalyst/subcommands/generate.hpp"
 
 namespace catalyst::clean {
 namespace fs = std::filesystem;
