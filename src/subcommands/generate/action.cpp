@@ -47,7 +47,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-generate hooks.");
-    if (auto res = hooks::pre_generate(config); !res) {
+    if (auto res = hooks::preGenerate(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-generate hook failed: {}", res.error());
         return res;
     }
@@ -133,7 +133,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     profile_comp_file << config.get_root();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-generate hooks.");
-    if (auto res = hooks::post_generate(config); !res) {
+    if (auto res = hooks::postGenerate(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-generate hook failed: {}", res.error());
         return res;
     }

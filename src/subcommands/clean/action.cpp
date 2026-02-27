@@ -63,7 +63,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-clean hooks.");
-    if (auto res = hooks::pre_clean(profile_comp); !res) {
+    if (auto res = hooks::preClean(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-clean hook failed: {}", res.error());
         return res;
     }
@@ -85,7 +85,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-clean hooks.");
-    if (auto res = hooks::post_clean(profile_comp); !res) {
+    if (auto res = hooks::postClean(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-clean hook failed: {}", res.error());
         return res;
     }

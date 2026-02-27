@@ -46,7 +46,7 @@ std::expected<void, std::string> action(const Parse &args) {
     profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-run hooks.");
-    if (std::expected<void, std::string> res = hooks::pre_run(profile_comp); !res) {
+    if (std::expected<void, std::string> res = hooks::preRun(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-run hook failed: {}", res.error());
         return res;
     }
@@ -113,7 +113,7 @@ std::expected<void, std::string> action(const Parse &args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-run hooks.");
-    if (std::expected<void, std::string> res = hooks::post_run(profile_comp); !res) {
+    if (std::expected<void, std::string> res = hooks::postRun(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-run hook failed: {}", res.error());
         return res;
     }

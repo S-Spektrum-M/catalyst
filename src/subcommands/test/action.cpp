@@ -79,7 +79,7 @@ std::expected<void, std::string> action(const Parse &args) {
     profile_comp = res.value();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-test hooks.");
-    if (auto res = hooks::pre_test(profile_comp); !res) {
+    if (auto res = hooks::preTest(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-test hook failed: {}", res.error());
         return res;
     }
@@ -130,7 +130,7 @@ std::expected<void, std::string> action(const Parse &args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-test hooks.");
-    if (auto res = hooks::post_test(profile_comp); !res) {
+    if (auto res = hooks::postTest(profile_comp); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-test hook failed: {}", res.error());
         return res;
     }

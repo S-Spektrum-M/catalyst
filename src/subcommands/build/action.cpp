@@ -221,9 +221,9 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     yaml_utils::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::INFO, "Running pre-build hooks.");
-    if (auto res = hooks::pre_build(config); !res) {
+    if (auto res = hooks::preBuild(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-build hook failed: {}", res.error());
-        if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
+        if (auto hook_res = hooks::onBuildFailure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(res.error() +
                                    "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
@@ -242,7 +242,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
                                                .backend = parse_args.backend});
         if (!res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to generate build files: {}", res.error());
-            if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
+            if (auto hook_res = hooks::onBuildFailure(config); !hook_res) {
                 catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
                 return std::unexpected(
                     res.error() + "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
@@ -261,7 +261,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         if (auto res = catalyst::fetch::action({.profiles = parse_args.profiles, .workspace = parse_args.workspace});
             !res) {
             catalyst::logger.log(LogLevel::ERROR, "Failed to fetch dependencies: {}", res.error());
-            if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
+            if (auto hook_res = hooks::onBuildFailure(config); !hook_res) {
                 catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
                 return std::unexpected(
                     res.error() + "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
@@ -275,7 +275,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
     if (int res = catalyst::processExec(std::move(build_command)).value().get(); res != 0) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to build project.");
-        if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
+        if (auto hook_res = hooks::onBuildFailure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(
                 "Failed to build project.\nAdditionally, the on_build_failure hook failed with error: " +
@@ -287,7 +287,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generating compile commands.");
     if (auto res = generateCompileCommands(build_dir, generator); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Failed to generate compile commands: {}", res.error());
-        if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
+        if (auto hook_res = hooks::onBuildFailure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(res.error() +
                                    "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());
@@ -296,9 +296,9 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::INFO, "Running post-build hooks.");
-    if (auto res = hooks::post_build(config); !res) {
+    if (auto res = hooks::postBuild(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-build hook failed: {}", res.error());
-        if (auto hook_res = hooks::on_build_failure(config); !hook_res) {
+        if (auto hook_res = hooks::onBuildFailure(config); !hook_res) {
             catalyst::logger.log(LogLevel::ERROR, "on_build_failure hook failed: {}", hook_res.error());
             return std::unexpected(res.error() +
                                    "\nAdditionally, the on_build_failure hook failed with error: " + hook_res.error());

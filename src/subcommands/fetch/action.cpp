@@ -125,7 +125,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     yaml_utils::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-fetch hooks.");
-    if (auto res = hooks::pre_fetch(config); !res) {
+    if (auto res = hooks::preFetch(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Pre-fetch hook failed: {}", res.error());
         return res;
     }
@@ -219,7 +219,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-fetch hooks.");
-    if (auto res = hooks::post_fetch(config); !res) {
+    if (auto res = hooks::postFetch(config); !res) {
         catalyst::logger.log(LogLevel::ERROR, "Post-fetch hook failed: {}", res.error());
         return res;
     }
