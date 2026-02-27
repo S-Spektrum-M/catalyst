@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../generate/">
+        <link rel="prev" href="../ide_sync/">
       
       
         <link rel="next" href="../install/">
@@ -601,6 +601,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../ide_sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    catalyst ide_sync
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1126,7 +1154,9 @@ Options:
   --include-dirs TEXT ...     include directories
   --source-dirs TEXT ...      source directories
   --build-dir TEXT            build directory
+  --ides TEXT ...             IDEs to generate project files for {vscode, clion}
   -p,--profile TEXT           the profile to initialize
+  --force-ide                 force emitting IDE config even if one already exists
 </code></pre>
 <h2 id="examples">Examples</h2>
 <p><strong>Create a basic binary project:</strong></p>
@@ -1137,6 +1167,9 @@ Options:
 </code></pre>
 <p><strong>Create a debug profile:</strong></p>
 <pre><code class="language-bash">catalyst init --profile debug --cxxflags &quot;-g -O0&quot;
+</code></pre>
+<p><strong>Create a project and generate IDE configurations:</strong></p>
+<pre><code class="language-bash">catalyst init --name my-tool --ides vscode clion
 </code></pre>
 
 
