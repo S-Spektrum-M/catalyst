@@ -29,7 +29,7 @@ struct Parse {
     } dirs;
     std::string profile{"common"}; // only allow initializing one profile at a time.
     std::vector<Parse::IdeType> ides;
-    bool force_emit_ide;
+    bool force_emit_ide{false};
 };
 
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
