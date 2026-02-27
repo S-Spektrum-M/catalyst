@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 
 namespace catalyst::os_utils {
