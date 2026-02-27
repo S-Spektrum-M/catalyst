@@ -19,7 +19,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     const fs::path root_dir = fs::current_path();
 
     const auto config = catalyst::utils::yaml::Configuration(parse_args.profiles);
-    const auto &profile_node = config.get_root();
+    const auto &profile_node = config.getRoot();
 
     if (!profile_node["manifest"] || !profile_node["manifest"]["name"]) {
         return std::unexpected("Invalid profile: missing manifest.name in common profile.");

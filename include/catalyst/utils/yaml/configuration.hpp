@@ -15,12 +15,12 @@ public:
 
     bool has(const std::string &key) const;
 
-    std::optional<std::string> get_string(const std::string &key) const;
-    std::optional<int> get_int(const std::string &key) const;
-    std::optional<bool> get_bool(const std::string &key) const;
-    std::optional<std::vector<std::string>> get_string_vector(const std::string &key) const;
+    std::optional<std::string> getString(const std::string &key) const;
+    std::optional<int> getInt(const std::string &key) const;
+    std::optional<bool> getBool(const std::string &key) const;
+    std::optional<std::vector<std::string>> getStringVector(const std::string &key) const;
 
-    const YAML::Node &get_root() const & {
+    const YAML::Node &getRoot() const & {
         return root;
     }
 

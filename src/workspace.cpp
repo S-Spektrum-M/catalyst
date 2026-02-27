@@ -98,7 +98,7 @@ std::optional<WorkspaceMember> Workspace::findPackage(const std::string &package
                 profiles.emplace_back("common");
 
             utils::yaml::Configuration config(profiles, member.path);
-            auto name_opt = config.get_string("manifest.name");
+            auto name_opt = config.getString("manifest.name");
             if (name_opt && *name_opt == package_name) {
                 return member;
             }

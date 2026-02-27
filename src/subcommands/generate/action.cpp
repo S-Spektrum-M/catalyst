@@ -55,7 +55,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     fs::path current_dir = fs::current_path();
     std::vector<std::string> relative_source_dirs;
     std::vector<std::string> absolute_source_dirs;
-    auto source_dirs_res = config.get_string_vector("manifest.dirs.source");
+    auto source_dirs_res = config.getStringVector("manifest.dirs.source");
     if (!source_dirs_res) {
         return std::unexpected("Unable to get value for manifest.dirs.source");
     }
@@ -73,7 +73,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
     std::unordered_set<std::filesystem::path> source_set = source_set_res.value();
 
-    fs::path build_dir = config.get_string("manifest.dirs.build").value();
+    fs::path build_dir = config.getString("manifest.dirs.build").value();
     fs::path obj_dir = build_dir / "obj";
 
     catalyst::logger.log(LogLevel::DEBUG, "Creating object directory: {}", obj_dir.string());
@@ -85,7 +85,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
     std::string generator = parse_args.backend;
     if (generator.empty()) {
-        generator = config.get_string("meta.generator").value_or("cbe");
+        generator = config.getString("meta.generator").value_or("cbe");
     }
 
     std::string build_filename;
@@ -130,7 +130,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     if (!profile_comp_file) {
         return std::unexpected("Failed to open profile_composition.yaml for writing in " + build_dir.string());
     }
-    profile_comp_file << config.get_root();
+    profile_comp_file << config.getRoot();
 
     catalyst::logger.log(LogLevel::DEBUG, "Running post-generate hooks.");
     if (auto res = hooks::postGenerate(config); !res) {
@@ -167,7 +167,7 @@ void finalTarget(const utils::yaml::Configuration &config,
                  catalyst::generate::buildwriters::BaseWriter &writer) {
     catalyst::logger.log(LogLevel::DEBUG, "Generating final target.");
     // Build edge for the final target
-    std::string type = config.get_string("manifest.type").value_or("BINARY");
+    std::string type = config.getString("manifest.type").value_or("BINARY");
     std::string target_prefix;
     std::string target_suffix;
     std::string link_rule;
@@ -200,7 +200,7 @@ void finalTarget(const utils::yaml::Configuration &config,
 #endif
     }
 
-    std::string target_name = config.get_string("manifest.name").value_or("name");
+    std::string target_name = config.getString("manifest.name").value_or("name");
     fs::path target_path{target_prefix + target_name + target_suffix};
     catalyst::logger.log(LogLevel::DEBUG, "Final target name: {}", target_path.string());
     writer.addComment("Build edge for the final target");
@@ -216,17 +216,17 @@ void writeVariables(const catalyst::utils::yaml::Configuration &config,
                     const std::vector<std::string> &enabled_features) {
 
     catalyst::logger.log(LogLevel::DEBUG, "Writing variables to build file.");
-    std::string build_dir_str = config.get_string("manifest.dirs.build").value_or("build");
+    std::string build_dir_str = config.getString("manifest.dirs.build").value_or("build");
 
     std::string cxxflags =
         std::format(R"({} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME="{}" -DCATALYST_PROJ_VER="{}")",
-                    config.get_string("manifest.tooling.CXXFLAGS").value_or(""),
-                    config.get_string("manifest.name").value_or("name"),
-                    config.get_string("manifest.version").value_or("0.0.0"));
+                    config.getString("manifest.tooling.CXXFLAGS").value_or(""),
+                    config.getString("manifest.name").value_or("name"),
+                    config.getString("manifest.version").value_or("0.0.0"));
     std::string ccflags = std::format(R"({} -DCATALYST_BUILD_SYS=1 -DCATALYST_PROJ_NAME="{}" -DCATALYST_PROJ_VER="{}")",
-                                      config.get_string("manifest.tooling.CCFLAGS").value_or(""),
-                                      config.get_string("manifest.name").value_or("name"),
-                                      config.get_string("manifest.version").value_or("0.0.0"));
+                                      config.getString("manifest.tooling.CCFLAGS").value_or(""),
+                                      config.getString("manifest.name").value_or("name"),
+                                      config.getString("manifest.version").value_or("0.0.0"));
     std::string ldflags = "-Lcatalyst-libs";
 
     if (const char *vcpkg_root = std::getenv("VCPKG_ROOT"); vcpkg_root != nullptr) {
@@ -244,7 +244,7 @@ void writeVariables(const catalyst::utils::yaml::Configuration &config,
         logger.log(LogLevel::WARN, "VCPKG_ROOT environment variable is not defined.");
     }
 
-    if (const auto &features_node = config.get_root()["features"]; features_node && features_node.IsSequence()) {
+    if (const auto &features_node = config.getRoot()["features"]; features_node && features_node.IsSequence()) {
         for (const auto &feature_map : features_node) {
             if (feature_map.IsMap()) {
                 for (auto it = feature_map.begin(); it != feature_map.end(); ++it) {
@@ -264,7 +264,7 @@ void writeVariables(const catalyst::utils::yaml::Configuration &config,
                     }
 
                     std::string flag = std::format(" -DFF_{}__{}={}",
-                                                   config.get_string("manifest.name").value_or("name"),
+                                                   config.getString("manifest.name").value_or("name"),
                                                    feature,
                                                    is_enabled ? "1" : "0");
                     cxxflags += flag;
@@ -275,14 +275,14 @@ void writeVariables(const catalyst::utils::yaml::Configuration &config,
         }
     }
 
-    std::vector<std::string> inc_dirs = config.get_string_vector("manifest.dirs.include").value();
+    std::vector<std::string> inc_dirs = config.getStringVector("manifest.dirs.include").value();
     for (const auto &inc_dir : inc_dirs) {
         cxxflags += std::format(" -I{}", fs::absolute(inc_dir).string());
         ccflags += std::format(" -I{}", fs::absolute(inc_dir).string());
     }
 
     std::string ldlibs;
-    for (const auto &dep : config.get_root()["dependencies"]) {
+    for (const auto &dep : config.getRoot()["dependencies"]) {
         auto find_dep_res = findDep(build_dir_str, dep);
         if (!find_dep_res) {
             catalyst::logger.log(LogLevel::ERROR, "{}", find_dep_res.error());
@@ -296,8 +296,8 @@ void writeVariables(const catalyst::utils::yaml::Configuration &config,
     }
 
     writer.addComment("Variables");
-    writer.addVariable("cc", config.get_string("manifest.tooling.CC").value_or("clang"));
-    writer.addVariable("cxx", config.get_string("manifest.tooling.CXX").value_or("clang++"));
+    writer.addVariable("cc", config.getString("manifest.tooling.CC").value_or("clang"));
+    writer.addVariable("cxx", config.getString("manifest.tooling.CXX").value_or("clang++"));
     writer.addVariable("cxxflags", cxxflags);
     writer.addVariable("cflags", ccflags);
     writer.addVariable("ldflags", ldflags);

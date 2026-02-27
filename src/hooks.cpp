@@ -88,63 +88,63 @@ std::expected<void, std::string> postTest(const YAML::Node &profile_comp) {
 }
 
 std::expected<void, std::string> preBuild(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-build");
+    return executeHook(profile_comp.getRoot(), "pre-build");
 }
 
 std::expected<void, std::string> postBuild(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-build");
+    return executeHook(profile_comp.getRoot(), "post-build");
 }
 
 std::expected<void, std::string> onBuildFailure(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "on-build-failure");
+    return executeHook(profile_comp.getRoot(), "on-build-failure");
 }
 
 std::expected<void, std::string> preGenerate(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-generate");
+    return executeHook(profile_comp.getRoot(), "pre-generate");
 }
 
 std::expected<void, std::string> postGenerate(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-generate");
+    return executeHook(profile_comp.getRoot(), "post-generate");
 }
 
 std::expected<void, std::string> preFetch(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-fetch");
+    return executeHook(profile_comp.getRoot(), "pre-fetch");
 }
 
 std::expected<void, std::string> postFetch(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-fetch");
+    return executeHook(profile_comp.getRoot(), "post-fetch");
 }
 
 std::expected<void, std::string> preClean(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-clean");
+    return executeHook(profile_comp.getRoot(), "pre-clean");
 }
 
 std::expected<void, std::string> postClean(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-clean");
+    return executeHook(profile_comp.getRoot(), "post-clean");
 }
 
 std::expected<void, std::string> preRun(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-run");
+    return executeHook(profile_comp.getRoot(), "pre-run");
 }
 
 std::expected<void, std::string> postRun(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-run");
+    return executeHook(profile_comp.getRoot(), "post-run");
 }
 
 std::expected<void, std::string> preTest(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-test");
+    return executeHook(profile_comp.getRoot(), "pre-test");
 }
 
 std::expected<void, std::string> postTest(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-test");
+    return executeHook(profile_comp.getRoot(), "post-test");
 }
 
 std::expected<void, std::string> preLink(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "pre-link");
+    return executeHook(profile_comp.getRoot(), "pre-link");
 }
 
 std::expected<void, std::string> postLink(const utils::yaml::Configuration &profile_comp) {
-    return executeHook(profile_comp.get_root(), "post-link");
+    return executeHook(profile_comp.getRoot(), "post-link");
 }
 
 std::expected<void, std::string> onCompile([[maybe_unused]] const std::filesystem::path &file) {

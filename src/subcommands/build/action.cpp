@@ -43,7 +43,7 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
                 profiles.emplace_back("common");
 
             utils::yaml::Configuration config(profiles, member.path);
-            auto name_opt = config.get_string("manifest.name");
+            auto name_opt = config.getString("manifest.name");
             if (!name_opt) {
                 catalyst::logger.log(LogLevel::WARN, "Member {} has no manifest.name", key);
                 continue;
@@ -54,7 +54,7 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
             info.name = name;
             info.workspace_member_key = key;
 
-            const auto &root = config.get_root();
+            const auto &root = config.getRoot();
             if (root["dependencies"]) {
                 for (const auto &dep : root["dependencies"]) {
                     if (dep["name"]) {
@@ -109,13 +109,13 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
 
 bool depMissing(const utils::yaml::Configuration &config) {
     catalyst::logger.log(LogLevel::DEBUG, "Checking for missing dependencies.");
-    fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
+    fs::path build_dir = config.getString("manifest.dirs.build").value_or("build");
     if (!config.has("dependencies")) {
         catalyst::logger.log(LogLevel::DEBUG, "No dependencies declared, skipping check.");
         return false;
     }
     // TODO: needs to be updated to respect actual dependency types
-    const auto &pc = config.get_root();
+    const auto &pc = config.getRoot();
     return std::any_of(pc["dependencies"].begin(), pc["dependencies"].end(), [&](const YAML::Node &dep) {
         if (auto type = dep["source"].as<std::string>(); type == "git") {
             bool missing = !fs::exists(build_dir / "catalyst-libs" / dep["name"].as<std::string>());
@@ -180,7 +180,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
                 for (const auto &m : order) {
                     utils::yaml::Configuration c(m.profiles.empty() ? std::vector<std::string>{"common"} : m.profiles,
                                                 m.path);
-                    if (c.get_string("manifest.name").value_or("") == parse_args.package) {
+                    if (c.getString("manifest.name").value_or("") == parse_args.package) {
                         targets.push_back(m);
                         found = true;
                         break;
@@ -231,8 +231,8 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         return res;
     }
 
-    fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
-    std::string generator = config.get_string("meta.generator").value_or("cbe");
+    fs::path build_dir = config.getString("manifest.dirs.build").value_or("build");
+    std::string generator = config.getString("meta.generator").value_or("cbe");
     std::string build_filename = (generator == "ninja") ? "build.ninja" : "catalyst.build";
 
     if (!fs::exists(build_dir / build_filename) || parse_args.regen) {

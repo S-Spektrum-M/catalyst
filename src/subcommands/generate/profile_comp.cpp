@@ -21,7 +21,7 @@ std::expected<YAML::Node, std::string> profileComposition(const std::vector<std:
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     catalyst::logger.log(LogLevel::DEBUG, "Profile composition finished.");
     try {
-        return YAML::Clone(utils::yaml::Configuration{p}.get_root());
+        return YAML::Clone(utils::yaml::Configuration{p}.getRoot());
     } catch (std::exception &err) {
         return std::unexpected(err.what());
     }

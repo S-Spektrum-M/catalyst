@@ -33,7 +33,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         return std::unexpected(e.what());
     }
 
-    fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
+    fs::path build_dir = config.getString("manifest.dirs.build").value_or("build");
 
     if (!fs::exists(build_dir)) {
         return std::unexpected(
@@ -50,8 +50,8 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         return std::unexpected(std::format("Failed to create install directory: {}", e.what()));
     }
 
-    std::string type = config.get_string("manifest.type").value_or("BINARY");
-    std::string target_name = config.get_string("manifest.name").value_or("name");
+    std::string type = config.getString("manifest.type").value_or("BINARY");
+    std::string target_name = config.getString("manifest.name").value_or("name");
     std::string target_filename;
     std::string import_lib_filename; // For Windows SHAREDLIB
     fs::path artifact_subdir;
@@ -126,7 +126,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     // Install headers if defined
-    if (auto include_dirs = config.get_string_vector("manifest.dirs.include")) {
+    if (auto include_dirs = config.getStringVector("manifest.dirs.include")) {
         fs::path dest_include_dir = install_path / "include";
         for (const auto &inc_dir : *include_dirs) {
             fs::path source_inc = fs::path(inc_dir); // Relative to current path (which is source_path)

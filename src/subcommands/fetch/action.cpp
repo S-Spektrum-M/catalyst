@@ -130,8 +130,8 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         return res;
     }
 
-    std::string build_dir = config.get_string("manifest.dirs.build").value_or("build");
-    if (auto deps = config.get_root()["dependencies"]; deps && deps.IsSequence()) {
+    std::string build_dir = config.getString("manifest.dirs.build").value_or("build");
+    if (auto deps = config.getRoot()["dependencies"]; deps && deps.IsSequence()) {
         for (int ii = 0; auto dep : deps) {
             if (!dep["name"]) {
                 catalyst::logger.log(LogLevel::ERROR, "Dependency: {} does not define field: name", ii);

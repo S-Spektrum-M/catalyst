@@ -310,7 +310,7 @@ bool Configuration::has(const std::string &key) const {
     return true;
 }
 
-std::optional<std::string> Configuration::get_string(const std::string &key) const {
+std::optional<std::string> Configuration::getString(const std::string &key) const {
     std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
     if (!res) {
         return std::nullopt;
@@ -323,7 +323,7 @@ std::optional<std::string> Configuration::get_string(const std::string &key) con
     }
 }
 
-std::optional<int> Configuration::get_int(const std::string &key) const {
+std::optional<int> Configuration::getInt(const std::string &key) const {
     std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
     if (!res) {
         return std::nullopt;
@@ -336,7 +336,7 @@ std::optional<int> Configuration::get_int(const std::string &key) const {
     }
 }
 
-std::optional<bool> Configuration::get_bool(const std::string &key) const {
+std::optional<bool> Configuration::getBool(const std::string &key) const {
     std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
     if (!res) {
         return std::nullopt;
@@ -349,7 +349,7 @@ std::optional<bool> Configuration::get_bool(const std::string &key) const {
     }
 }
 
-std::optional<std::vector<std::string>> Configuration::get_string_vector(const std::string &key) const {
+std::optional<std::vector<std::string>> Configuration::getStringVector(const std::string &key) const {
     std::optional<YAML::Node> res = traverse(key, YAML::Clone(root));
     if (!res) {
         return std::nullopt;
