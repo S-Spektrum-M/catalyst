@@ -8,6 +8,8 @@
 namespace catalyst::ide_sync {
 struct Parse {
     using IdeType = catalyst::init::Parse::IdeType;
+
+    std::vector<std::string> profiles;
     std::vector<IdeType> ides;
     bool force_emit_ide;
 };
