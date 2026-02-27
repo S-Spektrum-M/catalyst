@@ -22,6 +22,7 @@ Options:
   --build-dir TEXT            build directory
   --ides TEXT ...             IDEs to generate project files for {vscode, clion}
   -p,--profile TEXT           the profile to initialize
+  --force-ide                 force emitting IDE config even if one already exists
 ```
 
 ## Examples
