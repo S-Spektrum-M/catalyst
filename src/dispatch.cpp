@@ -102,7 +102,7 @@ int dispatch(const catalyst::CliContext &ctx) {
     if (*ctx.generate_subc)
         return dispatchFN("generate", *ctx.generate_res, catalyst::generate::action);
     if (*ctx.ide_sync_subc)
-        return dispatchFN("ide-sync", *ctx.ide_sync_res, catalyst::ide_sync::action);
+        return dispatchFN("ide_sync", *ctx.ide_sync_res, catalyst::ide_sync::action);
     if (*ctx.init_subc)
         return dispatchFN("init", *ctx.init_res, catalyst::init::action);
     if (*ctx.install_subc)
