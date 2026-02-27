@@ -1,3 +1,5 @@
+#pragma once
+
 #include <expected>
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
