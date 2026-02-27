@@ -10,35 +10,8 @@
 
 #include "yaml-cpp/node/node.h"
 
-static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
-                                                              const catalyst::add::vcpkg::Parse &args);
-
-namespace catalyst::add::vcpkg {
-std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &add) {
-    CLI::App *add_vcpkg = add.add_subcommand("vcpkg", "add a vcpkg dependency");
-    auto ret = std::make_unique<Parse>();
-
-    add_vcpkg->add_option("name", ret->name)->required();
-    add_vcpkg->add_option("-t,--triplet", ret->triplet)->required();
-    add_vcpkg->add_option("-v,--version", ret->version)->default_str("latest");
-    add_vcpkg->add_option("-p,--profiles", ret->profiles)->default_val(std::vector<std::string>{"common"});
-    add_vcpkg->add_option("-f,--features", ret->enabled_features);
-
-    return {add_vcpkg, std::move(ret)};
-}
-
-std::expected<void, std::string> action(const Parse &parse_args) {
-    for (const auto &profile_name : parse_args.profiles) {
-        if (auto res = add_to_profile(profile_name, parse_args); !res)
-            return std::unexpected(res.error());
-    }
-    return {};
-}
-
-} // namespace catalyst::add::vcpkg
-
-static inline std::expected<void, std::string> add_to_profile(const std::string &profile,
-                                                              const catalyst::add::vcpkg::Parse &args) {
+namespace {
+std::expected<void, std::string> add_to_profile(const std::string &profile, const catalyst::add::vcpkg::Parse &args) {
     auto res = catalyst::yaml_utils::loadProfileFile(profile);
     if (!res) {
         catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
@@ -83,3 +56,28 @@ static inline std::expected<void, std::string> add_to_profile(const std::string 
 
     return catalyst::yaml_utils::profileWriteBack(profile, profile_node);
 }
+} // namespace
+
+namespace catalyst::add::vcpkg {
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &add) {
+    CLI::App *add_vcpkg = add.add_subcommand("vcpkg", "add a vcpkg dependency");
+    auto ret = std::make_unique<Parse>();
+
+    add_vcpkg->add_option("name", ret->name)->required();
+    add_vcpkg->add_option("-t,--triplet", ret->triplet)->required();
+    add_vcpkg->add_option("-v,--version", ret->version)->default_str("latest");
+    add_vcpkg->add_option("-p,--profiles", ret->profiles)->default_val(std::vector<std::string>{"common"});
+    add_vcpkg->add_option("-f,--features", ret->enabled_features);
+
+    return {add_vcpkg, std::move(ret)};
+}
+
+std::expected<void, std::string> action(const Parse &parse_args) {
+    for (const auto &profile_name : parse_args.profiles) {
+        if (auto res = add_to_profile(profile_name, parse_args); !res)
+            return std::unexpected(res.error());
+    }
+    return {};
+}
+
+} // namespace catalyst::add::vcpkg
