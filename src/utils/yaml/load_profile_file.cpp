@@ -3,14 +3,14 @@
 #include <format>
 #include <string>
 
-#include <catalyst/yaml_utils/load_profile_file.hpp>
+#include <catalyst/utils/yaml/load_profile_file.hpp>
 #include <yaml-cpp/exceptions.h>
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 
-namespace catalyst::yaml_utils {
+namespace catalyst::utils::yaml {
 std::expected<YAML::Node, std::string> loadProfileFile(const std::string &profile,
                                                        const std::filesystem::path &root_dir) {
     catalyst::logger.log(LogLevel::DEBUG, "Loading profile file: {} from {}", profile, root_dir.string());
@@ -36,4 +36,4 @@ std::expected<YAML::Node, std::string> loadProfileFile(const std::string &profil
         return std::unexpected(err.what());
     }
 }
-} // namespace catalyst::yaml_utils
+} // namespace catalyst::utils::yaml

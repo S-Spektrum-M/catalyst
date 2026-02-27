@@ -1,4 +1,4 @@
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 
 #include <iostream>
 

@@ -5,7 +5,7 @@
 #include <tuple>
 #include <utility>
 
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 
 namespace {
 std::string concatArgv(int argc, char **argv) {

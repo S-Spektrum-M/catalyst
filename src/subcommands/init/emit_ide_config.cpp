@@ -4,8 +4,8 @@
 #include <fstream>
 #include <string>
 
-#include "catalyst/log_utils/log.hpp"
-#include "catalyst/os_utils/os_defs.hpp"
+#include "catalyst/utils/log/log.hpp"
+#include "catalyst/utils/os/os_defs.hpp"
 #include "catalyst/subcommands/init.hpp"
 
 namespace catalyst::init {
@@ -51,25 +51,25 @@ std::expected<void, std::string> invokeIDEConfigEmitters(const Parse &parse_args
 template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generating VS Code IDE configuration");
 
-    catalyst::os_utils::OSInfo os_info{};
+    catalyst::utils::os::OSInfo os_info{};
     std::string os_str{"linux"};
     std::string arch_str{"x64"};
     std::string mi_mode{"gdb"};
     std::string exe_ext;
 
-    if (os_info.os == catalyst::os_utils::OperatingSystem::Windows) {
+    if (os_info.os == catalyst::utils::os::OperatingSystem::Windows) {
         os_str = "windows";
         exe_ext = ".exe";
-    } else if (os_info.os == catalyst::os_utils::OperatingSystem::MacOS) {
+    } else if (os_info.os == catalyst::utils::os::OperatingSystem::MacOS) {
         os_str = "macos";
         mi_mode = "lldb";
     }
 
-    if (os_info.arch == catalyst::os_utils::Architecture::x86) {
+    if (os_info.arch == catalyst::utils::os::Architecture::x86) {
         arch_str = "x86";
-    } else if (os_info.arch == catalyst::os_utils::Architecture::ARM64) {
+    } else if (os_info.arch == catalyst::utils::os::Architecture::ARM64) {
         arch_str = "arm64";
-    } else if (os_info.arch == catalyst::os_utils::Architecture::ARM32) {
+    } else if (os_info.arch == catalyst::utils::os::Architecture::ARM32) {
         arch_str = "arm";
     }
 
@@ -197,9 +197,9 @@ template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(
 template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::clion>(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generating CLion IDE configuration");
 
-    catalyst::os_utils::OSInfo os_info{};
+    catalyst::utils::os::OSInfo os_info{};
     std::string exe_ext{""};
-    if (os_info.os == catalyst::os_utils::OperatingSystem::Windows) {
+    if (os_info.os == catalyst::utils::os::OperatingSystem::Windows) {
         exe_ext = ".exe";
     }
 

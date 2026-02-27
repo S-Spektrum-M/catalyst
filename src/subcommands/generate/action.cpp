@@ -11,9 +11,9 @@
 #include <yaml-cpp/yaml.h>
 
 #include "catalyst/hooks.hpp"
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 
@@ -22,13 +22,13 @@ namespace fs = std::filesystem;
 
 namespace {
 
-void writeVariables(const catalyst::yaml_utils::Configuration &config,
+void writeVariables(const catalyst::utils::yaml::Configuration &config,
                     catalyst::generate::buildwriters::BaseWriter &writer,
                     const std::vector<std::string> &enabled_features);
 void writeRules(catalyst::generate::buildwriters::BaseWriter &writer);
 std::vector<std::string> intermediateTargets(catalyst::generate::buildwriters::BaseWriter &writer,
                                              const std::unordered_set<fs::path> &source_set);
-void finalTarget(const yaml_utils::Configuration &config,
+void finalTarget(const utils::yaml::Configuration &config,
                  const auto &object_files,
                  catalyst::generate::buildwriters::BaseWriter &writer);
 
@@ -38,10 +38,10 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    yaml_utils::Configuration config;
+    utils::yaml::Configuration config;
 
     try {
-        config = yaml_utils::Configuration(parse_args.profiles);
+        config = utils::yaml::Configuration(parse_args.profiles);
     } catch (std::runtime_error &err) {
         return std::unexpected(err.what());
     }
@@ -162,7 +162,7 @@ std::vector<std::string> intermediateTargets(catalyst::generate::buildwriters::B
     return object_files;
 }
 
-void finalTarget(const yaml_utils::Configuration &config,
+void finalTarget(const utils::yaml::Configuration &config,
                  const auto &object_files,
                  catalyst::generate::buildwriters::BaseWriter &writer) {
     catalyst::logger.log(LogLevel::DEBUG, "Generating final target.");
@@ -211,7 +211,7 @@ void finalTarget(const yaml_utils::Configuration &config,
     writer.addDefault(target_path.string());
 }
 
-void writeVariables(const catalyst::yaml_utils::Configuration &config,
+void writeVariables(const catalyst::utils::yaml::Configuration &config,
                     catalyst::generate::buildwriters::BaseWriter &writer,
                     const std::vector<std::string> &enabled_features) {
 

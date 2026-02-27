@@ -4,7 +4,7 @@
 #include <string>
 
 #include "catalyst/dir_guard.hpp"
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 
 #include "yaml-cpp/node/node.h"

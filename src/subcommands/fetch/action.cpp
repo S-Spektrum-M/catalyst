@@ -11,7 +11,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "catalyst/hooks.hpp"
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/process_exec.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 
@@ -122,7 +122,7 @@ fetchLocal(const std::string &name, const std::string &path, const std::vector<s
 std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Fetch subcommand invoked.");
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    yaml_utils::Configuration config{parse_args.profiles};
+    utils::yaml::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::DEBUG, "Running pre-fetch hooks.");
     if (auto res = hooks::preFetch(config); !res) {

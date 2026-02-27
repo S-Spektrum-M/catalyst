@@ -6,7 +6,7 @@
 
 #include "yaml-cpp/yaml.h"
 
-namespace catalyst::yaml_utils {
+namespace catalyst::utils::yaml {
 class Configuration {
 public:
     Configuration() = default;
@@ -27,4 +27,4 @@ public:
 private:
     YAML::Node root;
 };
-} // namespace catalyst::yaml_utils
+} // namespace catalyst::utils::yaml

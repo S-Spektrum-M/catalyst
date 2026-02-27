@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <string>
 
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 
@@ -15,20 +15,20 @@ std::expected<void, std::string> postRun(const YAML::Node &profile_comp);
 std::expected<void, std::string> preTest(const YAML::Node &profile_comp);
 std::expected<void, std::string> postTest(const YAML::Node &profile_comp);
 
-std::expected<void, std::string> preBuild(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postBuild(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> onBuildFailure(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> preGenerate(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postGenerate(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> preFetch(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postFetch(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> preClean(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postClean(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> preRun(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postRun(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> preTest(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postTest(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> preLink(const yaml_utils::Configuration &profile_comp);
-std::expected<void, std::string> postLink(const yaml_utils::Configuration &profile_comp);
+std::expected<void, std::string> preBuild(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postBuild(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> onBuildFailure(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> preGenerate(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postGenerate(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> preFetch(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postFetch(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> preClean(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postClean(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> preRun(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postRun(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> preTest(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postTest(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> preLink(const utils::yaml::Configuration &profile_comp);
+std::expected<void, std::string> postLink(const utils::yaml::Configuration &profile_comp);
 std::expected<void, std::string> onCompile(const std::filesystem::path &file);
 }; // namespace catalyst::hooks

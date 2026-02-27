@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace catalyst::os_utils {
+namespace catalyst::utils::os {
 // NOLINTBEGIN(cppcoreguidelines-use-default-member-init,modernize-use-default-member-init,cppcoreguidelines-prefer-member-initializer)
 enum class OperatingSystem : std::uint8_t { Linux, MacOS, Windows, Unknown };
 enum class Architecture : std::uint8_t { x86, x86_64, ARM32, ARM64, Unknown };
@@ -32,4 +32,4 @@ struct OSInfo {
     }
     // NOLINTEND(cppcoreguidelines-use-default-member-init,modernize-use-default-member-init,cppcoreguidelines-prefer-member-initializer)
 };
-}; // namespace catalyst::os_utils
+}; // namespace catalyst::utils::os

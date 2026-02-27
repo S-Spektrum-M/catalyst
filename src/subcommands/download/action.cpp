@@ -5,7 +5,7 @@
 #include <random>
 
 #include "catalyst/dir_guard.hpp"
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/process_exec.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/download.hpp"

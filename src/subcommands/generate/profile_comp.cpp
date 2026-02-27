@@ -9,9 +9,9 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 
@@ -21,7 +21,7 @@ std::expected<YAML::Node, std::string> profileComposition(const std::vector<std:
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
     catalyst::logger.log(LogLevel::DEBUG, "Profile composition finished.");
     try {
-        return YAML::Clone(yaml_utils::Configuration{p}.get_root());
+        return YAML::Clone(utils::yaml::Configuration{p}.get_root());
     } catch (std::exception &err) {
         return std::unexpected(err.what());
     }

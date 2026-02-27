@@ -2,13 +2,13 @@
 #include <filesystem>
 #include <fstream>
 
-#include <catalyst/yaml_utils/profile_write_back.hpp>
+#include <catalyst/utils/yaml/profile_write_back.hpp>
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 
-namespace catalyst::yaml_utils {
+namespace catalyst::utils::yaml {
 std::expected<void, std::string> profileWriteBack(const std::string &profile_name, const YAML::Node &node) {
     catalyst::logger.log(LogLevel::DEBUG, "Writing profile to file: {}", profile_name);
     namespace fs = std::filesystem;
@@ -32,4 +32,4 @@ std::expected<void, std::string> profileWriteBack(const std::string &profile_nam
     catalyst::logger.log(LogLevel::DEBUG, "Profile file written successfully.");
     return {};
 }
-} // namespace catalyst::yaml_utils
+} // namespace catalyst::utils::yaml

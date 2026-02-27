@@ -11,13 +11,13 @@
 #include <yaml-cpp/node/node.h>
 
 #include "catalyst/hooks.hpp"
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/process_exec.hpp"
 #include "catalyst/subcommands/build.hpp"
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/workspace.hpp"
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 namespace catalyst::build {
 namespace fs = std::filesystem;
@@ -42,7 +42,7 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
             if (profiles.empty())
                 profiles.emplace_back("common");
 
-            yaml_utils::Configuration config(profiles, member.path);
+            utils::yaml::Configuration config(profiles, member.path);
             auto name_opt = config.get_string("manifest.name");
             if (!name_opt) {
                 catalyst::logger.log(LogLevel::WARN, "Member {} has no manifest.name", key);
@@ -107,7 +107,7 @@ std::vector<WorkspaceMember> buildOrderTopSort(const Workspace &ws) {
     return order;
 }
 
-bool depMissing(const yaml_utils::Configuration &config) {
+bool depMissing(const utils::yaml::Configuration &config) {
     catalyst::logger.log(LogLevel::DEBUG, "Checking for missing dependencies.");
     fs::path build_dir = config.get_string("manifest.dirs.build").value_or("build");
     if (!config.has("dependencies")) {
@@ -178,7 +178,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
                 // For now, let's just loop.
                 bool found = false;
                 for (const auto &m : order) {
-                    yaml_utils::Configuration c(m.profiles.empty() ? std::vector<std::string>{"common"} : m.profiles,
+                    utils::yaml::Configuration c(m.profiles.empty() ? std::vector<std::string>{"common"} : m.profiles,
                                                 m.path);
                     if (c.get_string("manifest.name").value_or("") == parse_args.package) {
                         targets.push_back(m);
@@ -218,7 +218,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     }
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    yaml_utils::Configuration config{parse_args.profiles};
+    utils::yaml::Configuration config{parse_args.profiles};
 
     catalyst::logger.log(LogLevel::INFO, "Running pre-build hooks.");
     if (auto res = hooks::preBuild(config); !res) {

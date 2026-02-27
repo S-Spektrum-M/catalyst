@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "catalyst/dir_guard.hpp"
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/subcommands/install.hpp"
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 namespace catalyst::install {
 namespace fs = std::filesystem;
@@ -26,9 +26,9 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::DirectoryChangeGuard dg(source_path);
 
     catalyst::logger.log(LogLevel::DEBUG, "Composing profiles.");
-    yaml_utils::Configuration config;
+    utils::yaml::Configuration config;
     try {
-        config = yaml_utils::Configuration(parse_args.profiles);
+        config = utils::yaml::Configuration(parse_args.profiles);
     } catch (const std::exception &e) {
         return std::unexpected(e.what());
     }

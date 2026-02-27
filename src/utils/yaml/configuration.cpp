@@ -1,4 +1,4 @@
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -14,13 +14,13 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 
 #include "yaml-cpp/node/node.h"
 #include "yaml-cpp/node/parse.h"
 
 using catalyst::LogLevel;
-using catalyst::yaml_utils::Configuration;
+using catalyst::utils::yaml::Configuration;
 namespace fs = std::filesystem;
 
 namespace {

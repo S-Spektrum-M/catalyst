@@ -4,8 +4,8 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log_utils/log.hpp"
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/log/log.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 namespace catalyst {
 
@@ -97,7 +97,7 @@ std::optional<WorkspaceMember> Workspace::findPackage(const std::string &package
             if (profiles.empty())
                 profiles.emplace_back("common");
 
-            yaml_utils::Configuration config(profiles, member.path);
+            utils::yaml::Configuration config(profiles, member.path);
             auto name_opt = config.get_string("manifest.name");
             if (name_opt && *name_opt == package_name) {
                 return member;

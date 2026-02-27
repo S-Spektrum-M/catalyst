@@ -3,15 +3,15 @@
 
 #include <catalyst/subcommands/add.hpp>
 
-#include "catalyst/log_utils/log.hpp"
-#include "catalyst/yaml_utils/load_profile_file.hpp"
-#include "catalyst/yaml_utils/profile_write_back.hpp"
+#include "catalyst/utils/log/log.hpp"
+#include "catalyst/utils/yaml/load_profile_file.hpp"
+#include "catalyst/utils/yaml/profile_write_back.hpp"
 
 #include "yaml-cpp/node/node.h"
 
 namespace {
 std::expected<void, std::string> addToProfile(const std::string &profile, const catalyst::add::local::Parse &args) {
-    auto res = catalyst::yaml_utils::loadProfileFile(profile);
+    auto res = catalyst::utils::yaml::loadProfileFile(profile);
     if (!res) {
         catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
         return std::unexpected(res.error());
@@ -46,7 +46,7 @@ std::expected<void, std::string> addToProfile(const std::string &profile, const 
 
     dependencies.push_back(new_dep);
 
-    return catalyst::yaml_utils::profileWriteBack(profile, profile_node);
+    return catalyst::utils::yaml::profileWriteBack(profile, profile_node);
 }
 } // namespace
 

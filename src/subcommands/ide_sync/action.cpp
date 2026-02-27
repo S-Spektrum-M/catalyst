@@ -4,10 +4,10 @@
 
 #include <yaml-cpp/node/node.h>
 
-#include "catalyst/log_utils/log.hpp"
+#include "catalyst/utils/log/log.hpp"
 #include "catalyst/subcommands/ide_sync.hpp"
 #include "catalyst/subcommands/init.hpp"
-#include "catalyst/yaml_utils/configuration.hpp"
+#include "catalyst/utils/yaml/configuration.hpp"
 
 namespace catalyst::ide_sync {
 
@@ -18,7 +18,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
 
     const fs::path root_dir = fs::current_path();
 
-    const auto config = catalyst::yaml_utils::Configuration(parse_args.profiles);
+    const auto config = catalyst::utils::yaml::Configuration(parse_args.profiles);
     const auto &profile_node = config.get_root();
 
     if (!profile_node["manifest"] || !profile_node["manifest"]["name"]) {
