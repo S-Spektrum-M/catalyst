@@ -34,6 +34,8 @@ struct Parse {
 
 std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
 std::expected<void, std::string> action(const Parse &);
+
+std::expected<void, std::string> invokeIDEConfigEmitters(const Parse &parse_args);
 template <Parse::IdeType Ide_T> std::expected<void, std::string> emitIDEConfig(const Parse &) {
     static_assert(Ide_T == Parse::IdeType::vsc || Ide_T == Parse::IdeType::clion,
                   "emitIDEConfig is not implemented for this IdeType");

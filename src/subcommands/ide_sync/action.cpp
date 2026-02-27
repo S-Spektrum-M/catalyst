@@ -40,20 +40,8 @@ std::expected<void, std::string> action(const Parse &parse_args) {
         init_parse.dirs.build = profile_node["manifest"]["dirs"]["build"].as<std::string>();
     }
 
-    for (const catalyst::init::Parse::IdeType &ide : parse_args.ides) {
-        std::function<std::expected<void, std::string>(const catalyst::init::Parse &)> emit_fn;
-        switch (ide) {
-            case catalyst::init::Parse::IdeType::vsc:
-                emit_fn = catalyst::init::emitIDEConfig<catalyst::init::Parse::IdeType::vsc>;
-                break;
-            case catalyst::init::Parse::IdeType::clion:
-                emit_fn = catalyst::init::emitIDEConfig<catalyst::init::Parse::IdeType::clion>;
-                break;
-        }
-        if (auto res = emit_fn(init_parse); !res) {
-            return std::unexpected(res.error());
-        }
-    }
+    if (auto res = invokeIDEConfigEmitters(init_parse); !res)
+        return std::unexpected(res.error());
 
     catalyst::logger.log(LogLevel::DEBUG, "IDE sync subcommand finished successfully.");
     return {};

@@ -27,6 +27,27 @@ std::expected<std::ofstream, std::string> createFile(const fs::path &file_path, 
 }
 } // namespace
 
+std::expected<void, std::string> invokeIDEConfigEmitters(const Parse &parse_args) {
+    for (const Parse::IdeType &ide : parse_args.ides) {
+        std::function<std::expected<void, std::string>(const Parse &)> emit_fn;
+        switch (ide) {
+            case Parse::IdeType::vsc:
+                emit_fn = emitIDEConfig<Parse::IdeType::vsc>;
+                break;
+            case Parse::IdeType::clion:
+                emit_fn = emitIDEConfig<Parse::IdeType::clion>;
+                break;
+            default:
+                continue;
+        }
+        if (auto res = emit_fn(parse_args); !res) {
+            catalyst::logger.log(LogLevel::ERROR, "Failed to emit IDE configuration: {}", res.error());
+            return std::unexpected(res.error());
+        }
+    }
+    return {};
+}
+
 template <> std::expected<void, std::string> emitIDEConfig<Parse::IdeType::vsc>(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::INFO, "Generating VS Code IDE configuration");
 
