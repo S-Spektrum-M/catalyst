@@ -10,7 +10,7 @@
 #include "yaml-cpp/node/node.h"
 
 namespace {
-std::expected<void, std::string> add_to_profile(const std::string &profile, const catalyst::add::system::Parse &args) {
+std::expected<void, std::string> addToProfile(const std::string &profile, const catalyst::add::system::Parse &args) {
     auto res = catalyst::yaml_utils::loadProfileFile(profile);
     if (!res) {
         catalyst::logger.log(catalyst::LogLevel::ERROR, "{}", res.error());
@@ -65,7 +65,7 @@ std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &add) {
 
 std::expected<void, std::string> action(const Parse &parse_args) {
     for (const auto &profile_name : parse_args.profiles) {
-        if (auto res = add_to_profile(profile_name, parse_args); !res)
+        if (auto res = addToProfile(profile_name, parse_args); !res)
             return std::unexpected(res.error());
     }
     return {};
