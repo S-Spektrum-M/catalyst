@@ -20,6 +20,8 @@
 namespace catalyst::generate {
 namespace fs = std::filesystem;
 
+namespace {
+
 void writeVariables(const catalyst::yaml_utils::Configuration &config,
                     catalyst::generate::buildwriters::BaseWriter &writer,
                     const std::vector<std::string> &enabled_features);
@@ -29,6 +31,8 @@ std::vector<std::string> intermediateTargets(catalyst::generate::buildwriters::B
 void finalTarget(const yaml_utils::Configuration &config,
                  const auto &object_files,
                  catalyst::generate::buildwriters::BaseWriter &writer);
+
+} // namespace
 
 std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
@@ -137,6 +141,7 @@ std::expected<void, std::string> action(const Parse &parse_args) {
     return {};
 }
 
+namespace {
 std::vector<std::string> intermediateTargets(catalyst::generate::buildwriters::BaseWriter &writer,
                                              const std::unordered_set<std::filesystem::path> &source_set) {
     catalyst::logger.log(LogLevel::DEBUG, "Generate subcommand invoked.");
@@ -310,4 +315,6 @@ void writeRules(catalyst::generate::buildwriters::BaseWriter &writer) {
     writer.addRule("static_link", "ar rcs $out $in", "LINK $out");
     writer.addRule("shared_link", "$cxx -shared $in -o $out", "LINK $out");
 }
+} // namespace
+
 } // namespace catalyst::generate

@@ -22,6 +22,8 @@
 namespace catalyst::build {
 namespace fs = std::filesystem;
 
+namespace {
+
 struct PackageInfo {
     std::string name;
     std::string workspace_member_key;
@@ -146,6 +148,8 @@ std::expected<void, std::string> generateCompileCommands(const fs::path &build_d
         return std::unexpected(std::format("Failed to open {} for writing", real_compdb_path.string()));
     return {};
 }
+
+} // namespace
 
 std::expected<void, std::string> action(const Parse &parse_args) {
     catalyst::logger.log(LogLevel::DEBUG, "Build subcommand invoked.");

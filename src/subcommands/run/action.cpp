@@ -16,7 +16,17 @@
 namespace fs = std::filesystem;
 
 namespace catalyst::run {
-std::string commandStr(const fs::path &executable_name, const std::vector<std::string> &params);
+
+namespace {
+std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
+    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
+    std::string command = executable;
+    for (const auto &param : params) {
+        command += " " + param;
+    }
+    return command;
+}
+} // namespace
 
 std::expected<void, std::string> action(const Parse &args) {
     catalyst::logger.log(LogLevel::DEBUG, "Run subcommand invoked.");
@@ -112,12 +122,4 @@ std::expected<void, std::string> action(const Parse &args) {
     return {};
 }
 
-std::string commandStr(const fs::path &executable, const std::vector<std::string> &params) {
-    catalyst::logger.log(LogLevel::DEBUG, "Constructing command string.");
-    std::string command = executable;
-    for (const auto &param : params) {
-        command += " " + param;
-    }
-    return command;
-}
 } // namespace catalyst::run
