@@ -5,7 +5,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "catalyst/log-utils/log.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
+#include "catalyst/yaml-utils/configuration.hpp"
 
 namespace catalyst {
 

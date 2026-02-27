@@ -13,7 +13,7 @@
 #include "catalyst/hooks.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
+#include "catalyst/yaml-utils/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 

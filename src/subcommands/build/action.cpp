@@ -17,7 +17,7 @@
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/generate.hpp"
 #include "catalyst/workspace.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
+#include "catalyst/yaml-utils/configuration.hpp"
 
 namespace catalyst::build {
 namespace fs = std::filesystem;

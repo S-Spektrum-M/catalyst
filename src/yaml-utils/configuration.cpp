@@ -1,4 +1,4 @@
-#include "catalyst/yaml-utils/Configuration.hpp"
+#include "catalyst/yaml-utils/configuration.hpp"
 
 #include <algorithm>
 #include <cassert>

@@ -8,7 +8,7 @@
 
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/process_exec.hpp"
-#include "catalyst/yaml-utils/Configuration.hpp"
+#include "catalyst/yaml-utils/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 
