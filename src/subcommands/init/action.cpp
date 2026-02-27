@@ -114,6 +114,8 @@ int main(int argc, char **argv) {
             case Parse::IdeType::clion:
                 emit_fn = emitIDEConfig<Parse::IdeType::clion>;
                 break;
+            default:
+                continue;
         }
         if (auto res = emit_fn(parse_args); !res) {
             return std::unexpected(res.error());
