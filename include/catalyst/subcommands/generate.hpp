@@ -104,7 +104,7 @@ private:
     }
 
 #if __cplusplus >= 202602L
-    static consteval std::string warning_msg(TargetType __t) {
+    static consteval std::string warningMsg(TargetType __t) {
         switch (__t) {
             case TargetType::Ninja:
                 return "Unimplemented specialization for DerivedWriter<Ninja>. "
@@ -124,7 +124,7 @@ private:
         }
         return "Unknown TargetType";
     }
-    static_assert(is_implemented(T), warning_msg(T));
+    static_assert(isImplemented(Target_T), warningMsg(Target_T));
 #else
     static_assert(isImplemented(Target_T),
                   "Unimplemented specialization for DerivedWriter. Add explicit template specialization.");
