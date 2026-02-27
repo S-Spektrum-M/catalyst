@@ -1,4 +1,4 @@
-#include "catalyst/GLOBALS.hpp"
+#include "catalyst/globals.hpp"
 #include "catalyst/dispatch.hpp"
 #include "catalyst/log-utils/log.hpp"
 

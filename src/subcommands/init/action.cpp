@@ -1,4 +1,4 @@
-#include "catalyst/GLOBALS.hpp"
+#include "catalyst/globals.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/init.hpp"
 #include "catalyst/yaml-utils/profile_write_back.hpp"
