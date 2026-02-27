@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "catalyst/log-utils/log.hpp"
+#include "catalyst/log_utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 
 #include "yaml-cpp/yaml.h"

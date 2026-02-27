@@ -7,7 +7,7 @@
 
 #include "catalyst/dispatch.hpp"
 #include "catalyst/globals.hpp"
-#include "catalyst/log-utils/log.hpp"
+#include "catalyst/log_utils/log.hpp"
 
 namespace {
 std::string concatArgv(int argc, char **argv) {

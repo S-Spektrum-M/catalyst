@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include "catalyst/log-utils/log.hpp"
+#include "catalyst/log_utils/log.hpp"
 #include "catalyst/os_utils/os_defs.hpp"
 #include "catalyst/subcommands/init.hpp"
 

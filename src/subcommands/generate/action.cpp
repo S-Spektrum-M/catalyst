@@ -11,9 +11,9 @@
 #include <yaml-cpp/yaml.h>
 
 #include "catalyst/hooks.hpp"
-#include "catalyst/log-utils/log.hpp"
+#include "catalyst/log_utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
-#include "catalyst/yaml-utils/configuration.hpp"
+#include "catalyst/yaml_utils/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 

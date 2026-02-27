@@ -10,7 +10,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log-utils/log.hpp"
+#include "catalyst/log_utils/log.hpp"
 #include "catalyst/subcommands/generate.hpp"
 
 namespace fs = std::filesystem;

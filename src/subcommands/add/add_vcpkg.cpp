@@ -4,9 +4,9 @@
 
 #include <catalyst/subcommands/add.hpp>
 
-#include "catalyst/log-utils/log.hpp"
-#include "catalyst/yaml-utils/load_profile_file.hpp"
-#include "catalyst/yaml-utils/profile_write_back.hpp"
+#include "catalyst/log_utils/log.hpp"
+#include "catalyst/yaml_utils/load_profile_file.hpp"
+#include "catalyst/yaml_utils/profile_write_back.hpp"
 
 #include "yaml-cpp/node/node.h"
 

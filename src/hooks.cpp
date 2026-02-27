@@ -6,9 +6,9 @@
 #include <catalyst/hooks.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include "catalyst/log-utils/log.hpp"
+#include "catalyst/log_utils/log.hpp"
 #include "catalyst/process_exec.hpp"
-#include "catalyst/yaml-utils/configuration.hpp"
+#include "catalyst/yaml_utils/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 

@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <string>
 
-#include "catalyst/yaml-utils/configuration.hpp"
+#include "catalyst/yaml_utils/configuration.hpp"
 
 #include "yaml-cpp/node/node.h"
 
