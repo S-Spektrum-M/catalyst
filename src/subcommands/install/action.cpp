@@ -1,4 +1,4 @@
-#include "catalyst/dir_gaurd.hpp"
+#include "catalyst/dir_guard.hpp"
 #include "catalyst/log-utils/log.hpp"
 #include "catalyst/subcommands/install.hpp"
 #include "catalyst/yaml-utils/Configuration.hpp"
