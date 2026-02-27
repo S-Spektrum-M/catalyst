@@ -1,0 +1,16 @@
+#pragma once
+#include "catalyst/subcommands/init.hpp"
+
+#include <CLI/App.hpp>
+#include <expected>
+#include <utility>
+
+namespace catalyst::ide_sync {
+struct Parse {
+    using IdeType = catalyst::init::Parse::IdeType;
+    std::vector<IdeType> ides;
+    bool force_emit_ide;
+};
+std::pair<CLI::App *, std::unique_ptr<Parse>> parse(CLI::App &app);
+std::expected<void, std::string> action(const Parse &);
+} // namespace catalyst::ide_sync

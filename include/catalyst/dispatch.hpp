@@ -6,6 +6,7 @@
 #include "catalyst/subcommands/fetch.hpp"
 #include "catalyst/subcommands/fmt.hpp"
 #include "catalyst/subcommands/generate.hpp"
+#include "catalyst/subcommands/ide_sync.hpp"
 #include "catalyst/subcommands/init.hpp"
 #include "catalyst/subcommands/install.hpp"
 #include "catalyst/subcommands/run.hpp"
@@ -40,6 +41,9 @@ struct CliContext {
 
     CLI::App *generate_subc{nullptr};
     std::unique_ptr<catalyst::generate::Parse> generate_res{nullptr};
+
+    CLI::App *ide_sync_subc{nullptr};
+    std::unique_ptr<catalyst::ide_sync::Parse> ide_sync_res{nullptr};
 
     CLI::App *init_subc{nullptr};
     std::unique_ptr<catalyst::init::Parse> init_res{nullptr};
